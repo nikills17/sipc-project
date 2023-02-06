@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { Text } from 'react-native-paper'
 import { useGetData, getData } from './ReactApiData'
 import { useQuery } from "react-query";
-import axios from "axios"
+import API from '../utility/api';
 
 
 const Dashboard = () => {
@@ -13,7 +13,7 @@ const Dashboard = () => {
 
 
   const getDataUsingSimpleGetCall = () => {
-    axios.get('https://jsonplaceholder.typicode.com/users')
+    API.instance.get('https://jsonplaceholder.typicode.com/users')
       .then((json) => setData(json.data))
       .finally(() => setLoading(false));
   };

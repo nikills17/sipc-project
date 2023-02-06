@@ -6,6 +6,8 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start --reset-cache",
+    "install": "npm install --legacy-peer-deps",
+    "android-clean": "cd android && ./gradlew clean && cd ..",
     "test": "jest",
     "lint": "eslint ."
   },
@@ -14,7 +16,6 @@
     "@react-navigation/bottom-tabs": "^6.5.2",
     "@react-navigation/native": "^6.1.1",
     "@react-navigation/native-stack": "^6.9.7",
-    "axios": "^1.2.3",
     "moment": "^2.29.4",
     "react": "18.1.0",
     "react-native": "0.70.6",
