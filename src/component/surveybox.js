@@ -5,6 +5,7 @@ import { Col, Grid } from 'react-native-easy-grid';
 import SIPCStyles from '../Screens/styles';
 
 const SurveyBox = ({ data,navigation }) => {
+  
   const [Show, setShow] = useState(false);
 
   // const switch_tab = (x) => {
