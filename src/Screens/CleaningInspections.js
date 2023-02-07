@@ -14,6 +14,8 @@ import moment from "moment";
 
 const CleaningInspections = ({ navigation }) => {
 
+  
+
 // ========CLEANING Checkbox ============
 const [checked, setChecked] = useState(false);
 const [checked1, setChecked1] = useState(false);

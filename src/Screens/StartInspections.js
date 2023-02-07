@@ -204,10 +204,6 @@ const StartInspections = ({ navigation }) => {
 
                 </View>
             </Card>
-
-
-
-
         </View>
     )
 }
