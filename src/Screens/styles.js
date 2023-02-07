@@ -93,14 +93,13 @@ const SIPCStyles = StyleSheet.create({
 
     ViewRowAlign: {
         flexDirection: 'row',
-        alignItems: 'center',
-        
+        alignItems: 'center',     
     },
 
     healthImageView: {
         flexDirection: 'row',
         marginTop: 10,
-        alignItems: 'center',
+        alignItems: 'center',       
     },
 
 
@@ -177,6 +176,10 @@ const SIPCStyles = StyleSheet.create({
         resizeMode: 'contain'
     },
 
+    inspectionScore:{
+        fontSize: responsiveScreenFontSize(1.8),
+        fontFamily: Bold
+    },
     OrangeColor: {
         fontSize: responsiveScreenFontSize(1.8),
         color: '#ffa543', fontFamily: Bold,
@@ -188,6 +191,15 @@ const SIPCStyles = StyleSheet.create({
     RedColor: {
         fontSize: responsiveScreenFontSize(1.8),
         color: '#d85c53', fontFamily: Bold,
+    },
+    textSuccess:{
+        color: "#00d97e"
+    },
+    textWarning:{
+        color: "#f6c343"
+    },
+    textDanger:{
+        color: "#e63757"
     },
 
     //-----------------------------Work Orders --------------------------------

@@ -15,6 +15,7 @@ import StartSurveysScreen from './src/screens/StartSurveys';
 import SurveyViewAllScreen from './src/screens/SurveyViewAll';
 import SaveSurveyScreen from './src/screens/SaveSurvey';
 import AssignmentScreen from './src/screens/Assignment';
+import InspectionViewRoomScreen from './src/screens/InspectionViewRoom';
 import {responsiveScreenFontSize} from 'react-native-responsive-dimensions';
 import SIPCStyles from './src/screens/styles';
 
@@ -149,17 +150,12 @@ const App = () => {
           {/* <Stack.Screen name="Reports" component={ReportsScreen} /> */}
           {/* <Stack.Screen name="Dashboard" component={DashboardScreen} /> */}
           <Stack.Screen name="AddWorkOrders" component={AddWorkOrdersScreen} />
-          <Stack.Screen
-            name="StartInspections"
-            component={StartInspectionsScreen}
-          />
-          <Stack.Screen
-            name="CleaningInspections"
-            component={CleaningInspectionsScreen}
-          />
+          <Stack.Screen name="StartInspections"component={StartInspectionsScreen}/>
+          <Stack.Screen name="CleaningInspections"component={CleaningInspectionsScreen}/>
           <Stack.Screen name="StartSurveys" component={StartSurveysScreen} />
           <Stack.Screen name="SaveSurvey" component={SaveSurveyScreen} />
           <Stack.Screen name="Assignment" component={AssignmentScreen} />
+          <Stack.Screen name="InspectionViewRoom" component={InspectionViewRoomScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </QueryClientProvider>

@@ -27,15 +27,7 @@ const Surveys = ({navigation}) => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const onChangeSearch = query => setSearchQuery(query);
 
-  const [Active, setActive] = useState(0);
 
-  const switch_tab = x => {
-    if (x == Active) {
-      setActive(0);
-    } else {
-      setActive(x);
-    }
-  };
 
   const [data, setData] = useState([]);
   const params = JSON.stringify({

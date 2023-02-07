@@ -1,16 +1,10 @@
-import {
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-  Image,
-} from 'react-native';
-import React, {useState} from 'react';
-import {Surface, Divider} from 'react-native-paper';
-import {Col, Grid} from 'react-native-easy-grid';
+import {StyleSheet,TouchableWithoutFeedback, View,Image,} from 'react-native';
+import React, { useState } from 'react';
+import { Surface, Divider,Text, } from 'react-native-paper';
+import { Col, Grid } from 'react-native-easy-grid';
 import SIPCStyles from '../screens/styles';
 
-const SurveyBox = ({data, navigation}) => {
+const SurveyBox = ({ data, navigation }) => {
   const [Show, setShow] = useState(false);
 
   // const switch_tab = (x) => {
@@ -24,14 +18,10 @@ const SurveyBox = ({data, navigation}) => {
   return (
     <>
       <Surface
-        style={{
-          padding: 15,
-          marginTop: 20,
-          backgroundColor: Show == true ? '#fffcf8' : 'white',
-        }}>
+        style={{ padding: 15, marginTop: 20, backgroundColor: Show == true ? '#fffcf8' : 'white', }}>
         <Grid>
-          <Col size={85} style={{justifyContent: 'center', paddingRight: 10}}>
-            <View style={{flexDirection: 'column'}}>
+          <Col size={85} style={{ justifyContent: 'center', paddingRight: 10 }}>
+            <View style={{ flexDirection: 'column' }}>
               <View style={SIPCStyles.ViewRowAlign}>
                 <TouchableWithoutFeedback
                   onPress={() => {
@@ -62,7 +52,7 @@ const SurveyBox = ({data, navigation}) => {
             </View>
           </Col>
 
-          <Col size={15} style={{alignItems: 'center'}}>
+          <Col size={15} style={{ alignItems: 'center' }}>
             <TouchableWithoutFeedback
               onPress={() => navigation.navigate('StartSurveys')}>
               <Image
@@ -79,15 +69,15 @@ const SurveyBox = ({data, navigation}) => {
       {/* ---------Show == 1--------------------- */}
       {Show == true ? (
         <>
-          <Surface style={{backgroundColor: 'white'}}>
-            <View style={{flexDirection: 'row', display: 'flex', padding: 15}}>
+          <Surface style={{ backgroundColor: 'white' }}>
+            <View style={{ flexDirection: 'row', display: 'flex', padding: 15 }}>
               <Text style={SIPCStyles.DescriptionHeading}>Description :</Text>
               <Text style={SIPCStyles.DescriptionDetails}>
                 {data.description}
               </Text>
             </View>
             <Divider bold={true} />
-            <View style={{flexDirection: 'row', display: 'flex', padding: 15}}>
+            <View style={{ flexDirection: 'row', display: 'flex', padding: 15 }}>
               <Text style={SIPCStyles.DescriptionHeading}>Date Created :</Text>
               <Text style={SIPCStyles.DescriptionDetails}>
                 {data.date_created}
@@ -109,23 +99,4 @@ const styles = StyleSheet.create({
   },
 });
 
-{
-  /* <TouchableOpacity onPress={() => {
-  setShow(!show)
-}} style={{ backgroundColor: '#fff', backgroundColor: show ? '#d0d0d0' : '000000', marginBottom: 20, elevation: 16, height: 100, width: 300, padding: 16 }}>
-  <View style={{ flexDirection: 'row' }}>
-    <Text style={styles.text}>{show ? '-' : '+'}</Text>
-    <Text style={styles.text}>{data.title}</Text>
-  </View>
-  <View style={{ flexDirection: 'row' }}>
-    <Text style={styles.text}>+</Text>
-    <Text style={styles.text}>{data.type}</Text>
-  </View>
-</TouchableOpacity>
-  {show && <TouchableOpacity style={{ backgroundColor: '#2d6cdf', marginTop: -20, elevation: 16, height: 100, width: 300, padding: 16 }}>
-    <View style={{ flexDirection: 'row' }}>
-      <Text style={styles.text}>+</Text>
-      <Text style={styles.text}>{data.description}</Text>
-    </View>
-  </TouchableOpacity>} */
-}
+
