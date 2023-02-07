@@ -99,10 +99,10 @@ const Inspections = ({ navigation }) => {
         {/* ==========Completed ==================================== */}
         {Active == 0 ?
           <>
-            {data.map((item, index) => {
+            {data.map((item1, index1) => {
               return (
                 <View style={{}}>
-                  <InspectionBox data={item} key={index} navigation={navigation} />
+                  <InspectionBox data={item1} key={index1} navigation={navigation} />
                 </View>
               )
 
@@ -113,8 +113,8 @@ const Inspections = ({ navigation }) => {
         {/* ==========Pending ==================================== */}
         {Active == 1 ?
           <>
-            {data.map((item, index) => {
-              return <InspectionBox data={item} key={index} navigation={navigation} />;
+            {data.map((item2, index2) => {
+              return <InspectionBox data={item2} key={index2} navigation={navigation} />;
             })}
           </>
           : null}

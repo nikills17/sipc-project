@@ -9,7 +9,7 @@ import { Col, Grid } from 'react-native-easy-grid';
 const InspectionBox = ({ data,navigation }) => {
     const [Show, setShow] = useState(false);
     
-    checkScore=(score)=>{
+  const checkScore=(score)=>{
         if( score > 90 ){
             return <Text style={[SIPCStyles.inspectionScore,SIPCStyles.textSuccess]}>{score}%</Text>
         }else if(score > 80){
@@ -22,7 +22,6 @@ const InspectionBox = ({ data,navigation }) => {
     return (
         <View>
             <Surface style={{ marginTop: 20, padding: 15, backgroundColor: Show == true ? '#fffcf8' : 'white' }}>
-
                 <Grid>
                     <Col size={80} style={{ justifyContent: 'center', paddingRight: 10 }}>
                         <View style={{ flexDirection: 'column' }}>
