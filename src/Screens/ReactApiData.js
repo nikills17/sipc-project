@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useQuery } from "react-query";
 
 // const url = 'https://dummy.restapiexample.com/api/v1/employee/1';
