@@ -1,10 +1,9 @@
-import { View, Text } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import {View, Text} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import SurveyBox from '../component/surveybox';
 import InspectionBox from '../component/inspectionbox';
 import API from '../utility/api';
-import { ScrollView } from 'react-native-gesture-handler';
-
+import {ScrollView} from 'react-native-gesture-handler';
 
 const Reports = () => {
   const [data, setData] = useState([]);
@@ -18,20 +17,26 @@ const Reports = () => {
   });
 
   useEffect(() => {
-    API.instance.post(`http://sipcsurvey.devuri.com/sipcsurvey/survey-list-device?is_api=true`, body)
-    .then(response => {
-      setData(response.data)
-    }, error => console.error());
+    API.instance
+      .post(
+        `http://sipcsurvey.devuri.com/sipcsurvey/survey-list-device?is_api=true`,
+        body,
+      )
+      .then(
+        response => {
+          setData(response.data);
+        },
+        error => console.error(),
+      );
   }, []);
 
   return (
-    <View style={{ flex: 1 }}>
-    <ScrollView>
-
-      {data.map((item, index) => {
-        return <InspectionBox data={item} key={index} />;
-      })}
-    </ScrollView>
+    <View style={{flex: 1}}>
+      <ScrollView>
+        {data.map((item, index) => {
+          return <InspectionBox data={item} key={index} />;
+        })}
+      </ScrollView>
     </View>
   );
 };

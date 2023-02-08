@@ -1,123 +1,185 @@
-import { View, Alert, Image, ScrollView, Dimensions, TouchableWithoutFeedback, StatusBar } from 'react-native'
-import React, { useState, useEffect } from 'react'
-import { Button, Card, Searchbar, TextInput, Surface, Divider, Text, } from 'react-native-paper';
+import {
+  View,
+  Alert,
+  Image,
+  ScrollView,
+  Dimensions,
+  TouchableWithoutFeedback,
+  StatusBar,
+} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  Button,
+  Card,
+  Searchbar,
+  TextInput,
+  Surface,
+  Divider,
+  Text,
+} from 'react-native-paper';
 import SIPCStyles from './styles';
 import Icon2 from 'react-native-vector-icons/Entypo';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
-import { Col, Grid } from 'react-native-easy-grid';
+import {Col, Grid} from 'react-native-easy-grid';
 import SurveyViewAllBox from '../component/surveyviewallbox';
 import API from '../utility/api';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 
+const SurveyViewAll = ({navigation}) => {
+  const Width = Dimensions.get('window').width;
+  const Height = Dimensions.get('window').height;
 
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const onChangeSearch = query => setSearchQuery(query);
 
-const SurveyViewAll = ({ navigation }) => {
+  const [Active, setActive] = useState(1);
 
-    const Width = Dimensions.get('window').width;
-    const Height = Dimensions.get('window').height;
+  const [data, setData] = useState([]);
 
-    const [searchQuery, setSearchQuery] = React.useState('');
-    const onChangeSearch = query => setSearchQuery(query);
+  const params = JSON.stringify({
+    pageSize: '25',
+    pageNumber: '1',
+    appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+    device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+    userId: '1',
+    userSurveyStatus: Active,
+    searchKeyword: '',
+  });
 
-    const [Active, setActive] = useState(1);
+  useFocusEffect(
+    React.useCallback(() => {
+      API.instance
+        .post(
+          'http://sipcsurvey.devuri.com/sipcsurvey/user-surveys-device?is_api=true',
+          params,
+        )
+        .then(
+          response => {
+            setData(response.data);
+            // console.log(Active)
+          },
+          error => {
+            console.error(error);
+          },
+        );
+    }, [Active]),
+  );
 
-    const [data, setData] = useState([]);
+  return (
+    <View style={SIPCStyles.flex}>
+      <StatusBar barStyle={'dark-content'} backgroundColor="white" />
 
-    const params = JSON.stringify({
-        "pageSize": "25",
-        "pageNumber": "1",
-        "appKey": "f9285c6c2d6a6b531ae1f70d2853f612",
-        "device_id": "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
-        "userId": "1",
-        "userSurveyStatus": Active,
-        "searchKeyword": "",
-    });
+      {/* ====================================== */}
+      <Surface style={SIPCStyles.headerSurface}>
+        <Image
+          source={require('../assets/man.png')}
+          style={SIPCStyles.headerManImage}
+        />
 
-    useFocusEffect(
-        React.useCallback(() => {
-            API.instance
-            .post(
-                'http://sipcsurvey.devuri.com/sipcsurvey/user-surveys-device?is_api=true', params,
-            ).then(response => {
-                setData(response.data);
-                // console.log(Active)
-            },
-                error => {
-                    console.error(error);
-                },
-            );
-        }, [Active])
-      );
+        <Searchbar
+          placeholder="Search Survey"
+          placeholderTextColor="grey"
+          onChangeText={onChangeSearch}
+          value={searchQuery}
+          style={SIPCStyles.searchBar}
+          icon={() => (
+            <SimpleLineIcons
+              name="magnifier"
+              size={20}
+              style={{color: 'grey'}}
+            />
+          )}
+        />
 
+        <TouchableWithoutFeedback
+          onPress={() => navigation.navigate('Surveys')}>
+          <Image
+            source={require('../assets/start-inspection.png')}
+            style={SIPCStyles.headerManImage}
+          />
+        </TouchableWithoutFeedback>
+      </Surface>
+      <Divider bold={true} />
+      {/* ================TABS============================== */}
 
-    return (
-        <View style={SIPCStyles.flex}>
-            <StatusBar barStyle={"dark-content"} backgroundColor="white" />
+      <View
+        style={{
+          backgroundColor: 'white',
+          flexDirection: 'row',
+          justifyContent: 'space-around',
+        }}>
+        <Card
+          elevation={0}
+          style={{
+            paddingVertical: 15,
+            paddingHorizontal: 20,
+            backgroundColor: 'white',
+            borderBottomWidth: Active == 1 ? 1 : 0,
+            borderColor: Active == 1 ? '#1485cc' : 'transparent',
+            width: Width / 2,
+          }}
+          onPress={() => setActive(1)}>
+          <Text
+            style={[
+              SIPCStyles.NormalFont,
+              {textAlign: 'center', color: Active == 1 ? '#1485cc' : '#525252'},
+            ]}>
+            Completed
+          </Text>
+        </Card>
 
+        <Card
+          elevation={0}
+          style={{
+            paddingVertical: 15,
+            paddingHorizontal: 20,
+            backgroundColor: 'white',
+            borderBottomWidth: Active == 0 ? 1 : 0,
+            borderColor: Active == 0 ? '#1485cc' : 'transparent',
+            width: Width / 2,
+          }}
+          onPress={() => setActive(0)}>
+          <Text
+            style={[
+              SIPCStyles.NormalFont,
+              {color: Active == 0 ? '#1485cc' : '#525252', textAlign: 'center'},
+            ]}>
+            Pending
+          </Text>
+        </Card>
+      </View>
+      <Divider bold={true} />
 
-            {/* ====================================== */}
-            <Surface style={SIPCStyles.headerSurface}>
-                <Image source={require('../assets/man.png')}
-                    style={SIPCStyles.headerManImage}
-                />
+      <ScrollView>
+        {data.map((item, index) => {
+          return (
+            <SurveyViewAllBox
+              data={item}
+              key={index}
+              navigation={navigation}
+              Active={Active}
+            />
+          );
+        })}
 
-                <Searchbar
-                    placeholder="Search Survey"
-                    placeholderTextColor="grey"
-                    onChangeText={onChangeSearch}
-                    value={searchQuery}
-                    style={SIPCStyles.searchBar}
-                    icon={() => <SimpleLineIcons name="magnifier" size={20} style={{ color: 'grey', }} />}
-                />
+        {/* ==================================================== */}
+      </ScrollView>
+    </View>
+  );
+};
 
-                <TouchableWithoutFeedback onPress={() => navigation.navigate('Surveys')}>
-                    <Image
-                        source={require('../assets/start-inspection.png')}
-                        style={SIPCStyles.headerManImage} />
-                </TouchableWithoutFeedback>
-            </Surface>
-            <Divider bold={true} />
-            {/* ================TABS============================== */}
+export default SurveyViewAll;
 
-            <View style={{ backgroundColor: 'white', flexDirection: 'row', justifyContent: 'space-around', }} >
-                <Card elevation={0} style={{
-                    paddingVertical: 15, paddingHorizontal: 20, backgroundColor: 'white', borderBottomWidth: Active == 1 ? 1 : 0, borderColor: Active == 1 ? '#1485cc' : 'transparent', width: Width / 2
-                }} onPress={() => setActive(1)}>
-                    <Text style={[SIPCStyles.NormalFont, { textAlign: 'center', color: Active == 1 ? '#1485cc' : '#525252' }]}>Completed</Text>
-                </Card>
-
-                <Card elevation={0} style={{ paddingVertical: 15, paddingHorizontal: 20, backgroundColor: 'white', borderBottomWidth: Active == 0 ? 1 : 0, borderColor: Active == 0 ? '#1485cc' : 'transparent', width: Width / 2 }} onPress={() => setActive(0)}>
-                    <Text style={[SIPCStyles.NormalFont, { color: Active == 0 ? '#1485cc' : '#525252', textAlign: 'center' }]}>Pending</Text>
-                </Card>
-            </View>
-            <Divider bold={true} />
-
-
-            <ScrollView>
-
-                {data.map((item, index) => {
-                    return <SurveyViewAllBox data={item} key={index} navigation={navigation} Active={Active} />;
-                })}
-
-                {/* ==================================================== */}
-            </ScrollView>
-        </View>
-    )
-}
-
-export default SurveyViewAll
-
-
-    // useEffect(() => {
-    //     API.instance
-    //         .post(
-    //             'http://sipcsurvey.devuri.com/sipcsurvey/user-surveys-device?is_api=true', params,
-    //         ).then(response => {
-    //             setData(response.data);
-    //             console.log(Active)
-    //         },
-    //             error => {
-    //                 console.error(error);
-    //             },
-    //         );
-    // }, [Active]);
+// useEffect(() => {
+//     API.instance
+//         .post(
+//             'http://sipcsurvey.devuri.com/sipcsurvey/user-surveys-device?is_api=true', params,
+//         ).then(response => {
+//             setData(response.data);
+//             console.log(Active)
+//         },
+//             error => {
+//                 console.error(error);
+//             },
+//         );
+// }, [Active]);

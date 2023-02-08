@@ -22,13 +22,11 @@ import SIPCStyles from './styles';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import SurveyBox from '../component/surveybox';
 import API from '../utility/api';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 
 const Surveys = ({navigation}) => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const onChangeSearch = query => setSearchQuery(query);
-
-
 
   const [data, setData] = useState([]);
   const params = JSON.stringify({
@@ -58,19 +56,19 @@ const Surveys = ({navigation}) => {
   useFocusEffect(
     React.useCallback(() => {
       API.instance
-      .post(
-        'http://sipcsurvey.devuri.com/sipcsurvey/survey-list-device?is_api=true',
-        params,
-      )
-      .then(
-        response => {
-          setData(response.data);
-        },
-        error => {
-          console.error(error);
-        },
-      );
-    }, [])
+        .post(
+          'http://sipcsurvey.devuri.com/sipcsurvey/survey-list-device?is_api=true',
+          params,
+        )
+        .then(
+          response => {
+            setData(response.data);
+          },
+          error => {
+            console.error(error);
+          },
+        );
+    }, []),
   );
 
   return (
