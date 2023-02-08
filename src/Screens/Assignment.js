@@ -482,13 +482,13 @@ const Assignment = ({ navigation }) => {
             <Card style={{ marginTop: 15, backgroundColor: 'white', borderRadius: 0 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-around' }} >
 
-                    <TouchableWithoutFeedback onPress={() => navigation.navigate('WorkOrders')} style={{}}>
+                    <TouchableWithoutFeedback onPress={() => navigation.navigate('Work Orders')} style={{}}>
                         <Text style={[SIPCStyles.NormalFont, { padding: 15 }]}>Cancel</Text>
                     </TouchableWithoutFeedback>
 
                     <View style={{ borderWidth: 1, borderColor: '#e6e6e6' }} />
 
-                    <TouchableWithoutFeedback onPress={() => navigation.navigate('WorkOrders')} style={{}}>
+                    <TouchableWithoutFeedback onPress={() => navigation.navigate('Work Orders')} style={{}}>
                         <Text style={[SIPCStyles.NormalFont, { color: '#199be2', padding: 15 }]}>Save</Text>
                     </TouchableWithoutFeedback>
 

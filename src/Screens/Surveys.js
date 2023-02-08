@@ -22,6 +22,7 @@ import SIPCStyles from './styles';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import SurveyBox from '../component/surveybox';
 import API from '../utility/api';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Surveys = ({navigation}) => {
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -31,7 +32,7 @@ const Surveys = ({navigation}) => {
 
   const [data, setData] = useState([]);
   const params = JSON.stringify({
-    pageSize: '25',
+    pageSize: '10',
     pageNumber: '1',
     appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
     device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
@@ -39,8 +40,24 @@ const Surveys = ({navigation}) => {
     orgId: '1',
   });
 
-  useEffect(() => {
-    API.instance
+  // useEffect(() => {
+  //   API.instance
+  //     .post(
+  //       'http://sipcsurvey.devuri.com/sipcsurvey/survey-list-device?is_api=true',
+  //       params,
+  //     )
+  //     .then(
+  //       response => {
+  //         setData(response.data);
+  //       },
+  //       error => {
+  //         console.error(error);
+  //       },
+  //     );
+  // }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      API.instance
       .post(
         'http://sipcsurvey.devuri.com/sipcsurvey/survey-list-device?is_api=true',
         params,
@@ -53,7 +70,8 @@ const Surveys = ({navigation}) => {
           console.error(error);
         },
       );
-  }, []);
+    }, [])
+  );
 
   return (
     <View style={SIPCStyles.flex}>

@@ -9,10 +9,11 @@ const ViewRoomBox = () => {
 
     return (
         <>
+        
             <Surface
                 style={{ padding: 15, marginTop: 20, backgroundColor: Show == true ? '#fffcf8' : 'white', }}>
                 <View style={{flexDirection:'row',}}>
-                <Col size={70} style={{ justifyContent: 'center', paddingRight: 10 }}>
+                <Col size={60} style={{ justifyContent: 'center', paddingRight: 10 }}>
                     <View style={{ flexDirection: 'column' }}>
                         <View style={[SIPCStyles.ViewRowAlign]}>
                             <TouchableWithoutFeedback

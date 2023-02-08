@@ -1,5 +1,6 @@
-import { View, Alert, Image, ScrollView, Dimensions, TouchableWithoutFeedback, StatusBar } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import { View, Alert, Image, ScrollView, Dimensions, TouchableWithoutFeedback, StatusBar, } from 'react-native'
+import React, { useState, useEffect, } from 'react'
+import { useFocusEffect } from '@react-navigation/native';
 import { Button, Card, Searchbar, TextInput, Surface, Divider, Text, } from 'react-native-paper';
 import SIPCStyles from './styles';
 import Icon2 from 'react-native-vector-icons/Entypo';
@@ -11,24 +12,47 @@ import API from '../utility/api';
 
 const Inspections = ({ navigation }) => {
 
+  const Width = Dimensions.get('window').width;
+  const Height = Dimensions.get('window').height;
+
   const [searchQuery, setSearchQuery] = useState('');
   const onChangeSearch = query => setSearchQuery(query);
 
   const [Active, setActive] = useState(null);
 
   const [data, setData] = useState([]);
+  
   const params = JSON.stringify({
     "pageSize": "25",
     "pageNumber": "1",
     "appKey": "f9285c6c2d6a6b531ae1f70d2853f612",
     "device_id": "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
     "userId": "1",
-    "inspectionStatus": "",
+    "inspectionStatus": Active == null ? '' : Active,
     "searchKeyword": "",
   });
 
-  useEffect(() => {
-    API.instance
+  // "inspectionStatus": "", == inspection
+  // "inspectionStatus": "0", == pending
+  // "inspectionStatus": "1", == complete
+
+  // useEffect(() => {
+  //   API.instance
+  //     .post(
+  //       'http://sipcsurvey.devuri.com/sipcsurvey/inspection-list-device?is_api=true', params,
+  //     ).then(response => {
+  //       setData(response.data);
+  //     },
+  //       error => {
+  //         console.error(error);
+  //       },
+  //     );
+  // }, [Active]);
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      API.instance
       .post(
         'http://sipcsurvey.devuri.com/sipcsurvey/inspection-list-device?is_api=true', params,
       ).then(response => {
@@ -38,8 +62,11 @@ const Inspections = ({ navigation }) => {
           console.error(error);
         },
       );
-  }, []);
-
+      // console.log(Active);
+    }, [Active])
+  );
+    
+  
 
   return (
     <View style={SIPCStyles.flex}>
@@ -68,56 +95,32 @@ const Inspections = ({ navigation }) => {
       </Surface>
       <Divider bold={true} />
       {/* ================TABS============================== */}
-      <ScrollView>
+      
         <View style={{ backgroundColor: 'white', flexDirection: 'row', justifyContent: 'space-around', }} >
           <Card elevation={0} style={{
             paddingVertical: 15,
-            paddingHorizontal: 20, backgroundColor: 'white', borderBottomWidth: Active == null ? 1 : 0, borderColor: Active == null ? '#1485cc' : 'transparent'
+            paddingHorizontal: 20, backgroundColor: 'white', borderBottomWidth: Active == null ? 1 : 0, borderColor: Active == null ? '#1485cc' : 'transparent', 
           }} onPress={() => setActive(null)}>
             <Text style={[SIPCStyles.NormalFont, { color: Active == null ? '#1485cc' : '#525252' }]}>Inspections</Text>
           </Card>
 
-          <Card elevation={0} style={{ paddingVertical: 15, paddingHorizontal: 20, backgroundColor: 'white', borderBottomWidth: Active == 0 ? 1 : 0, borderColor: Active == 0 ? '#1485cc' : 'transparent' }} onPress={() => setActive(0)}>
-            <Text style={[SIPCStyles.NormalFont, { color: Active == 0 ? '#1485cc' : '#525252' }]}>Completed</Text>
+          <Card elevation={0} style={{ paddingVertical: 15, paddingHorizontal: 20, backgroundColor: 'white', borderBottomWidth: Active == 1 ? 1 : 0, borderColor: Active == 1 ? '#1485cc' : 'transparent',  }} onPress={() => setActive(1)}>
+            <Text style={[SIPCStyles.NormalFont, { color: Active == 1 ? '#1485cc' : '#525252' }]}>Completed</Text>
           </Card>
 
-          <Card elevation={0} style={{ paddingHorizontal: 20, paddingVertical: 15, backgroundColor: 'white', borderBottomWidth: Active == 1 ? 1 : 0, borderColor: Active == 1 ? '#1485cc' : 'transparent' }} onPress={() => setActive(1)}>
-            <Text style={[SIPCStyles.NormalFont, { color: Active == 1 ? '#1485cc' : '#525252' }]}>Pending</Text>
+          <Card elevation={0} style={{ paddingHorizontal: 20, paddingVertical: 15, backgroundColor: 'white', borderBottomWidth: Active == 0 ? 1 : 0, borderColor: Active == 0 ? '#1485cc' : 'transparent' }} onPress={() => setActive(0)}>
+            <Text style={[SIPCStyles.NormalFont, { color: Active == 0 ? '#1485cc' : '#525252',  }]}>Pending</Text>
           </Card>
 
         </View>
-
-
+       
+        <ScrollView showsVerticalScrollIndicator={false} >
         {/* ==========INSPECTIONS ==================================== */}
-        {Active == null ?
-          <>
+        <>
             {data.map((item, index) => {
               return <InspectionBox data={item} key={index} navigation={navigation} />;
             })}
           </>
-          : null}
-        {/* ==========Completed ==================================== */}
-        {Active == 0 ?
-          <>
-            {data.map((item1, index1) => {
-              return (
-                <View style={{}}>
-                  <InspectionBox data={item1} key={index1} navigation={navigation} />
-                </View>
-              )
-
-
-            })}
-          </>
-          : null}
-        {/* ==========Pending ==================================== */}
-        {Active == 1 ?
-          <>
-            {data.map((item2, index2) => {
-              return <InspectionBox data={item2} key={index2} navigation={navigation} />;
-            })}
-          </>
-          : null}
 
         {/* 
 

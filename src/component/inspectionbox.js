@@ -6,18 +6,25 @@ import Moment from 'moment';
 import { Col, Grid } from 'react-native-easy-grid';
 
 
-const InspectionBox = ({ data,navigation }) => {
-    const [Show, setShow] = useState(false);
+const InspectionBox = ({ data, navigation }) => {
     
-  const checkScore=(score)=>{
-        if( score > 90 ){
-            return <Text style={[SIPCStyles.inspectionScore,SIPCStyles.textSuccess]}>{score}%</Text>
-        }else if(score > 80){
+    const [Show, setShow] = useState(false);
+
+
+    
+
+    const checkScore = (score) => {
+        if (score > 90) {
+            return <Text style={[SIPCStyles.inspectionScore, SIPCStyles.textSuccess]}>{score}%</Text>
+        } else if (score > 80) {
             return <Text style={[SIPCStyles.inspectionScore, SIPCStyles.textWarning]}>{score}%</Text>
-        }else{
+        } else {
             return <Text style={[SIPCStyles.inspectionScore, SIPCStyles.textDanger]}>{score}%</Text>
         }
-      }
+    }
+
+    let SCORE = data.received_score;
+    SCORE = parseFloat(SCORE).toFixed(2);
 
     return (
         <View>
@@ -27,7 +34,7 @@ const InspectionBox = ({ data,navigation }) => {
                         <View style={{ flexDirection: 'column' }}>
                             <View style={SIPCStyles.ViewRowAlign}>
                                 <TouchableWithoutFeedback
-                                    onPress={() => {  
+                                    onPress={() => {
                                         setShow(!Show);
                                     }}>
                                     {Show == true ? (
@@ -58,22 +65,22 @@ const InspectionBox = ({ data,navigation }) => {
                     <Col size={16} style={{ alignItems: 'center' }}>
                         <TouchableWithoutFeedback>
                             {
-                                data.is_completed == "1" ? 
-                                (
-                                    <Image
-                                    source={require('../assets/share.png')}
-                                    style={SIPCStyles.playImage}
-                                    />
-                                ):
-                                (
-                                    <Image
-                                    source={require('../assets/continue.png')}
-                                    style={SIPCStyles.playImage}
-                                />
-                                )
+                                data.is_completed == "1" ?
+                                    (
+                                        <Image
+                                            source={require('../assets/share.png')}
+                                            style={SIPCStyles.playImage}
+                                        />
+                                    ) :
+                                    (
+                                        <Image
+                                            source={require('../assets/continue.png')}
+                                            style={SIPCStyles.playImage}
+                                        />
+                                    )
                             }
                         </TouchableWithoutFeedback>
-                        <Text style={SIPCStyles.SurfacePlayImageText}>{data.is_completed=="1"?"View":"Continue"}</Text>
+                        <Text style={SIPCStyles.SurfacePlayImageText}>{data.is_completed == "1" ? "View" : "Continue"}</Text>
                     </Col>
                 </Grid>
             </Surface>
@@ -86,7 +93,7 @@ const InspectionBox = ({ data,navigation }) => {
                                 <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>Rooms:</Text>
                                 <Text style={SIPCStyles.ValueFont}>{data.total_room}</Text>
                             </View>
-                            <Text style={[SIPCStyles.ValueFont, { color: '#1485cc' }]} onPress={() => {navigation.navigate('InspectionViewRoom')}}>View Rooms</Text>
+                            <Text style={[SIPCStyles.ValueFont, { color: '#1485cc' }]} onPress={() => { navigation.navigate('InspectionViewRoom') }}>View Rooms</Text>
                         </View>
                     </Surface>
 
@@ -94,23 +101,27 @@ const InspectionBox = ({ data,navigation }) => {
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <View style={{ flexDirection: 'row' }}>
                                 <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>Score:</Text>
-                                {checkScore(data.received_score)}
+                                {checkScore(SCORE)}
                                 
+                                {/* <Text style={[SIPCStyles.inspectionScore,
+                                data.received_score > 90 ? SIPCStyles.textSuccess :
+                                    data.received_score > 80 ? SIPCStyles.textWarning :
+                                        SIPCStyles.textDanger]}>{data.received_score}%</Text> */}
                             </View>
                             {
-                                data.is_completed == "1"?
-                                (
-                                    <View style={{ flexDirection: 'row' }}>
-                                        <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>Status:</Text>
-                                        <Text style={[SIPCStyles.inspectionScore,SIPCStyles.textSuccess]}>Completed</Text>
-                                    </View>
-                                ):
-                                (
-                                    <View style={{ flexDirection: 'row' }}>
-                                        <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>Status:</Text>
-                                        <Text style={[SIPCStyles.inspectionScore, SIPCStyles.textWarning]}>In Progress</Text>
-                                    </View>
-                                )
+                                data.is_completed == "1" ?
+                                    (
+                                        <View style={{ flexDirection: 'row' }}>
+                                            <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>Status:</Text>
+                                            <Text style={[SIPCStyles.inspectionScore, SIPCStyles.textSuccess]}>Completed</Text>
+                                        </View>
+                                    ) :
+                                    (
+                                        <View style={{ flexDirection: 'row' }}>
+                                            <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>Status:</Text>
+                                            <Text style={[SIPCStyles.inspectionScore, SIPCStyles.textWarning]}>In Progress</Text>
+                                        </View>
+                                    )
                             }
                         </View>
                     </Surface>
