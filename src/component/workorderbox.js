@@ -14,7 +14,8 @@ import { Col, Grid } from 'react-native-easy-grid';
 const WorkOrderBox = ({ data, Active, navigation }) => {
 
 
-    const images = Object.values(data.images || {});
+    const images = data.images.split(",");
+
     console.log(images)
 
     // console.log(data.work_order_status)
@@ -34,6 +35,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
     //   }, []);
 
     const [Show, setShow] = useState(false);
+
 
     const [showDropDown1, setShowDropDown1] = useState(false);
     const [Group, setGroup] = useState(data.work_order_status);
@@ -69,7 +71,6 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
             label: 'UNASSIGNED',
             value: '-1',
         },
-
         {
             label: 'IN-PROGRESS',
             value: '0',
