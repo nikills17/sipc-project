@@ -11,8 +11,9 @@ import { useNavigation } from '@react-navigation/native';
 
 
 const WorkOrderBox = ({ data, Active, navigation }) => {
-
-    const [images, setImages] = useState([]);
+  
+    
+    const images = data.images
 
     // useEffect(() => {
     //     fetch('http://sipcsurvey.devuri.com/sipcsurvey/workorder-list-device?is_api=true')
@@ -34,7 +35,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
             label: 'UNASSIGNED',
             value: '1',
         },
-        
+
         {
             label: 'IN-PROGRESS',
             value: '2',
@@ -45,10 +46,10 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
         },
     ]);
 
-    
+
     const handleDropDownChange = (value) => {
         setGroup(value);
-        
+
         if (value === '2') {
             console.log('2')
             navigation.navigate('Assignment');
@@ -56,7 +57,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
             navigation.navigate('Assignment');
         }
         console.log('3')
-        
+
     };
     //  -----------------InProgress DropDown
     const [showDropDown2, setShowDropDown2] = useState(false);
@@ -157,37 +158,57 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
 
                     {Show === true ? (
                         <Surface style={{ backgroundColor: 'white' }}>
-                            <View style={{ flexDirection: 'row', padding: 15 }}>
-                                <Image
-                                    source={require('../assets/building.png')}
-                                    style={SIPCStyles.MainBuilding}
-                                />
-                                <Text style={SIPCStyles.SurfaceType}>{data.building_name}</Text>
-                            </View>
-                            <Divider bold={true} />
-                            {/* ================ */}
-                            <View
-                                style={{
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}>
-                                <View style={{ flexDirection: 'row', padding: 15 }}>
-                                    <Image
-                                        source={require('../assets/floor.png')}
-                                        style={SIPCStyles.MainBuilding}
-                                    />
-                                    <Text style={SIPCStyles.SurfaceType}>{data.floor_name}</Text>
-                                </View>
 
-                                <View style={{ flexDirection: 'row', padding: 15 }}>
-                                    <Image
-                                        source={require('../assets/room.png')}
-                                        style={SIPCStyles.MainBuilding}
-                                    />
-                                    <Text style={SIPCStyles.SurfaceType}>{data.room_name}</Text>
-                                </View>
-                            </View>
-                            <Divider bold={true} />
+                            {data.location_type_id === '1' ?
+                                <>
+                                    <View style={{ flexDirection: 'row', padding: 15 }}>
+                                        <Image
+                                            source={require('../assets/building.png')}
+                                            style={SIPCStyles.MainBuilding}
+                                        />
+                                        <Text style={SIPCStyles.SurfaceType}>{data.building_name}</Text>
+                                    </View>
+                                    <Divider bold={true} />
+                                    {/* ================ */}
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between',
+                                        }}>
+                                        <View style={{ flexDirection: 'row', padding: 15 }}>
+                                            <Image
+                                                source={require('../assets/floor.png')}
+                                                style={SIPCStyles.MainBuilding}
+                                            />
+                                            <Text style={SIPCStyles.SurfaceType}>{data.floor_name}</Text>
+                                        </View>
+
+                                        <View style={{ flexDirection: 'row', padding: 15 }}>
+                                            <Image
+                                                source={require('../assets/room.png')}
+                                                style={SIPCStyles.MainBuilding}
+                                            />
+                                            <Text style={SIPCStyles.SurfaceType}>{data.room_name}</Text>
+                                        </View>
+                                    </View>
+                                    <Divider bold={true} />
+                                </> 
+                                :
+                                <>
+                                    <View style={{ flexDirection: 'row', padding: 15 }}>
+                                        <Image
+                                            source={require('../assets/location.png')}
+                                            style={SIPCStyles.MainBuilding}
+                                        />
+                                        <Text style={SIPCStyles.SurfaceType}>{data.location}</Text>
+                                    </View>
+                                    <Divider bold={true} />
+
+                            
+                                </>
+                            }
+
+
                             {/* =================================== */}
 
                             <View
@@ -377,38 +398,55 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
 
                     {Show === true ? (
                         <Surface style={{ backgroundColor: 'white' }}>
-                            <View style={{ flexDirection: 'row', padding: 15 }}>
-                                <Image
-                                    source={require('../assets/building.png')}
-                                    style={SIPCStyles.MainBuilding}
-                                />
+                           {data.location_type_id === '1' ?
+                                <>
+                                    <View style={{ flexDirection: 'row', padding: 15 }}>
+                                        <Image
+                                            source={require('../assets/building.png')}
+                                            style={SIPCStyles.MainBuilding}
+                                        />
+                                        <Text style={SIPCStyles.SurfaceType}>{data.building_name}</Text>
+                                    </View>
+                                    <Divider bold={true} />
+                                    {/* ================ */}
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between',
+                                        }}>
+                                        <View style={{ flexDirection: 'row', padding: 15 }}>
+                                            <Image
+                                                source={require('../assets/floor.png')}
+                                                style={SIPCStyles.MainBuilding}
+                                            />
+                                            <Text style={SIPCStyles.SurfaceType}>{data.floor_name}</Text>
+                                        </View>
 
-                                <Text style={SIPCStyles.SurfaceType}>{data.building_name}</Text>
-                            </View>
-                            <Divider bold={true} />
-                            {/* ================ */}
-                            <View
-                                style={{
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}>
-                                <View style={{ flexDirection: 'row', padding: 15 }}>
-                                    <Image
-                                        source={require('../assets/floor.png')}
-                                        style={SIPCStyles.MainBuilding}
-                                    />
-                                    <Text style={SIPCStyles.SurfaceType}>{data.floor_name}</Text>
-                                </View>
+                                        <View style={{ flexDirection: 'row', padding: 15 }}>
+                                            <Image
+                                                source={require('../assets/room.png')}
+                                                style={SIPCStyles.MainBuilding}
+                                            />
+                                            <Text style={SIPCStyles.SurfaceType}>{data.room_name}</Text>
+                                        </View>
+                                    </View>
+                                    <Divider bold={true} />
+                                </> 
+                                :
+                                <>
+                                    <View style={{ flexDirection: 'row', padding: 15 }}>
+                                        <Image
+                                            source={require('../assets/location.png')}
+                                            style={SIPCStyles.MainBuilding}
+                                        />
+                                        <Text style={SIPCStyles.SurfaceType}>{data.location}</Text>
+                                    </View>
+                                    <Divider bold={true} />
 
-                                <View style={{ flexDirection: 'row', padding: 15 }}>
-                                    <Image
-                                        source={require('../assets/room.png')}
-                                        style={SIPCStyles.MainBuilding}
-                                    />
-                                    <Text style={SIPCStyles.SurfaceType}>{data.room_name}</Text>
-                                </View>
-                            </View>
-                            <Divider bold={true} />
+                            
+                                </>
+                            }
+
                             {/* =================================== */}
                             <View
                                 style={{
@@ -607,38 +645,55 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
 
                     {Show === true ? (
                         <Surface style={{ backgroundColor: 'white' }}>
-                            <View style={{ flexDirection: 'row', padding: 15 }}>
-                                <Image
-                                    source={require('../assets/building.png')}
-                                    style={SIPCStyles.MainBuilding}
-                                />
+                        {data.location_type_id === '1' ?
+                                <>
+                                    <View style={{ flexDirection: 'row', padding: 15 }}>
+                                        <Image
+                                            source={require('../assets/building.png')}
+                                            style={SIPCStyles.MainBuilding}
+                                        />
+                                        <Text style={SIPCStyles.SurfaceType}>{data.building_name}</Text>
+                                    </View>
+                                    <Divider bold={true} />
+                                    {/* ================ */}
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between',
+                                        }}>
+                                        <View style={{ flexDirection: 'row', padding: 15 }}>
+                                            <Image
+                                                source={require('../assets/floor.png')}
+                                                style={SIPCStyles.MainBuilding}
+                                            />
+                                            <Text style={SIPCStyles.SurfaceType}>{data.floor_name}</Text>
+                                        </View>
 
-                                <Text style={SIPCStyles.SurfaceType}>{data.building_name}</Text>
-                            </View>
-                            <Divider bold={true} />
-                            {/* ================ */}
-                            <View
-                                style={{
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                }}>
-                                <View style={{ flexDirection: 'row', padding: 15 }}>
-                                    <Image
-                                        source={require('../assets/floor.png')}
-                                        style={SIPCStyles.MainBuilding}
-                                    />
-                                    <Text style={SIPCStyles.SurfaceType}>{data.floor_name}</Text>
-                                </View>
+                                        <View style={{ flexDirection: 'row', padding: 15 }}>
+                                            <Image
+                                                source={require('../assets/room.png')}
+                                                style={SIPCStyles.MainBuilding}
+                                            />
+                                            <Text style={SIPCStyles.SurfaceType}>{data.room_name}</Text>
+                                        </View>
+                                    </View>
+                                    <Divider bold={true} />
+                                </> 
+                                :
+                                <>
+                                    <View style={{ flexDirection: 'row', padding: 15 }}>
+                                        <Image
+                                            source={require('../assets/location.png')}
+                                            style={SIPCStyles.MainBuilding}
+                                        />
+                                        <Text style={SIPCStyles.SurfaceType}>{data.location}</Text>
+                                    </View>
+                                    <Divider bold={true} />
 
-                                <View style={{ flexDirection: 'row', padding: 15 }}>
-                                    <Image
-                                        source={require('../assets/room.png')}
-                                        style={SIPCStyles.MainBuilding}
-                                    />
-                                    <Text style={SIPCStyles.SurfaceType}>{data.room_name}</Text>
-                                </View>
-                            </View>
-                            <Divider bold={true} />
+                            
+                                </>
+                            }
+
                             {/* =================================== */}
                             <View
                                 style={{
