@@ -7,7 +7,7 @@ import {
   TouchableWithoutFeedback,
   StatusBar,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   Button,
   Card,
@@ -19,9 +19,10 @@ import {
 } from 'react-native-paper';
 import SIPCStyles from '../screens/styles';
 import Moment from 'moment';
-import {Col, Grid} from 'react-native-easy-grid';
+import { Col, Grid } from 'react-native-easy-grid';
 
-const InspectionBox = ({data, navigation}) => {
+const InspectionBox = ({ data, navigation }) => {
+ 
   const [Show, setShow] = useState(false);
 
   const checkScore = score => {
@@ -58,8 +59,8 @@ const InspectionBox = ({data, navigation}) => {
           backgroundColor: Show == true ? '#fffcf8' : 'white',
         }}>
         <Grid>
-          <Col size={80} style={{justifyContent: 'center', paddingRight: 10}}>
-            <View style={{flexDirection: 'column'}}>
+          <Col size={80} style={{ justifyContent: 'center', paddingRight: 10 }}>
+            <View style={{ flexDirection: 'column' }}>
               <View style={SIPCStyles.ViewRowAlign}>
                 <TouchableWithoutFeedback
                   onPress={() => {
@@ -90,7 +91,7 @@ const InspectionBox = ({data, navigation}) => {
             </View>
           </Col>
 
-          <Col size={16} style={{alignItems: 'center'}}>
+          <Col size={16} style={{ alignItems: 'center' }}>
             <TouchableWithoutFeedback>
               {data.is_completed == '1' ? (
                 <Image
@@ -113,17 +114,17 @@ const InspectionBox = ({data, navigation}) => {
       {/* ======================================== */}
       {Show == true ? (
         <>
-          <Surface style={{backgroundColor: 'white', padding: 15}}>
+          <Surface style={{ backgroundColor: 'white', padding: 15 }}>
             <View
-              style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-              <View style={{flexDirection: 'row'}}>
-                <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
+              style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
                   Rooms:
                 </Text>
                 <Text style={SIPCStyles.ValueFont}>{data.total_room}</Text>
               </View>
               <Text
-                style={[SIPCStyles.ValueFont, {color: '#1485cc'}]}
+                style={[SIPCStyles.ValueFont, { color: '#1485cc' }]}
                 onPress={() => {
                   navigation.navigate('InspectionViewRoom');
                 }}>
@@ -132,11 +133,11 @@ const InspectionBox = ({data, navigation}) => {
             </View>
           </Surface>
 
-          <Surface style={{backgroundColor: 'white', padding: 15}}>
+          <Surface style={{ backgroundColor: 'white', padding: 15 }}>
             <View
-              style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-              <View style={{flexDirection: 'row'}}>
-                <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
+              style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
                   Score:
                 </Text>
                 {checkScore(SCORE)}
@@ -147,8 +148,8 @@ const InspectionBox = ({data, navigation}) => {
                                         SIPCStyles.textDanger]}>{data.received_score}%</Text> */}
               </View>
               {data.is_completed == '1' ? (
-                <View style={{flexDirection: 'row'}}>
-                  <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
+                <View style={{ flexDirection: 'row' }}>
+                  <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
                     Status:
                   </Text>
                   <Text
@@ -160,8 +161,8 @@ const InspectionBox = ({data, navigation}) => {
                   </Text>
                 </View>
               ) : (
-                <View style={{flexDirection: 'row'}}>
-                  <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
+                <View style={{ flexDirection: 'row' }}>
+                  <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
                     Status:
                   </Text>
                   <Text
@@ -176,11 +177,11 @@ const InspectionBox = ({data, navigation}) => {
             </View>
           </Surface>
 
-          <Surface style={{backgroundColor: 'white', padding: 15}}>
+          <Surface style={{ backgroundColor: 'white', padding: 15 }}>
             <View
-              style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-              <View style={{flexDirection: 'row'}}>
-                <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
+              style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
                   Inspector:
                 </Text>
                 <Text style={SIPCStyles.ValueFont}>

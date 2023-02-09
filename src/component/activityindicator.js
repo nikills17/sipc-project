@@ -1,15 +1,15 @@
 import React from 'react';
 import {View, ActivityIndicator, Dimensions, Platform} from 'react-native';
 
-const Loader = ({color, bgColor}) => {
-  const {height, width} = Dimensions.get('screen');
+const Loader = ({color}) => {
 
   return (
     <View
       style={{
         flex: 1,
         justifyContent: 'center',
-        zIndex: 100,
+        alignItems: 'center',
+        zIndex: 100,marginTop:'30%'
       }}>
       <ActivityIndicator
         style={{flex: 1, alignSelf: 'center'}}

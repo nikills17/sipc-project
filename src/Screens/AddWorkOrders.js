@@ -725,7 +725,7 @@ const AddWorkOrders = ({navigation}) => {
         </View>
 
         <Card
-          style={{marginTop: 15, backgroundColor: 'white', borderRadius: 0}}>
+          style={{marginTop: 15, backgroundColor: 'white', borderRadius: 0,bottom:0}}>
           <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
             <TouchableWithoutFeedback
               onPress={() => navigation.navigate('Work Orders')}
