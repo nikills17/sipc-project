@@ -11,9 +11,14 @@ import { useNavigation } from '@react-navigation/native';
 
 
 const WorkOrderBox = ({ data, Active, navigation }) => {
-  
-    
-    const images = data.images
+
+
+    const images = Object.values(data.images || {});
+
+    console.log(data.work_order_status)
+
+
+
 
     // useEffect(() => {
     //     fetch('http://sipcsurvey.devuri.com/sipcsurvey/workorder-list-device?is_api=true')
@@ -29,70 +34,83 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
     const [Show, setShow] = useState(false);
 
     const [showDropDown1, setShowDropDown1] = useState(false);
-    const [Group, setGroup] = useState('1');
+    const [Group, setGroup] = useState(data.work_order_status);
     const [GroupList, setGroupList] = useState([
         {
             label: 'UNASSIGNED',
-            value: '1',
+            value: '-1',
         },
 
         {
             label: 'IN-PROGRESS',
-            value: '2',
+            value: '0',
         },
         {
             label: 'COMPLETED',
-            value: '3',
+            value: '1',
         },
     ]);
 
 
-    const handleDropDownChange = (value) => {
-        setGroup(value);
-
-        if (value === '2') {
-            console.log('2')
+    const handleDropDownChange = () => {
+        if (Group === '2') {
             navigation.navigate('Assignment');
-        } else if (value === '3') {
+        } else if (Group === '3') {
             navigation.navigate('Assignment');
         }
-        console.log('3')
-
     };
     //  -----------------InProgress DropDown
     const [showDropDown2, setShowDropDown2] = useState(false);
-    const [Group2, setGroup2] = useState('1');
+    const [Group2, setGroup2] = useState(data.work_order_status);
     const [GroupList2, setGroupList2] = useState([
         {
-            label: 'IN-PROGRESS',
-            value: '1',
-        },
-        {
             label: 'UNASSIGNED',
-            value: '2',
+            value: '-1',
+        },
+
+        {
+            label: 'IN-PROGRESS',
+            value: '0',
         },
         {
             label: 'COMPLETED',
-            value: '3',
+            value: '1',
         },
     ]);
+
+    const handleDropDownChange2 = () => {
+        if (Group2 === '2') {
+            navigation.navigate('Assignment');
+        } else if (Group2 === '3') {
+            navigation.navigate('Assignment');
+        }
+    };
     //  -----------------Completed DropDown
     const [showDropDown3, setShowDropDown3] = useState(false);
-    const [Group3, setGroup3] = useState('1');
+    const [Group3, setGroup3] = useState(data.work_order_status);
     const [GroupList3, setGroupList3] = useState([
+        {
+            label: 'UNASSIGNED',
+            value: '-1',
+        },
+
+        {
+            label: 'IN-PROGRESS',
+            value: '0',
+        },
         {
             label: 'COMPLETED',
             value: '1',
         },
-        {
-            label: 'UNASSIGNED',
-            value: '2',
-        },
-        {
-            label: 'IN-PROGRESS',
-            value: '3',
-        },
     ]);
+
+    const handleDropDownChange3 = () => {
+        if (Group3 === '2') {
+            navigation.navigate('Assignment');
+        } else if (Group3 === '3') {
+            navigation.navigate('Assignment');
+        }
+    };
 
     // console.log(Active)
 
@@ -109,7 +127,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                             backgroundColor: Show === true ? '#fffcf8' : 'white',
                         }}>
                         <View
-                            style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                             <View style={{ flexDirection: 'column' }}>
                                 <View style={SIPCStyles.ViewRowAlign}>
                                     <TouchableWithoutFeedback
@@ -192,7 +210,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                         </View>
                                     </View>
                                     <Divider bold={true} />
-                                </> 
+                                </>
                                 :
                                 <>
                                     <View style={{ flexDirection: 'row', padding: 15 }}>
@@ -204,7 +222,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     </View>
                                     <Divider bold={true} />
 
-                            
+
                                 </>
                             }
 
@@ -248,7 +266,10 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     value={Group}
                                     items={GroupList}
                                     setOpen={setShowDropDown1}
-                                    setValue={handleDropDownChange}
+                                    setValue={setGroup}
+                                    onChangeValue={value => {
+                                        handleDropDownChange(value);
+                                    }}
                                     setItems={setGroupList}
                                 />
                             </View>
@@ -265,7 +286,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
                                         Assigned To:
                                     </Text>
-                                    <Text style={SIPCStyles.ValueFont}>Jhon Smith</Text>
+                                    <Text style={SIPCStyles.ValueFont}>{data.assigned_firstname}</Text>
                                 </View>
                                 <TouchableWithoutFeedback
                                     onPress={() => {
@@ -327,7 +348,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                 <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
                                     Date Completed:
                                 </Text>
-                                <Text style={SIPCStyles.ValueFont}>{data.last_updated}</Text>
+                                <Text style={SIPCStyles.ValueFont}>{data.completed_date}</Text>
                             </View>
                             <Divider bold={true} />
                         </Surface>
@@ -344,7 +365,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                             backgroundColor: Show === true ? '#fffcf8' : 'white',
                         }}>
                         <View
-                            style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                             <View style={{ flexDirection: 'column' }}>
                                 <View style={SIPCStyles.ViewRowAlign}>
                                     <TouchableWithoutFeedback
@@ -398,7 +419,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
 
                     {Show === true ? (
                         <Surface style={{ backgroundColor: 'white' }}>
-                           {data.location_type_id === '1' ?
+                            {data.location_type_id === '1' ?
                                 <>
                                     <View style={{ flexDirection: 'row', padding: 15 }}>
                                         <Image
@@ -431,7 +452,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                         </View>
                                     </View>
                                     <Divider bold={true} />
-                                </> 
+                                </>
                                 :
                                 <>
                                     <View style={{ flexDirection: 'row', padding: 15 }}>
@@ -443,7 +464,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     </View>
                                     <Divider bold={true} />
 
-                            
+
                                 </>
                             }
 
@@ -494,6 +515,9 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     items={GroupList2}
                                     setOpen={setShowDropDown2}
                                     setValue={setGroup2}
+                                    onChangeValue={value => {
+                                        handleDropDownChange2(value);
+                                    }}
                                     setItems={setGroupList2}
                                 />
                             </View>
@@ -509,7 +533,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
                                         Assigned To:
                                     </Text>
-                                    <Text style={SIPCStyles.ValueFont}>Jhon Smith</Text>
+                                    <Text style={SIPCStyles.ValueFont}>{data.assigned_firstname}</Text>
                                 </View>
                                 <TouchableWithoutFeedback
                                     onPress={() => {
@@ -534,7 +558,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                 <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
                                     Due Date:
                                 </Text>
-                                <Text style={SIPCStyles.ValueFont}></Text>
+                                <Text style={SIPCStyles.ValueFont}>{data.assigned_firstname}</Text>
                             </View>
                             <Divider bold={true} />
                             {/* ================ */}
@@ -557,6 +581,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     <Image
                                         key={index}
                                         source={{ uri: data.image_path + image }}
+
                                         style={{ height: 65, width: 65, margin: 10 }}
                                     />
                                 ))}
@@ -577,7 +602,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                 <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
                                     Date Completed:
                                 </Text>
-                                <Text style={SIPCStyles.ValueFont}>{data.last_updated}</Text>
+                                <Text style={SIPCStyles.ValueFont}>{data.completed_date}</Text>
                             </View>
                             <Divider bold={true} />
                         </Surface>
@@ -591,7 +616,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                     <Surface
                         style={{ marginTop: 20, padding: 15, backgroundColor: Show === true ? '#fffcf8' : 'white', }}>
                         <View
-                            style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                             <View style={{ flexDirection: 'column' }}>
                                 <View style={SIPCStyles.ViewRowAlign}>
                                     <TouchableWithoutFeedback
@@ -645,7 +670,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
 
                     {Show === true ? (
                         <Surface style={{ backgroundColor: 'white' }}>
-                        {data.location_type_id === '1' ?
+                            {data.location_type_id === '1' ?
                                 <>
                                     <View style={{ flexDirection: 'row', padding: 15 }}>
                                         <Image
@@ -678,7 +703,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                         </View>
                                     </View>
                                     <Divider bold={true} />
-                                </> 
+                                </>
                                 :
                                 <>
                                     <View style={{ flexDirection: 'row', padding: 15 }}>
@@ -690,7 +715,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     </View>
                                     <Divider bold={true} />
 
-                            
+
                                 </>
                             }
 
@@ -737,6 +762,9 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     items={GroupList3}
                                     setOpen={setShowDropDown3}
                                     setValue={setGroup3}
+                                    onChangeValue={value => {
+                                        handleDropDownChange3(value);
+                                    }}
                                     setItems={setGroupList3}
                                 />
                             </View>
@@ -752,7 +780,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
                                         Assigned To:
                                     </Text>
-                                    <Text style={SIPCStyles.ValueFont}>Jhon Smith</Text>
+                                    <Text style={SIPCStyles.ValueFont}>{data.assigned_firstname}</Text>
                                 </View>
                                 <TouchableWithoutFeedback
                                     onPress={() => {
@@ -814,7 +842,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                 <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
                                     Date Completed:
                                 </Text>
-                                <Text style={SIPCStyles.ValueFont}>{data.last_updated}</Text>
+                                <Text style={SIPCStyles.ValueFont}>{data.completed_date}</Text>
                             </View>
                             <Divider bold={true} />
                         </Surface>

@@ -146,7 +146,7 @@ const Assignment = ({navigation}) => {
             backgroundColor: 'white',
             borderBottomWidth: Active == 1 ? 1 : 0,
             borderColor: Active == 1 ? '#1485cc' : 'transparent',
-            width: Width / 2.2,
+            flex:1
           }}
           onPress={() => setActive(1)}>
           <Text
@@ -166,7 +166,7 @@ const Assignment = ({navigation}) => {
             backgroundColor: 'white',
             borderBottomWidth: Active == 2 ? 1 : 0,
             borderColor: Active == 2 ? '#1485cc' : 'transparent',
-            width: Width / 2.5,
+            flex:1
           }}
           onPress={() => setActive(2)}>
           <Text
@@ -186,7 +186,7 @@ const Assignment = ({navigation}) => {
             backgroundColor: 'white',
             borderBottomWidth: Active == 3 ? 1 : 0,
             borderColor: Active == 3 ? '#1485cc' : 'transparent',
-            width: Width / 2.2,
+            flex:1
           }}
           onPress={() => setActive(3)}>
           <Text
