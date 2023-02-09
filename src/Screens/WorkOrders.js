@@ -43,6 +43,7 @@ const WorkOrders = ({ navigation }) => {
           response => {
             setIsLoading(false);
             setData(response.data);
+            console.log(response.data);
           },
           error => {
             console.error(error);

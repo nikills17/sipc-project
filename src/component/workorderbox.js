@@ -8,14 +8,16 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useNavigation } from '@react-navigation/native';
+import { Col, Grid } from 'react-native-easy-grid';
 
 
 const WorkOrderBox = ({ data, Active, navigation }) => {
 
 
     const images = Object.values(data.images || {});
+    console.log(images)
 
-    console.log(data.work_order_status)
+    // console.log(data.work_order_status)
 
 
 
@@ -53,9 +55,9 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
 
 
     const handleDropDownChange = () => {
-        if (Group === '2') {
+        if (Group === '0') {
             navigation.navigate('Assignment');
-        } else if (Group === '3') {
+        } else if (Group === '1') {
             navigation.navigate('Assignment');
         }
     };
@@ -79,9 +81,9 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
     ]);
 
     const handleDropDownChange2 = () => {
-        if (Group2 === '2') {
+        if (Group2 === '0') {
             navigation.navigate('Assignment');
-        } else if (Group2 === '3') {
+        } else if (Group2 === '1') {
             navigation.navigate('Assignment');
         }
     };
@@ -105,9 +107,9 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
     ]);
 
     const handleDropDownChange3 = () => {
-        if (Group3 === '2') {
+        if (Group3 === '0') {
             navigation.navigate('Assignment');
-        } else if (Group3 === '3') {
+        } else if (Group3 === '1') {
             navigation.navigate('Assignment');
         }
     };
@@ -126,40 +128,39 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                             padding: 15,
                             backgroundColor: Show === true ? '#fffcf8' : 'white',
                         }}>
-                        <View
-                            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <View style={{ flexDirection: 'column' }}>
-                                <View style={SIPCStyles.ViewRowAlign}>
-                                    <TouchableWithoutFeedback
-                                        onPress={() => {
-                                            setShow(!Show);
-                                        }}>
-                                        {Show === true ? (
-                                            <Image
-                                                source={require('../assets/minus.png')}
-                                                style={SIPCStyles.PlusMinusImage}
-                                            />
-                                        ) : (
-                                            <Image
-                                                source={require('../assets/plus.png')}
-                                                style={SIPCStyles.PlusMinusImage}
-                                            />
-                                        )}
-                                    </TouchableWithoutFeedback>
-                                    <Text style={SIPCStyles.SurfaceTitle}> {data.item_name}</Text>
-                                </View>
+                        <Grid>
+                            <Col size={85} style={{ justifyContent: 'center', paddingRight: 10 }}>
+                                <View style={{ flexDirection: 'column' }}>
+                                    <View style={SIPCStyles.ViewRowAlign}>
+                                        <TouchableWithoutFeedback
+                                            onPress={() => {
+                                                setShow(!Show);
+                                            }}>
+                                            {Show === true ? (
+                                                <Image
+                                                    source={require('../assets/minus.png')}
+                                                    style={SIPCStyles.PlusMinusImage}
+                                                />
+                                            ) : (
+                                                <Image
+                                                    source={require('../assets/plus.png')}
+                                                    style={SIPCStyles.PlusMinusImage}
+                                                />
+                                            )}
+                                        </TouchableWithoutFeedback>
+                                        <Text style={SIPCStyles.SurfaceTitle}> {data.item_name}</Text>
+                                    </View>
 
-                                <View style={SIPCStyles.healthImageView}>
-                                    <Image
-                                        source={require('../assets/ii.png')}
-                                        style={SIPCStyles.healthImage}
-                                    />
-                                    <Text style={SIPCStyles.SurfaceType}>{data.condition_name}</Text>
+                                    <View style={SIPCStyles.healthImageView}>
+                                        <Image
+                                            source={require('../assets/ii.png')}
+                                            style={SIPCStyles.healthImage}
+                                        />
+                                        <Text style={SIPCStyles.SurfaceType}>{data.condition_name}</Text>
+                                    </View>
                                 </View>
-                            </View>
-
-                            <View
-                                style={{ alignItems: 'flex-end', justifyContent: 'center' }}>
+                            </Col>
+                            <Col size={15} style={{ alignItems: 'center' }}>
                                 <TouchableWithoutFeedback>
                                     <Image
                                         source={require('../assets/print.png')}
@@ -169,8 +170,8 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                 <Text style={[SIPCStyles.SurfacePlayImageText, {}]}>
                                     Print{' '}
                                 </Text>
-                            </View>
-                        </View>
+                            </Col>
+                        </Grid>
                     </Surface>
                     <Divider bold={true} />
 
@@ -191,7 +192,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     <View
                                         style={{
                                             flexDirection: 'row',
-                                            justifyContent: 'space-between',
+                                            justifyContent: 'space-between',flexWrap:'wrap'
                                         }}>
                                         <View style={{ flexDirection: 'row', padding: 15 }}>
                                             <Image
@@ -329,10 +330,14 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                             {/* ======================== */}
                             <View style={{ flexDirection: 'row', padding: 15, flexWrap: 'wrap' }}>
                                 <Text style={SIPCStyles.BoldFont}>Images:</Text>
-                                <Image
-                                    source={require('../assets/con1.jpg')}
-                                    style={{ height: 65, width: 65, margin: 10 }}
-                                />
+                                {images.map((image, index) => (
+                                    <Image
+                                        key={index}
+                                        source={{ uri: data.image_path + image }}
+
+                                        style={{ height: 65, width: 65, margin: 10 }}
+                                    />
+                                ))}
                             </View>
                             <Divider bold={true} />
                             {/* ================ */}
@@ -364,56 +369,54 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                             padding: 15,
                             backgroundColor: Show === true ? '#fffcf8' : 'white',
                         }}>
-                        <View
-                            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <View style={{ flexDirection: 'column' }}>
-                                <View style={SIPCStyles.ViewRowAlign}>
-                                    <TouchableWithoutFeedback
-                                        onPress={() => {
-                                            setShow(!Show);
-                                        }}>
-                                        {Show === true ? (
-                                            <Image
-                                                source={require('../assets/minus.png')}
-                                                style={SIPCStyles.PlusMinusImage}
-                                            />
-                                        ) : (
-                                            <Image
-                                                source={require('../assets/plus.png')}
-                                                style={SIPCStyles.PlusMinusImage}
-                                            />
-                                        )}
-                                    </TouchableWithoutFeedback>
-                                    <Text style={SIPCStyles.SurfaceTitle}>
-                                        {data.item_name}
-                                    </Text>
-                                </View>
+                        <Grid>
+                            <Col size={85} style={{ justifyContent: 'center', paddingRight: 10 }}>
+                                <View style={{ flexDirection: 'column' }}>
+                                    <View style={SIPCStyles.ViewRowAlign}>
+                                        <TouchableWithoutFeedback
+                                            onPress={() => {
+                                                setShow(!Show);
+                                            }}>
+                                            {Show === true ? (
+                                                <Image
+                                                    source={require('../assets/minus.png')}
+                                                    style={SIPCStyles.PlusMinusImage}
+                                                />
+                                            ) : (
+                                                <Image
+                                                    source={require('../assets/plus.png')}
+                                                    style={SIPCStyles.PlusMinusImage}
+                                                />
+                                            )}
+                                        </TouchableWithoutFeedback>
+                                        <Text style={SIPCStyles.SurfaceTitle}>
+                                            {data.item_name}
+                                        </Text>
+                                    </View>
 
-                                <View style={SIPCStyles.healthImageView}>
-                                    <Image
-                                        source={require('../assets/ii.png')}
-                                        style={SIPCStyles.healthImage}
-                                    />
-                                    <Text style={SIPCStyles.SurfaceType}>{data.condition_name}</Text>
-                                </View>
-                            </View>
-
-                            <View
-                                style={{ justifyContent: 'flex-end', alignItems: 'flex-end' }}>
-                                <View
-                                    style={{ alignItems: 'flex-end', justifyContent: 'center' }}>
-                                    <TouchableWithoutFeedback>
+                                    <View style={SIPCStyles.healthImageView}>
                                         <Image
-                                            source={require('../assets/print.png')}
-                                            style={SIPCStyles.playImage}
+                                            source={require('../assets/ii.png')}
+                                            style={SIPCStyles.healthImage}
                                         />
-                                    </TouchableWithoutFeedback>
-                                    <Text style={[SIPCStyles.SurfacePlayImageText, {}]}>
-                                        Print{' '}
-                                    </Text>
+                                        <Text style={SIPCStyles.SurfaceType}>{data.condition_name}</Text>
+                                    </View>
                                 </View>
-                            </View>
-                        </View>
+                            </Col>
+
+
+                            <Col size={15} style={{ alignItems: 'center' }}>
+                                <TouchableWithoutFeedback>
+                                    <Image
+                                        source={require('../assets/print.png')}
+                                        style={SIPCStyles.playImage}
+                                    />
+                                </TouchableWithoutFeedback>
+                                <Text style={[SIPCStyles.SurfacePlayImageText, {}]}>
+                                    Print{' '}
+                                </Text>
+                            </Col>
+                        </Grid>
                     </Surface>
                     <Divider bold={true} />
 
@@ -433,7 +436,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     <View
                                         style={{
                                             flexDirection: 'row',
-                                            justifyContent: 'space-between',
+                                            justifyContent: 'space-between',flexWrap:'wrap'
                                         }}>
                                         <View style={{ flexDirection: 'row', padding: 15 }}>
                                             <Image
@@ -463,8 +466,6 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                         <Text style={SIPCStyles.SurfaceType}>{data.location}</Text>
                                     </View>
                                     <Divider bold={true} />
-
-
                                 </>
                             }
 
@@ -615,56 +616,54 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                 <>
                     <Surface
                         style={{ marginTop: 20, padding: 15, backgroundColor: Show === true ? '#fffcf8' : 'white', }}>
-                        <View
-                            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <View style={{ flexDirection: 'column' }}>
-                                <View style={SIPCStyles.ViewRowAlign}>
-                                    <TouchableWithoutFeedback
-                                        onPress={() => {
-                                            setShow(!Show);
-                                        }}>
-                                        {Show === true ? (
-                                            <Image
-                                                source={require('../assets/minus.png')}
-                                                style={SIPCStyles.PlusMinusImage}
-                                            />
-                                        ) : (
-                                            <Image
-                                                source={require('../assets/plus.png')}
-                                                style={SIPCStyles.PlusMinusImage}
-                                            />
-                                        )}
-                                    </TouchableWithoutFeedback>
-                                    <Text style={SIPCStyles.SurfaceTitle}>
-                                        {data.item_name}
-                                    </Text>
-                                </View>
+                        <Grid>
+                            <Col size={85} style={{ justifyContent: 'center', paddingRight: 10 }}>
+                                <View style={{ flexDirection: 'column' }}>
+                                    <View style={SIPCStyles.ViewRowAlign}>
+                                        <TouchableWithoutFeedback
+                                            onPress={() => {
+                                                setShow(!Show);
+                                            }}>
+                                            {Show === true ? (
+                                                <Image
+                                                    source={require('../assets/minus.png')}
+                                                    style={SIPCStyles.PlusMinusImage}
+                                                />
+                                            ) : (
+                                                <Image
+                                                    source={require('../assets/plus.png')}
+                                                    style={SIPCStyles.PlusMinusImage}
+                                                />
+                                            )}
+                                        </TouchableWithoutFeedback>
+                                        <Text style={SIPCStyles.SurfaceTitle}>
+                                            {data.item_name}
+                                        </Text>
+                                    </View>
 
-                                <View style={SIPCStyles.healthImageView}>
-                                    <Image
-                                        source={require('../assets/ii.png')}
-                                        style={SIPCStyles.healthImage}
-                                    />
-                                    <Text style={SIPCStyles.SurfaceType}>{data.condition_name}</Text>
-                                </View>
-                            </View>
-
-                            <View
-                                style={{ justifyContent: 'flex-end', alignItems: 'flex-end' }}>
-                                <View
-                                    style={{ alignItems: 'flex-end', justifyContent: 'center' }}>
-                                    <TouchableWithoutFeedback>
+                                    <View style={SIPCStyles.healthImageView}>
                                         <Image
-                                            source={require('../assets/print.png')}
-                                            style={SIPCStyles.playImage}
+                                            source={require('../assets/ii.png')}
+                                            style={SIPCStyles.healthImage}
                                         />
-                                    </TouchableWithoutFeedback>
-                                    <Text style={[SIPCStyles.SurfacePlayImageText, {}]}>
-                                        Print{' '}
-                                    </Text>
+                                        <Text style={SIPCStyles.SurfaceType}>{data.condition_name}</Text>
+                                    </View>
                                 </View>
-                            </View>
-                        </View>
+                            </Col>
+
+
+                            <Col size={15} style={{ alignItems: 'center' }}>
+                                <TouchableWithoutFeedback>
+                                    <Image
+                                        source={require('../assets/print.png')}
+                                        style={SIPCStyles.playImage}
+                                    />
+                                </TouchableWithoutFeedback>
+                                <Text style={[SIPCStyles.SurfacePlayImageText, {}]}>
+                                    Print{' '}
+                                </Text>
+                            </Col>
+                        </Grid>
                     </Surface>
                     <Divider bold={true} />
 
@@ -684,7 +683,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     <View
                                         style={{
                                             flexDirection: 'row',
-                                            justifyContent: 'space-between',
+                                            justifyContent: 'space-between',flexWrap:'wrap'
                                         }}>
                                         <View style={{ flexDirection: 'row', padding: 15 }}>
                                             <Image
@@ -694,12 +693,12 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                             <Text style={SIPCStyles.SurfaceType}>{data.floor_name}</Text>
                                         </View>
 
-                                        <View style={{ flexDirection: 'row', padding: 15 }}>
+                                        <View style={{ flexDirection: 'row', padding: 15,flexWrap:'wrap' }}>
                                             <Image
                                                 source={require('../assets/room.png')}
                                                 style={SIPCStyles.MainBuilding}
                                             />
-                                            <Text style={SIPCStyles.SurfaceType}>{data.room_name}</Text>
+                                            <Text style={[SIPCStyles.SurfaceType,{}]}>{data.room_name}</Text>
                                         </View>
                                     </View>
                                     <Divider bold={true} />
@@ -823,10 +822,14 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                             {/* ======================== */}
                             <View style={{ flexDirection: 'row', padding: 15, flexWrap: 'wrap' }}>
                                 <Text style={SIPCStyles.BoldFont}>Images:</Text>
-                                <Image
-                                    source={require('../assets/con1.jpg')}
-                                    style={{ height: 65, width: 65, margin: 10 }}
-                                />
+                                {images.map((image, index) => (
+                                    <Image
+                                        key={index}
+                                        source={{ uri: data.image_path + image }}
+
+                                        style={{ height: 65, width: 65, margin: 10 }}
+                                    />
+                                ))}
                             </View>
                             <Divider bold={true} />
                             {/* ================ */}
