@@ -12,11 +12,12 @@ import { Col, Grid } from 'react-native-easy-grid';
 
 
 const WorkOrderBox = ({ data, Active, navigation }) => {
+    console.log(data.work_order_status)
 
 
     const images = data.images.split(",");
 
-    console.log(images)
+    // console.log(images)
 
     // console.log(data.work_order_status)
 
@@ -34,26 +35,37 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
     //       });
     //   }, []);
 
+
+
     const [Show, setShow] = useState(false);
 
+    const dropDownData = {
+        '-1': 'UNASSIGNED',
+        '0': 'IN-PROGRESS',
+        '1': 'COMPLETED'
+    };
 
     const [showDropDown1, setShowDropDown1] = useState(false);
     const [Group, setGroup] = useState(data.work_order_status);
-    const [GroupList, setGroupList] = useState([
+  
+    const GroupList = ([
         {
-            label: 'UNASSIGNED',
+            label: dropDownData[-1],
             value: '-1',
         },
-
         {
-            label: 'IN-PROGRESS',
+            label: dropDownData[0],
             value: '0',
         },
         {
-            label: 'COMPLETED',
+            label: dropDownData[1],
             value: '1',
         },
     ]);
+
+    console.log(data.work_order_status)
+    // console.log(GroupList)
+
 
 
     const handleDropDownChange = () => {
@@ -63,59 +75,60 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
             navigation.navigate('Assignment');
         }
     };
-    //  -----------------InProgress DropDown
-    const [showDropDown2, setShowDropDown2] = useState(false);
-    const [Group2, setGroup2] = useState(data.work_order_status);
-    const [GroupList2, setGroupList2] = useState([
-        {
-            label: 'UNASSIGNED',
-            value: '-1',
-        },
-        {
-            label: 'IN-PROGRESS',
-            value: '0',
-        },
-        {
-            label: 'COMPLETED',
-            value: '1',
-        },
-    ]);
 
-    const handleDropDownChange2 = () => {
-        if (Group2 === '0') {
-            navigation.navigate('Assignment');
-        } else if (Group2 === '1') {
-            navigation.navigate('Assignment');
-        }
-    };
-    //  -----------------Completed DropDown
-    const [showDropDown3, setShowDropDown3] = useState(false);
-    const [Group3, setGroup3] = useState(data.work_order_status);
-    const [GroupList3, setGroupList3] = useState([
-        {
-            label: 'UNASSIGNED',
-            value: '-1',
-        },
 
-        {
-            label: 'IN-PROGRESS',
-            value: '0',
-        },
-        {
-            label: 'COMPLETED',
-            value: '1',
-        },
-    ]);
+    // //  -----------------InProgress DropDown
+    // const [showDropDown2, setShowDropDown2] = useState(false);
+    // const [Group2, setGroup2] = useState(data.work_order_status);
+    // const GroupList2 = ([
+    //     {
+    //         label: dropDownData[-1],
+    //         value: '-1',
+    //     },
+    //     {
+    //         label: dropDownData[0],
+    //         value: '0',
+    //     },
+    //     {
+    //         label: dropDownData[1],
+    //         value: '1',
+    //     },
+    // ]);
 
-    const handleDropDownChange3 = () => {
-        if (Group3 === '0') {
-            navigation.navigate('Assignment');
-        } else if (Group3 === '1') {
-            navigation.navigate('Assignment');
-        }
-    };
+    // const handleDropDownChange2 = () => {
+    //     if (Group2 === '-1') {
+    //         navigation.navigate('Assignment');
+    //     } else if (Group2 === '1') {
+    //         navigation.navigate('Assignment');
+    //     }
+    // };
+    // //  -----------------Completed DropDown
+    // const [showDropDown3, setShowDropDown3] = useState(false);
+    // const [Group3, setGroup3] = useState(data.work_order_status);
+    // const [GroupList3, setGroupList3] = useState([
+    //     {
+    //         label: dropDownData[-1],
+    //         value: '-1',
+    //     },
+    //     {
+    //         label: dropDownData[0],
+    //         value: '0',
+    //     },
+    //     {
+    //         label: dropDownData[1],
+    //         value: '1',
+    //     },
+    // ]);
 
-    // console.log(Active)
+    // const handleDropDownChange3 = () => {
+    //     if (Group3 === '0') {
+    //         navigation.navigate('Assignment');
+    //     } else if (Group3 === '1') {
+    //         navigation.navigate('Assignment');
+    //     }
+    // };
+
+
 
     return (
         <View>
@@ -193,7 +206,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     <View
                                         style={{
                                             flexDirection: 'row',
-                                            justifyContent: 'space-between',flexWrap:'wrap'
+                                            justifyContent: 'space-between', flexWrap: 'wrap'
                                         }}>
                                         <View style={{ flexDirection: 'row', padding: 15 }}>
                                             <Image
@@ -223,11 +236,8 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                         <Text style={SIPCStyles.SurfaceType}>{data.location}</Text>
                                     </View>
                                     <Divider bold={true} />
-
-
                                 </>
                             }
-
 
                             {/* =================================== */}
 
@@ -261,7 +271,11 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                         );
                                     }}
                                     style={SIPCStyles.DropDownPicker}
-                                    textStyle={SIPCStyles.textSize}
+                                    textStyle={[SIPCStyles.textSize, SIPCStyles.textSize,
+                                    {
+                                        color: Group === '-1' ? '#e63757' : Group === '0' ? '#f6c343' : '#00d97e'
+                                    }
+                                    ]}
                                     dropDownContainerStyle={SIPCStyles.dropDownContainerStyle}
                                     labelStyle={[SIPCStyles.RedColor, { paddingHorizontal: 5 }]}
                                     open={showDropDown1}
@@ -272,8 +286,8 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     onChangeValue={value => {
                                         handleDropDownChange(value);
                                     }}
-                                    setItems={setGroupList}
                                 />
+                              
                             </View>
 
                             <Divider bold={true} />
@@ -437,7 +451,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     <View
                                         style={{
                                             flexDirection: 'row',
-                                            justifyContent: 'space-between',flexWrap:'wrap'
+                                            justifyContent: 'space-between', flexWrap: 'wrap'
                                         }}>
                                         <View style={{ flexDirection: 'row', padding: 15 }}>
                                             <Image
@@ -508,19 +522,15 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     style={SIPCStyles.DropDownPicker}
                                     textStyle={SIPCStyles.textSize}
                                     dropDownContainerStyle={SIPCStyles.dropDownContainerStyle}
-                                    labelStyle={[
-                                        SIPCStyles.OrangeColor,
-                                        { paddingHorizontal: 5 },
-                                    ]}
-                                    open={showDropDown2}
-                                    value={Group2}
-                                    items={GroupList2}
-                                    setOpen={setShowDropDown2}
-                                    setValue={setGroup2}
+                                    labelStyle={[SIPCStyles.RedColor, { paddingHorizontal: 5 }]}
+                                    open={showDropDown1}
+                                    value={Group}
+                                    items={GroupList}
+                                    setOpen={setShowDropDown1}
+                                    setValue={setGroup}
                                     onChangeValue={value => {
-                                        handleDropDownChange2(value);
+                                        handleDropDownChange(value);
                                     }}
-                                    setItems={setGroupList2}
                                 />
                             </View>
                             <Divider bold={true} />
@@ -684,7 +694,7 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     <View
                                         style={{
                                             flexDirection: 'row',
-                                            justifyContent: 'space-between',flexWrap:'wrap'
+                                            justifyContent: 'space-between', flexWrap: 'wrap'
                                         }}>
                                         <View style={{ flexDirection: 'row', padding: 15 }}>
                                             <Image
@@ -694,12 +704,12 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                             <Text style={SIPCStyles.SurfaceType}>{data.floor_name}</Text>
                                         </View>
 
-                                        <View style={{ flexDirection: 'row', padding: 15,flexWrap:'wrap' }}>
+                                        <View style={{ flexDirection: 'row', padding: 15, flexWrap: 'wrap' }}>
                                             <Image
                                                 source={require('../assets/room.png')}
                                                 style={SIPCStyles.MainBuilding}
                                             />
-                                            <Text style={[SIPCStyles.SurfaceType,{}]}>{data.room_name}</Text>
+                                            <Text style={[SIPCStyles.SurfaceType, {}]}>{data.room_name}</Text>
                                         </View>
                                     </View>
                                     <Divider bold={true} />
@@ -756,16 +766,15 @@ const WorkOrderBox = ({ data, Active, navigation }) => {
                                     style={SIPCStyles.DropDownPicker}
                                     textStyle={SIPCStyles.textSize}
                                     dropDownContainerStyle={SIPCStyles.dropDownContainerStyle}
-                                    labelStyle={[SIPCStyles.GreenColor, { paddingHorizontal: 5 }]}
-                                    open={showDropDown3}
-                                    value={Group3}
-                                    items={GroupList3}
-                                    setOpen={setShowDropDown3}
-                                    setValue={setGroup3}
+                                    labelStyle={[SIPCStyles.RedColor, { paddingHorizontal: 5 }]}
+                                    open={showDropDown1}
+                                    value={Group}
+                                    items={GroupList}
+                                    setOpen={setShowDropDown1}
+                                    setValue={setGroup}
                                     onChangeValue={value => {
-                                        handleDropDownChange3(value);
+                                        handleDropDownChange(value);
                                     }}
-                                    setItems={setGroupList3}
                                 />
                             </View>
                             <Divider bold={true} />

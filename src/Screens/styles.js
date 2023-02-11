@@ -203,6 +203,11 @@ const SIPCStyles = StyleSheet.create({
     color: '#d85c53',
     fontFamily: Bold,
   },
+  RedColor1: {
+    fontSize: responsiveScreenFontSize(1.8),
+    // color: '#d85c53',
+    fontFamily: Bold,
+  },
   textSuccess: {
     color: '#00d97e',
   },

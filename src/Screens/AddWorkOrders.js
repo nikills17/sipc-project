@@ -32,6 +32,8 @@ import ImagePicker from 'react-native-image-crop-picker';
 
 const AddWorkOrders = ({navigation}) => {
   const deviceWidth = Dimensions.get('window').width;
+
+  
   const [showDropDown1, setShowDropDown1] = useState(false);
   const [Group, setGroup] = useState();
   const [GroupList, setGroupList] = useState([

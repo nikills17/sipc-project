@@ -4,8 +4,34 @@ import {Surface, Divider, Text} from 'react-native-paper';
 import {Col, Grid} from 'react-native-easy-grid';
 import SIPCStyles from '../screens/styles';
 
-const ViewRoomBox = () => {
+const ViewRoomBox = ({data}) => {
+  // console.log("box" + data)
   const [Show, setShow] = useState(false);
+
+  const checkScore = score => {
+    if (score > 90) {
+      return (
+        <Text style={[SIPCStyles.inspectionScore, SIPCStyles.textSuccess]}>
+          {score}%
+        </Text>
+      );
+    } else if (score > 80) {
+      return (
+        <Text style={[SIPCStyles.inspectionScore, SIPCStyles.textWarning]}>
+          {score}%
+        </Text>
+      );
+    } else {
+      return (
+        <Text style={[SIPCStyles.inspectionScore, SIPCStyles.textDanger]}>
+          {score}%
+        </Text>
+      );
+    }
+  };
+
+  let SCORE = data.score;
+  SCORE = parseFloat(SCORE).toFixed(2);
 
   return (
     <>
@@ -36,18 +62,19 @@ const ViewRoomBox = () => {
                   )}
                 </TouchableWithoutFeedback>
                 <Text style={SIPCStyles.SurfaceTitle} numberOfLines={1}>
-                  302 - Business - Management{' '}
+                  {data.room_name}
                 </Text>
               </View>
             </View>
           </Col>
-          <Col size={40}>
+          <Col size={10}></Col>
+          <Col size={45}>
             <View style={{flexDirection: 'row', marginTop: 0}}>
               <Text style={[SIPCStyles.DescriptionHeading, {marginTop: 0}]}>
                 Score :
               </Text>
               <Text style={[SIPCStyles.DescriptionDetails, {marginTop: 0}]}>
-                100.00%
+              {checkScore(SCORE)}
               </Text>
             </View>
           </Col>
@@ -58,13 +85,13 @@ const ViewRoomBox = () => {
           <Surface style={{backgroundColor: 'white'}}>
             <View style={{flexDirection: 'row', display: 'flex', padding: 15}}>
               <Text style={SIPCStyles.DescriptionHeading}>Floor :</Text>
-              <Text style={SIPCStyles.DescriptionDetails}>3rd Floor</Text>
+              <Text style={SIPCStyles.DescriptionDetails}>{data.floor_name}</Text>
             </View>
 
             <Divider bold={true} />
             <View style={{flexDirection: 'row', display: 'flex', padding: 15}}>
               <Text style={SIPCStyles.DescriptionHeading}>Room Type :</Text>
-              <Text style={SIPCStyles.DescriptionDetails}>Classroom</Text>
+              <Text style={SIPCStyles.DescriptionDetails}>{data.room_type}</Text>
             </View>
           </Surface>
         </>

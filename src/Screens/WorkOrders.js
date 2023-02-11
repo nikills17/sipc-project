@@ -53,10 +53,7 @@ const WorkOrders = ({ navigation }) => {
     }, [Active]),
   );
 
-
-
-
-
+  
 
   return (
     <View style={SIPCStyles.flex}>
