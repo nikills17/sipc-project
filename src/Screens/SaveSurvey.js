@@ -41,6 +41,7 @@ const SaveSurvey = ({navigation, route}) => {
   const [Checked, setChecked] = useState(false);
   const [Checked1, setChecked1] = useState(false);
   const [surveyData, setSurveyData] = useState([]);
+  const [data, setData] = useState([]);
 
   // const [SecChecked, setSecChecked] = useState()
   {
@@ -49,9 +50,6 @@ const SaveSurvey = ({navigation, route}) => {
   const [visible, setVisible] = useState(false);
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
-
-  const [Active, setActive] = useState(0);
-  const [SubActive, setSubActive] = useState(0);
 
   const width = Dimensions.get('window').width;
 
@@ -67,36 +65,9 @@ const SaveSurvey = ({navigation, route}) => {
       )
       .then(response => {
         setSurveyData(response.surveyData[0]);
+        setData(response.data);
       });
   }, []);
-
-  // =============================
-
-  // const switch_yes = () => {
-  //     if (setChecked(!Checked) === setChecked1(false)) {
-  //     }
-  // };
-
-  // const switch_no = () => {
-  //     if (setChecked1(!Checked1) === setChecked(false)) {
-  //     }
-  // };
-
-  const switch_tab = x => {
-    if (x == Active) {
-      setActive(0);
-    } else {
-      setActive(x);
-    }
-  };
-
-  const switch_subSec = x => {
-    if (x == SubActive) {
-      setSubActive(0);
-    } else {
-      setSubActive(x);
-    }
-  };
 
   const [images, setImages] = useState([]);
   const [numColumns, setNumColumns] = useState(3);
@@ -133,6 +104,108 @@ const SaveSurvey = ({navigation, route}) => {
 
   const deleteImage = index => {
     setImages(images.filter((_, i) => i !== index));
+  };
+
+  const TextBox = () => {
+    const [answer, setAnswer] = useState('');
+
+    return (
+      <TextInput
+        style={{minHeight: 40, maxHeight: 80, marginTop: 12}}
+        multiline={true}
+        placeholder={'Answer'}
+        value={answer}
+        onChangeText={setAnswer}
+        // onEndEditing
+      />
+    );
+  };
+
+  const SurveyQuestions = ({data}) => {
+    const [Active, setActive] = useState(0);
+    const [SubActive, setSubActive] = useState(0);
+
+    const switch_tab = x => {
+      if (x == Active) {
+        setActive(0);
+      } else {
+        setActive(x);
+      }
+    };
+
+    const switch_subSec = x => {
+      if (x == SubActive) {
+        setSubActive(0);
+      } else {
+        setSubActive(x);
+      }
+    };
+
+    return (
+      <>
+        <View
+          style={{
+            paddingHorizontal: '5%',
+            marginTop: 25,
+            backgroundColor: Active === 1 ? '#fffcf8' : 'white',
+            elevation: 4,
+            padding: 15,
+            flexDirection: 'row',
+            alignItems: 'center',
+            borderBottomWidth: 1,
+            borderColor: '#CCCCCC',
+            borderRadius: 4,
+          }}>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              switch_tab(1);
+            }}>
+            {Active == 1 ? (
+              <Image
+                source={require('../assets/minus.png')}
+                style={SIPCStyles.PlusMinusImage}
+              />
+            ) : (
+              <Image
+                source={require('../assets/plus.png')}
+                style={SIPCStyles.PlusMinusImage}
+              />
+            )}
+          </TouchableWithoutFeedback>
+          <Text style={[SIPCStyles.BoldFont, {marginLeft: '5%'}]}>
+            {data.section}
+          </Text>
+        </View>
+        {data.section_data[0].questions_answers.map(question => {
+          return (
+            <View key={question.id}>
+              {question.question_type_id === 1 && (
+                <View>
+                  <Text>{question.question}</Text>
+                </View>
+              )}
+
+              {question.question_type_id === 2 && <Text>CheckBox</Text>}
+              {question.question_type_id === 3 && (
+                <View style={{backgroundColor: 'white', padding: 15}}>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Image
+                      source={require('../assets/question.png')}
+                      style={SIPCStyles.headerManImage}
+                    />
+                    <Text
+                      style={[SIPCStyles.SemiBold, {flex: 1, paddingLeft: 15}]}>
+                      {question.question}
+                    </Text>
+                  </View>
+                  <TextBox />
+                </View>
+              )}
+            </View>
+          );
+        })}
+      </>
+    );
   };
 
   return (
@@ -180,907 +253,10 @@ const SaveSurvey = ({navigation, route}) => {
           </TouchableWithoutFeedback>
         </Surface>
         <Divider bold={true} />
-        {/* ============================================================ */}
-        <Surface
-          elevation={4}
-          style={{marginTop: 25, backgroundColor: 'white'}}>
-          <View
-            style={{
-              backgroundColor: Active == 1 ? '#fffcf8' : 'white',
-              padding: 15,
-            }}>
-            <View style={[SIPCStyles.ViewRowAlign, {alignItems: 'center'}]}>
-              <TouchableWithoutFeedback
-                onPress={() => {
-                  switch_tab(1);
-                }}>
-                {Active == 1 ? (
-                  <Image
-                    source={require('../assets/minus.png')}
-                    style={SIPCStyles.PlusMinusImage}
-                  />
-                ) : (
-                  <Image
-                    source={require('../assets/plus.png')}
-                    style={SIPCStyles.PlusMinusImage}
-                  />
-                )}
-              </TouchableWithoutFeedback>
-              <Text style={[SIPCStyles.BoldFont, {paddingHorizontal: 15}]}>
-                Fire Alarm
-              </Text>
-            </View>
-          </View>
-          <Divider bold={true} />
-
-          {Active == 1 ? (
-            <>
-              <View style={{paddingVertical: 20}}>
-                <View style={{flexDirection: 'row', paddingHorizontal: 15}}>
-                  <Image
-                    source={require('../assets/question.png')}
-                    style={SIPCStyles.headerManImage}
-                  />
-                  <Text
-                    style={[SIPCStyles.SemiBold, {flex: 1, paddingLeft: 15}]}>
-                    Fire Alarm System - Has the Fire Alarm System been Tested
-                    and Inspected?
-                  </Text>
-                </View>
-
-                {/* ==========================CHECKBOX============================== */}
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-around',
-                    flexWrap: 'wrap',
-                  }}>
-                  <View
-                    style={{
-                      flexDirection: 'column',
-                      width: width > 500 ? '50%' : '100%',
-                    }}>
-                    <View style={{flexDirection: 'column'}}>
-                      <View
-                        style={[
-                          SIPCStyles.CheckboxView,
-                          {
-                            borderTopRightRadius: 10,
-                            borderTopLeftRadius: 10,
-                            borderBottomLeftRadius: Checked == 1 ? 0 : 10,
-                            borderBottomRightRadius: Checked == 1 ? 0 : 10,
-                          },
-                        ]}>
-                        <View style={{padding: 10, alignSelf: 'center'}}>
-                          <Checkbox
-                            status={Checked ? 'checked' : 'unchecked'}
-                            onPress={() => {
-                              setChecked(!Checked);
-                            }}
-                          />
-                        </View>
-
-                        <View style={{borderWidth: 1, borderColor: '#ccc'}} />
-
-                        <Text
-                          style={[
-                            SIPCStyles.checkboxFont,
-                            {paddingLeft: 10, alignSelf: 'center'},
-                          ]}>
-                          Yes
-                        </Text>
-                        <View
-                          style={{
-                            flexDirection: 'row',
-                            position: 'absolute',
-                            right: 0,
-                            alignSelf: 'center',
-                          }}>
-                          {Checked == 1 ? (
-                            <>
-                              <TouchableWithoutFeedback
-                                onPress={() => {
-                                  setChecked(!Checked);
-                                }}>
-                                <Text
-                                  style={[
-                                    SIPCStyles.checkboxFont,
-                                    {marginHorizontal: 10},
-                                  ]}>
-                                  Cancel
-                                </Text>
-                              </TouchableWithoutFeedback>
-
-                              <TouchableWithoutFeedback
-                                onPress={() => {
-                                  setChecked(!Checked);
-                                }}>
-                                <Text
-                                  style={[
-                                    SIPCStyles.checkboxFont,
-                                    {color: '#199be2', marginHorizontal: 10},
-                                  ]}>
-                                  Submit
-                                </Text>
-                              </TouchableWithoutFeedback>
-                            </>
-                          ) : (
-                            <>
-                              <TouchableWithoutFeedback
-                                onPress={() => {
-                                  setChecked(!Checked);
-                                }}>
-                                <Image
-                                  source={require('../assets/msg.png')}
-                                  style={SIPCStyles.commentImage}
-                                />
-                              </TouchableWithoutFeedback>
-
-                              <TouchableWithoutFeedback
-                                onPress={() => {
-                                  setChecked(!Checked);
-                                }}>
-                                <Image
-                                  source={require('../assets/img.png')}
-                                  style={SIPCStyles.commentImage}
-                                />
-                              </TouchableWithoutFeedback>
-                            </>
-                          )}
-                        </View>
-                      </View>
-                      {Checked == 1 ? (
-                        <View
-                          style={[SIPCStyles.CheckBox, {marginHorizontal: 20}]}>
-                          <TextInput
-                            mode="text"
-                            //  label="Outlined input"
-                            placeholder="Enter Your Comment"
-                            numberOfLines={8}
-                            multiline={true}
-                            underlineColor="transparent"
-                            theme={{colors: {primary: '#cccccc'}}}
-                            style={SIPCStyles.TextInput1}
-                          />
-
-                          <View
-                            style={{
-                              borderWidth: 1,
-                              paddingBottom: 10,
-                              borderColor: '#ccc',
-                              borderBottomLeftRadius: 10,
-                              borderBottomRightRadius: 10,
-                              borderTopLeftRadius: 0,
-                              borderTopRightRadius: 0,
-                            }}>
-                            <Card style={SIPCStyles.CameraImageCard}>
-                              <View
-                                style={{
-                                  flexDirection: 'row',
-                                  justifyContent: 'space-around',
-                                }}>
-                                <TouchableWithoutFeedback
-                                  onPress={() => openCamera()}>
-                                  <Image
-                                    source={require('../assets/camera.png')}
-                                    style={SIPCStyles.cameraImage}
-                                  />
-                                </TouchableWithoutFeedback>
-
-                                <View
-                                  style={{
-                                    borderWidth: 1,
-                                    borderColor: '#e6e6e6',
-                                  }}
-                                />
-
-                                <TouchableWithoutFeedback onPress={pickImage}>
-                                  <Image
-                                    source={require('../assets/gallery.png')}
-                                    style={SIPCStyles.cameraImage}
-                                  />
-                                </TouchableWithoutFeedback>
-                              </View>
-                            </Card>
-
-                            <View
-                              style={{
-                                marginTop: 10,
-                                flexDirection: 'row',
-                                flexWrap: width > 500 ? 'wrap' : 'wrap',
-                                flex: 1,
-                              }}>
-                              <ScrollView
-                                nestedScrollEnabled={true}
-                                horizontal={true}>
-                                <FlatList
-                                  numColumns={numColumns}
-                                  data={images}
-                                  keyExtractor={(item, index) =>
-                                    index.toString()
-                                  }
-                                  renderItem={({item, index}) => (
-                                    <View style={{position: 'relative'}}>
-                                      <Image
-                                        source={{uri: item.path}}
-                                        style={SIPCStyles.CameraClickImage}
-                                      />
-                                      <TouchableOpacity
-                                        style={SIPCStyles.crossImage}
-                                        onPress={() => deleteImage(index)}>
-                                        <Text
-                                          style={{
-                                            color: 'white',
-                                            fontWeight: 'bold',
-                                          }}>
-                                          X
-                                        </Text>
-                                      </TouchableOpacity>
-                                    </View>
-                                  )}
-                                />
-                              </ScrollView>
-                            </View>
-                          </View>
-                        </View>
-                      ) : null}
-                    </View>
-                  </View>
-                  {/* ==========================CHECKBOX============================== */}
-
-                  <View
-                    style={{
-                      flexDirection: 'column',
-                      width: width > 500 ? '50%' : '100%',
-                    }}>
-                    <View style={{flexDirection: 'column'}}>
-                      <View
-                        style={[
-                          SIPCStyles.CheckboxView,
-                          {
-                            borderTopRightRadius: 10,
-                            borderTopLeftRadius: 10,
-                            borderBottomLeftRadius: Checked1 == 1 ? 0 : 10,
-                            borderBottomRightRadius: Checked1 == 1 ? 0 : 10,
-                          },
-                        ]}>
-                        <View style={{padding: 10, alignSelf: 'center'}}>
-                          <Checkbox
-                            status={Checked1 ? 'checked' : 'unchecked'}
-                            onPress={() => {
-                              setChecked1(!Checked1);
-                            }}
-                          />
-                        </View>
-
-                        <View style={{borderWidth: 1, borderColor: '#ccc'}} />
-
-                        <Text
-                          style={[
-                            SIPCStyles.checkboxFont,
-                            {paddingLeft: 10, alignSelf: 'center'},
-                          ]}>
-                          No
-                        </Text>
-                        <View
-                          style={{
-                            flexDirection: 'row',
-                            position: 'absolute',
-                            right: 0,
-                            alignSelf: 'center',
-                          }}>
-                          {Checked1 == 1 ? (
-                            <>
-                              <TouchableWithoutFeedback
-                                onPress={() => {
-                                  setChecked1(!Checked1);
-                                }}>
-                                <Text
-                                  style={[
-                                    SIPCStyles.checkboxFont,
-                                    {marginHorizontal: 10},
-                                  ]}>
-                                  Cancel
-                                </Text>
-                              </TouchableWithoutFeedback>
-
-                              <TouchableWithoutFeedback
-                                onPress={() => {
-                                  setChecked1(!Checked1);
-                                }}>
-                                <Text
-                                  style={[
-                                    SIPCStyles.checkboxFont,
-                                    {color: '#199be2', marginHorizontal: 10},
-                                  ]}>
-                                  Submit
-                                </Text>
-                              </TouchableWithoutFeedback>
-                            </>
-                          ) : (
-                            <>
-                              <TouchableWithoutFeedback
-                                onPress={() => {
-                                  setChecked1(!Checked1);
-                                }}>
-                                <Image
-                                  source={require('../assets/msg.png')}
-                                  style={SIPCStyles.commentImage}
-                                />
-                              </TouchableWithoutFeedback>
-
-                              <TouchableWithoutFeedback
-                                onPress={() => {
-                                  setChecked1(!Checked1);
-                                }}>
-                                <Image
-                                  source={require('../assets/img.png')}
-                                  style={SIPCStyles.commentImage}
-                                />
-                              </TouchableWithoutFeedback>
-                            </>
-                          )}
-                        </View>
-                      </View>
-                      {Checked1 == 1 ? (
-                        <View
-                          style={[SIPCStyles.CheckBox, {marginHorizontal: 20}]}>
-                          <TextInput
-                            mode="text"
-                            //  label="Outlined input"
-                            placeholder="Enter Your Comment"
-                            numberOfLines={8}
-                            multiline={true}
-                            underlineColor="transparent"
-                            theme={{colors: {primary: '#cccccc'}}}
-                            style={SIPCStyles.TextInput1}
-                          />
-
-                          <View
-                            style={{
-                              borderWidth: 1,
-                              paddingBottom: 10,
-                              borderColor: '#ccc',
-                              borderBottomLeftRadius: 10,
-                              borderBottomRightRadius: 10,
-                              borderTopLeftRadius: 0,
-                              borderTopRightRadius: 0,
-                            }}>
-                            <Card style={SIPCStyles.CameraImageCard}>
-                              <View
-                                style={{
-                                  flexDirection: 'row',
-                                  justifyContent: 'space-around',
-                                }}>
-                                <TouchableWithoutFeedback
-                                  onPress={() => openCamera()}>
-                                  <Image
-                                    source={require('../assets/camera.png')}
-                                    style={SIPCStyles.cameraImage}
-                                  />
-                                </TouchableWithoutFeedback>
-
-                                <View
-                                  style={{
-                                    borderWidth: 1,
-                                    borderColor: '#e6e6e6',
-                                  }}
-                                />
-
-                                <TouchableWithoutFeedback onPress={pickImage}>
-                                  <Image
-                                    source={require('../assets/gallery.png')}
-                                    style={SIPCStyles.cameraImage}
-                                  />
-                                </TouchableWithoutFeedback>
-                              </View>
-                            </Card>
-
-                            <View
-                              style={{
-                                marginTop: 10,
-                                flexDirection: 'row',
-                                flexWrap: width > 500 ? 'wrap' : 'wrap',
-                                flex: 1,
-                              }}>
-                              <ScrollView
-                                nestedScrollEnabled={true}
-                                horizontal={true}>
-                                <FlatList
-                                  numColumns={numColumns}
-                                  data={images}
-                                  keyExtractor={(item, index) =>
-                                    index.toString()
-                                  }
-                                  renderItem={({item, index}) => (
-                                    <View style={{position: 'relative'}}>
-                                      <Image
-                                        source={{uri: item.path}}
-                                        style={SIPCStyles.CameraClickImage}
-                                      />
-                                      <TouchableOpacity
-                                        style={SIPCStyles.crossImage}
-                                        onPress={() => deleteImage(index)}>
-                                        <Text
-                                          style={{
-                                            color: 'white',
-                                            fontWeight: 'bold',
-                                          }}>
-                                          X
-                                        </Text>
-                                      </TouchableOpacity>
-                                    </View>
-                                  )}
-                                />
-                              </ScrollView>
-                            </View>
-                          </View>
-                        </View>
-                      ) : null}
-                    </View>
-                  </View>
-                  <Divider bold={true} />
-                </View>
-              </View>
-              {/* ==========================SUB SECTION================================== */}
-
-              <Surface
-                style={{
-                  backgroundColor: SubActive == 1 ? '#fffcf8' : 'white',
-                  padding: 20,
-                }}>
-                <View style={[SIPCStyles.ViewRowAlign, {alignItems: 'center'}]}>
-                  <TouchableWithoutFeedback
-                    onPress={() => {
-                      switch_subSec(1);
-                    }}>
-                    {SubActive == 1 ? (
-                      <Image
-                        source={require('../assets/minus.png')}
-                        style={SIPCStyles.PlusMinusImage}
-                      />
-                    ) : (
-                      <Image
-                        source={require('../assets/plus.png')}
-                        style={SIPCStyles.PlusMinusImage}
-                      />
-                    )}
-                  </TouchableWithoutFeedback>
-                  <Text style={[SIPCStyles.BoldFont, {paddingHorizontal: 15}]}>
-                    Sub Section
-                  </Text>
-                </View>
-              </Surface>
-              <Divider bold={true} />
-              {SubActive == 1 ? (
-                <Surface style={{backgroundColor: 'white', padding: 20}}>
-                  <View style={{flexDirection: 'row', paddingHorizontal: 15}}>
-                    <Image
-                      source={require('../assets/question.png')}
-                      style={SIPCStyles.headerManImage}
-                    />
-                    <Text
-                      style={[SIPCStyles.SemiBold, {flex: 1, paddingLeft: 15}]}>
-                      Sprinkler System - Has the Sprinkler System been inspected
-                      and or tested?
-                    </Text>
-                  </View>
-
-                  {/* ========================= */}
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-around',
-                      flexWrap: 'wrap',
-                    }}>
-                    <View
-                      style={{
-                        flexDirection: 'column',
-                        width: width > 500 ? '50%' : '100%',
-                      }}>
-                      <View style={{flexDirection: 'column'}}>
-                        <View
-                          style={[
-                            SIPCStyles.CheckboxView,
-                            {
-                              borderTopRightRadius: 10,
-                              borderTopLeftRadius: 10,
-                              borderBottomLeftRadius:
-                                RadioChecked == 'first' ? 0 : 10,
-                              borderBottomRightRadius:
-                                RadioChecked == 'first' ? 0 : 10,
-                            },
-                          ]}>
-                          <View style={{padding: 10, alignSelf: 'center'}}>
-                            <RadioButton
-                              value="first"
-                              status={
-                                RadioChecked === 'first'
-                                  ? 'checked'
-                                  : 'unchecked'
-                              }
-                              onPress={() => setRadioChecked('first')}
-                            />
-                          </View>
-
-                          <View style={{borderWidth: 1, borderColor: '#ccc'}} />
-                          <Text
-                            style={[
-                              SIPCStyles.checkboxFont,
-                              {
-                                paddingLeft: 10,
-                                alignSelf: 'center',
-                                width: width / 2,
-                              },
-                            ]}>
-                            yes
-                          </Text>
-                          <View
-                            style={{
-                              flexDirection: 'row',
-                              position: 'absolute',
-                              right: 0,
-                              alignSelf: 'center',
-                            }}>
-                            {RadioChecked == 'first' ? (
-                              <>
-                                <TouchableWithoutFeedback
-                                  onPress={() => {
-                                    setRadioChecked();
-                                  }}>
-                                  <Text
-                                    style={[
-                                      SIPCStyles.checkboxFont,
-                                      {marginHorizontal: 10},
-                                    ]}>
-                                    Cancel
-                                  </Text>
-                                </TouchableWithoutFeedback>
-
-                                <TouchableWithoutFeedback
-                                  onPress={() => {
-                                    setRadioChecked();
-                                  }}>
-                                  <Text
-                                    style={[
-                                      SIPCStyles.checkboxFont,
-                                      {color: '#199be2', marginHorizontal: 10},
-                                    ]}>
-                                    Submit
-                                  </Text>
-                                </TouchableWithoutFeedback>
-                              </>
-                            ) : (
-                              <>
-                                <TouchableWithoutFeedback
-                                  onPress={() => {
-                                    setRadioChecked('first');
-                                  }}>
-                                  <Image
-                                    source={require('../assets/msg.png')}
-                                    style={SIPCStyles.commentImage}
-                                  />
-                                </TouchableWithoutFeedback>
-
-                                <TouchableWithoutFeedback
-                                  onPress={() => {
-                                    setRadioChecked('first');
-                                  }}>
-                                  <Image
-                                    source={require('../assets/img.png')}
-                                    style={SIPCStyles.commentImage}
-                                  />
-                                </TouchableWithoutFeedback>
-                              </>
-                            )}
-                          </View>
-                        </View>
-                        {RadioChecked == 'first' ? (
-                          <View style={{marginHorizontal: 19}}>
-                            <TextInput
-                              mode="text"
-                              //  label="Outlined input"
-                              placeholder="Enter Your Comment"
-                              numberOfLines={8}
-                              multiline={true}
-                              underlineColor="transparent"
-                              theme={{colors: {primary: '#cccccc'}}}
-                              style={SIPCStyles.TextInput1}
-                            />
-
-                            <View
-                              style={{
-                                borderWidth: 1,
-                                paddingBottom: 10,
-                                borderColor: '#ccc',
-                                borderBottomLeftRadius: 10,
-                                borderBottomRightRadius: 10,
-                                borderTopLeftRadius: 0,
-                                borderTopRightRadius: 0,
-                              }}>
-                              <Card style={SIPCStyles.CameraImageCard}>
-                                <View
-                                  style={{
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-around',
-                                  }}>
-                                  <TouchableWithoutFeedback
-                                    onPress={() => openCamera()}>
-                                    <Image
-                                      source={require('../assets/camera.png')}
-                                      style={SIPCStyles.cameraImage}
-                                    />
-                                  </TouchableWithoutFeedback>
-
-                                  <View
-                                    style={{
-                                      borderWidth: 1,
-                                      borderColor: '#e6e6e6',
-                                    }}
-                                  />
-
-                                  <TouchableWithoutFeedback
-                                    onPress={() => pickImage()}>
-                                    <Image
-                                      source={require('../assets/gallery.png')}
-                                      style={SIPCStyles.cameraImage}
-                                    />
-                                  </TouchableWithoutFeedback>
-                                </View>
-                              </Card>
-
-                              <View
-                                style={{
-                                  marginTop: 10,
-                                  flexDirection: 'row',
-                                  flexWrap: width > 500 ? 'wrap' : 'wrap',
-                                  flex: 1,
-                                }}>
-                                <ScrollView
-                                  nestedScrollEnabled={true}
-                                  horizontal={true}>
-                                  <FlatList
-                                    numColumns={numColumns}
-                                    data={images}
-                                    keyExtractor={(item, index) =>
-                                      index.toString()
-                                    }
-                                    renderItem={({item, index}) => (
-                                      <View style={{position: 'relative'}}>
-                                        <Image
-                                          source={{uri: item.path}}
-                                          style={SIPCStyles.CameraClickImage}
-                                        />
-                                        <TouchableOpacity
-                                          style={SIPCStyles.crossImage}
-                                          onPress={() => deleteImage(index)}>
-                                          <Text
-                                            style={{
-                                              color: 'white',
-                                              fontWeight: 'bold',
-                                            }}>
-                                            X
-                                          </Text>
-                                        </TouchableOpacity>
-                                      </View>
-                                    )}
-                                  />
-                                </ScrollView>
-                              </View>
-                            </View>
-                          </View>
-                        ) : null}
-                      </View>
-                    </View>
-                    {/* ====================RadioChecked First finish=========== */}
-
-                    <View
-                      style={{
-                        flexDirection: 'column',
-                        width: width > 500 ? '50%' : '100%',
-                      }}>
-                      <View style={{flexDirection: 'column'}}>
-                        <View
-                          style={[
-                            SIPCStyles.CheckboxView,
-                            {
-                              borderTopRightRadius: 10,
-                              borderTopLeftRadius: 10,
-                              borderBottomLeftRadius:
-                                RadioChecked == 'second' ? 0 : 10,
-                              borderBottomRightRadius:
-                                RadioChecked == 'second' ? 0 : 10,
-                            },
-                          ]}>
-                          <View style={{padding: 10, alignSelf: 'center'}}>
-                            <RadioButton
-                              value="second"
-                              status={
-                                RadioChecked === 'second'
-                                  ? 'checked'
-                                  : 'unchecked'
-                              }
-                              onPress={() => setRadioChecked('second')}
-                            />
-                          </View>
-
-                          <View style={{borderWidth: 1, borderColor: '#ccc'}} />
-
-                          <Text
-                            style={[
-                              SIPCStyles.checkboxFont,
-                              {
-                                paddingLeft: 10,
-                                alignSelf: 'center',
-                                width: width / 2,
-                              },
-                            ]}>
-                            No{' '}
-                          </Text>
-                          <View
-                            style={{
-                              flexDirection: 'row',
-                              position: 'absolute',
-                              right: 0,
-                              alignSelf: 'center',
-                            }}>
-                            {RadioChecked == 'second' ? (
-                              <>
-                                <TouchableWithoutFeedback
-                                  onPress={() => {
-                                    setRadioChecked();
-                                  }}>
-                                  <Text
-                                    style={[
-                                      SIPCStyles.checkboxFont,
-                                      {marginHorizontal: 10},
-                                    ]}>
-                                    Cancel
-                                  </Text>
-                                </TouchableWithoutFeedback>
-
-                                <TouchableWithoutFeedback
-                                  onPress={() => {
-                                    setRadioChecked();
-                                  }}>
-                                  <Text
-                                    style={[
-                                      SIPCStyles.checkboxFont,
-                                      {color: '#199be2', marginHorizontal: 10},
-                                    ]}>
-                                    Submit
-                                  </Text>
-                                </TouchableWithoutFeedback>
-                              </>
-                            ) : (
-                              <>
-                                <TouchableWithoutFeedback
-                                  onPress={() => {
-                                    setRadioChecked('second');
-                                  }}>
-                                  <Image
-                                    source={require('../assets/msg.png')}
-                                    style={SIPCStyles.commentImage}
-                                  />
-                                </TouchableWithoutFeedback>
-
-                                <TouchableWithoutFeedback
-                                  onPress={() => {
-                                    setRadioChecked('second');
-                                  }}>
-                                  <Image
-                                    source={require('../assets/img.png')}
-                                    style={SIPCStyles.commentImage}
-                                  />
-                                </TouchableWithoutFeedback>
-                              </>
-                            )}
-                          </View>
-                        </View>
-                        {RadioChecked == 'second' ? (
-                          <View style={{marginHorizontal: 19}}>
-                            <TextInput
-                              mode="text"
-                              //  label="Outlined input"
-                              placeholder="Enter Your Comment"
-                              numberOfLines={8}
-                              multiline={true}
-                              underlineColor="transparent"
-                              theme={{colors: {primary: '#cccccc'}}}
-                              style={SIPCStyles.TextInput1}
-                            />
-
-                            <View
-                              style={{
-                                borderWidth: 1,
-                                paddingBottom: 10,
-                                borderColor: '#ccc',
-                                borderBottomLeftRadius: 10,
-                                borderBottomRightRadius: 10,
-                                borderTopLeftRadius: 0,
-                                borderTopRightRadius: 0,
-                              }}>
-                              <Card style={SIPCStyles.CameraImageCard}>
-                                <View
-                                  style={{
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-around',
-                                  }}>
-                                  <TouchableWithoutFeedback
-                                    onPress={() => CameraSubImage()}>
-                                    <Image
-                                      source={require('../assets/camera.png')}
-                                      style={SIPCStyles.cameraImage}
-                                    />
-                                  </TouchableWithoutFeedback>
-
-                                  <View
-                                    style={{
-                                      borderWidth: 1,
-                                      borderColor: '#e6e6e6',
-                                    }}
-                                  />
-
-                                  <TouchableWithoutFeedback
-                                    onPress={() => selectSubImage()}>
-                                    <Image
-                                      source={require('../assets/gallery.png')}
-                                      style={SIPCStyles.cameraImage}
-                                    />
-                                  </TouchableWithoutFeedback>
-                                </View>
-                              </Card>
-
-                              <View
-                                style={{
-                                  marginTop: 10,
-                                  flexDirection: 'row',
-                                  flexWrap: width > 500 ? 'wrap' : 'wrap',
-                                  flex: 1,
-                                }}>
-                                <ScrollView
-                                  nestedScrollEnabled={true}
-                                  horizontal={true}>
-                                  <FlatList
-                                    numColumns={numColumns}
-                                    data={images}
-                                    keyExtractor={(item, index) =>
-                                      index.toString()
-                                    }
-                                    renderItem={({item, index}) => (
-                                      <View style={{position: 'relative'}}>
-                                        <Image
-                                          source={{uri: item.path}}
-                                          style={SIPCStyles.CameraClickImage}
-                                        />
-                                        <TouchableOpacity
-                                          style={SIPCStyles.crossImage}
-                                          onPress={() => deleteImage(index)}>
-                                          <Text
-                                            style={{
-                                              color: 'white',
-                                              fontWeight: 'bold',
-                                            }}>
-                                            X
-                                          </Text>
-                                        </TouchableOpacity>
-                                      </View>
-                                    )}
-                                  />
-                                </ScrollView>
-                              </View>
-                            </View>
-                          </View>
-                        ) : null}
-                      </View>
-                    </View>
-                  </View>
-                </Surface>
-              ) : null}
-              {/* sub Active Finish */}
-            </>
-          ) : null}
-        </Surface>
+        {/* ===============================MULTIPLE============================ */}
+        {data.map((item, index) => {
+          return <SurveyQuestions data={item} key={index} />;
+        })}
         {/* ============================================================ */}
       </ScrollView>
       {/* ================================MODAL=================================== */}
