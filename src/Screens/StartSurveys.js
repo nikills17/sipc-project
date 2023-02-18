@@ -28,7 +28,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import {ScrollView} from 'react-native-gesture-handler';
 import API from '../utility/api';
 
-const StartSurveys = ({navigation}) => {
+const StartSurveys = ({navigation, route}) => {
   const [showDropDown1, setShowDropDown1] = useState(false);
   const [Group, setGroup] = useState();
   const [GroupList, setGroupList] = useState([
@@ -48,6 +48,8 @@ const StartSurveys = ({navigation}) => {
       id: null,
     },
   ]);
+
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     API.instance
@@ -185,7 +187,7 @@ const StartSurveys = ({navigation}) => {
                 />
               );
             }}
-            placeholder="Building"
+            placeholder="Select Building"
             placeholderStyle={SIPCStyles.placeholderStyle}
             style={SIPCStyles.DropDownPicker1}
             textStyle={SIPCStyles.textSize}
@@ -202,6 +204,28 @@ const StartSurveys = ({navigation}) => {
             setItems={setGroupList2}
           />
         </View>
+        {error && (
+          <View
+            style={{
+              width: '100%',
+              alignItems: 'center',
+            }}>
+            <Text
+              style={{
+                color: 'red',
+                fontFamily: 'Poppins-Medium',
+              }}>
+              Select An Organization and A Building
+            </Text>
+            <Text
+              style={{
+                color: 'red',
+                fontFamily: 'Poppins-Medium',
+              }}>
+              to Start the Survey!
+            </Text>
+          </View>
+        )}
       </ScrollView>
       {/* =================================================================== */}
       <Card
@@ -227,7 +251,14 @@ const StartSurveys = ({navigation}) => {
           <TouchableWithoutFeedback
             style={{}}
             onPress={() => {
-              navigation.navigate('SaveSurvey');
+              if (Group && Group2) {
+                setError(false);
+                navigation.navigate('SaveSurvey', {
+                  surveyId: route?.params?.surveyId,
+                });
+              } else {
+                setError(true);
+              }
             }}>
             <Text
               style={[SIPCStyles.NormalFont, {color: '#199be2', padding: 15}]}>

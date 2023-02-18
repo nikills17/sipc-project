@@ -58,7 +58,9 @@ const SurveyBox = ({data, navigation}) => {
 
           <Col size={15} style={{alignItems: 'center'}}>
             <TouchableWithoutFeedback
-              onPress={() => navigation.navigate('StartSurveys')}>
+              onPress={() =>
+                navigation.navigate('StartSurveys', {surveyId: data.id})
+              }>
               <Image
                 source={require('../assets/plays.png')}
                 style={SIPCStyles.playImage}

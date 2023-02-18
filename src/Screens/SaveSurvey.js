@@ -34,11 +34,13 @@ import {
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import ImagePicker from 'react-native-image-crop-picker';
 import moment from 'moment';
+import API from '../utility/api';
 
-const SaveSurvey = ({navigation}) => {
+const SaveSurvey = ({navigation, route}) => {
   const [RadioChecked, setRadioChecked] = useState();
   const [Checked, setChecked] = useState(false);
   const [Checked1, setChecked1] = useState(false);
+  const [surveyData, setSurveyData] = useState([]);
 
   // const [SecChecked, setSecChecked] = useState()
   {
@@ -51,9 +53,22 @@ const SaveSurvey = ({navigation}) => {
   const [Active, setActive] = useState(0);
   const [SubActive, setSubActive] = useState(0);
 
-  const Width = Dimensions.get('window').width;
-  const Height = Dimensions.get('window').height;
-  const deviceWidth = Dimensions.get('window').width;
+  const width = Dimensions.get('window').width;
+
+  useEffect(() => {
+    API.instance
+      .post(
+        `http://sipcsurvey.devuri.com/sipcsurvey/start-survey-device?is_api=true`,
+        JSON.stringify({
+          appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+          device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+          surveyId: route?.params?.surveyId,
+        }),
+      )
+      .then(response => {
+        setSurveyData(response.surveyData[0]);
+      });
+  }, []);
 
   // =============================
 
@@ -135,9 +150,9 @@ const SaveSurvey = ({navigation}) => {
 
           <View style={{marginHorizontal: 10}}>
             <Text
-              style={[SIPCStyles.NormalFont, {width: Width / 2}]}
+              style={[SIPCStyles.NormalFont, {width: width / 2}]}
               numberOfLines={1}>
-              Survey: Annual Health Life Safety Survey
+              Survey: {surveyData.title}
             </Text>
           </View>
 
@@ -223,7 +238,7 @@ const SaveSurvey = ({navigation}) => {
                   <View
                     style={{
                       flexDirection: 'column',
-                      width: deviceWidth > 500 ? '50%' : '100%',
+                      width: width > 500 ? '50%' : '100%',
                     }}>
                     <View style={{flexDirection: 'column'}}>
                       <View
@@ -372,7 +387,7 @@ const SaveSurvey = ({navigation}) => {
                               style={{
                                 marginTop: 10,
                                 flexDirection: 'row',
-                                flexWrap: deviceWidth > 500 ? 'wrap' : 'wrap',
+                                flexWrap: width > 500 ? 'wrap' : 'wrap',
                                 flex: 1,
                               }}>
                               <ScrollView
@@ -416,7 +431,7 @@ const SaveSurvey = ({navigation}) => {
                   <View
                     style={{
                       flexDirection: 'column',
-                      width: deviceWidth > 500 ? '50%' : '100%',
+                      width: width > 500 ? '50%' : '100%',
                     }}>
                     <View style={{flexDirection: 'column'}}>
                       <View
@@ -565,7 +580,7 @@ const SaveSurvey = ({navigation}) => {
                               style={{
                                 marginTop: 10,
                                 flexDirection: 'row',
-                                flexWrap: deviceWidth > 500 ? 'wrap' : 'wrap',
+                                flexWrap: width > 500 ? 'wrap' : 'wrap',
                                 flex: 1,
                               }}>
                               <ScrollView
@@ -661,7 +676,7 @@ const SaveSurvey = ({navigation}) => {
                     <View
                       style={{
                         flexDirection: 'column',
-                        width: deviceWidth > 500 ? '50%' : '100%',
+                        width: width > 500 ? '50%' : '100%',
                       }}>
                       <View style={{flexDirection: 'column'}}>
                         <View
@@ -695,7 +710,7 @@ const SaveSurvey = ({navigation}) => {
                               {
                                 paddingLeft: 10,
                                 alignSelf: 'center',
-                                width: Width / 2,
+                                width: width / 2,
                               },
                             ]}>
                             yes
@@ -818,7 +833,7 @@ const SaveSurvey = ({navigation}) => {
                                 style={{
                                   marginTop: 10,
                                   flexDirection: 'row',
-                                  flexWrap: deviceWidth > 500 ? 'wrap' : 'wrap',
+                                  flexWrap: width > 500 ? 'wrap' : 'wrap',
                                   flex: 1,
                                 }}>
                                 <ScrollView
@@ -862,7 +877,7 @@ const SaveSurvey = ({navigation}) => {
                     <View
                       style={{
                         flexDirection: 'column',
-                        width: deviceWidth > 500 ? '50%' : '100%',
+                        width: width > 500 ? '50%' : '100%',
                       }}>
                       <View style={{flexDirection: 'column'}}>
                         <View
@@ -897,7 +912,7 @@ const SaveSurvey = ({navigation}) => {
                               {
                                 paddingLeft: 10,
                                 alignSelf: 'center',
-                                width: Width / 2,
+                                width: width / 2,
                               },
                             ]}>
                             No{' '}
@@ -1020,7 +1035,7 @@ const SaveSurvey = ({navigation}) => {
                                 style={{
                                   marginTop: 10,
                                   flexDirection: 'row',
-                                  flexWrap: deviceWidth > 500 ? 'wrap' : 'wrap',
+                                  flexWrap: width > 500 ? 'wrap' : 'wrap',
                                   flex: 1,
                                 }}>
                                 <ScrollView
