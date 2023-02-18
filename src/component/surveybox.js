@@ -71,25 +71,23 @@ const SurveyBox = ({data, navigation}) => {
       <Divider bold={true} />
 
       {/* ---------Show == 1--------------------- */}
-      {Show == true ? (
-        <>
-          <Surface style={{backgroundColor: 'white'}}>
-            <View style={{flexDirection: 'row', display: 'flex', padding: 15}}>
-              <Text style={SIPCStyles.DescriptionHeading}>Description :</Text>
-              <Text style={SIPCStyles.DescriptionDetails}>
-                {data.description}
-              </Text>
-            </View>
-            <Divider bold={true} />
-            <View style={{flexDirection: 'row', display: 'flex', padding: 15}}>
-              <Text style={SIPCStyles.DescriptionHeading}>Date Created :</Text>
-              <Text style={SIPCStyles.DescriptionDetails}>
-                {data.date_created}
-              </Text>
-            </View>
-          </Surface>
-        </>
-      ) : null}
+      {Show === true && (
+        <Surface style={{backgroundColor: 'white'}}>
+          <View style={{flexDirection: 'row', display: 'flex', padding: 15}}>
+            <Text style={SIPCStyles.DescriptionHeading}>Description :</Text>
+            <Text style={SIPCStyles.DescriptionDetails}>
+              {data.description}
+            </Text>
+          </View>
+          <Divider bold={true} />
+          <View style={{flexDirection: 'row', display: 'flex', padding: 15}}>
+            <Text style={SIPCStyles.DescriptionHeading}>Date Created :</Text>
+            <Text style={SIPCStyles.DescriptionDetails}>
+              {data.date_created}
+            </Text>
+          </View>
+        </Surface>
+      )}
     </>
   );
 };

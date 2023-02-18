@@ -8,7 +8,7 @@ import {
   StatusBar,
   TouchableWithoutFeedback,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Button,
   Card,
@@ -22,10 +22,10 @@ import SIPCStyles from './styles';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import SurveyBox from '../component/surveybox';
 import API from '../utility/api';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 import Loader from '../component/activityindicator';
 
-const Surveys = ({ navigation }) => {
+const Surveys = ({navigation}) => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const onChangeSearch = query => setSearchQuery(query);
 
@@ -58,7 +58,7 @@ const Surveys = ({ navigation }) => {
   // }, []);
   useFocusEffect(
     React.useCallback(() => {
-      setIsLoading(true)
+      setIsLoading(true);
       API.instance
         .post(
           'http://sipcsurvey.devuri.com/sipcsurvey/survey-list-device?is_api=true',
@@ -66,12 +66,12 @@ const Surveys = ({ navigation }) => {
         )
         .then(
           response => {
-            setIsLoading(false)
+            setIsLoading(false);
             setData(response.data);
           },
           error => {
             console.error(error);
-            setIsLoading(false)
+            setIsLoading(false);
           },
         );
     }, []),
@@ -98,7 +98,7 @@ const Surveys = ({ navigation }) => {
             <SimpleLineIcons
               name="magnifier"
               size={20}
-              style={{ color: 'grey' }}
+              style={{color: 'grey'}}
             />
           )}
         />
@@ -106,20 +106,17 @@ const Surveys = ({ navigation }) => {
 
       <ScrollView>
         {/* =================Data With====Loop ================ */}
-        {isLoading ?
-          (<Loader />
-          )
-          :
-            (
+        {isLoading ? (
+          <Loader />
+        ) : (
           <>
             {data.map((item, index) => {
               return (
                 <SurveyBox data={item} key={index} navigation={navigation} />
-              )
+              );
             })}
           </>
-            )
-        }
+        )}
         {/* ------------------------------------------------------------ */}
       </ScrollView>
     </View>

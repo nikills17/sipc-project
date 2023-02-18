@@ -7,7 +7,7 @@ import {
   TouchableWithoutFeedback,
   StatusBar,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Button,
   Card,
@@ -20,15 +20,13 @@ import {
 import SIPCStyles from './styles';
 import Icon2 from 'react-native-vector-icons/Entypo';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
-import { Col, Grid } from 'react-native-easy-grid';
+import {Col, Grid} from 'react-native-easy-grid';
 import SurveyViewAllBox from '../component/surveyviewallbox';
 import API from '../utility/api';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 import Loader from '../component/activityindicator';
 
-
-
-const SurveyViewAll = ({ navigation }) => {
+const SurveyViewAll = ({navigation}) => {
   const Width = Dimensions.get('window').width;
   const Height = Dimensions.get('window').height;
 
@@ -38,7 +36,6 @@ const SurveyViewAll = ({ navigation }) => {
   const [Active, setActive] = useState(1);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
 
   const params = JSON.stringify({
     pageSize: '25',
@@ -62,7 +59,6 @@ const SurveyViewAll = ({ navigation }) => {
           response => {
             setIsLoading(false);
             setData(response.data);
-            // console.log(Active)
           },
           error => {
             console.error(error);
@@ -93,7 +89,7 @@ const SurveyViewAll = ({ navigation }) => {
             <SimpleLineIcons
               name="magnifier"
               size={20}
-              style={{ color: 'grey' }}
+              style={{color: 'grey'}}
             />
           )}
         />
@@ -129,7 +125,7 @@ const SurveyViewAll = ({ navigation }) => {
           <Text
             style={[
               SIPCStyles.NormalFont,
-              { textAlign: 'center', color: Active == 1 ? '#1485cc' : '#525252' },
+              {textAlign: 'center', color: Active == 1 ? '#1485cc' : '#525252'},
             ]}>
             Completed
           </Text>
@@ -149,7 +145,7 @@ const SurveyViewAll = ({ navigation }) => {
           <Text
             style={[
               SIPCStyles.NormalFont,
-              { color: Active == 0 ? '#1485cc' : '#525252', textAlign: 'center' },
+              {color: Active == 0 ? '#1485cc' : '#525252', textAlign: 'center'},
             ]}>
             Pending
           </Text>
@@ -158,27 +154,22 @@ const SurveyViewAll = ({ navigation }) => {
       <Divider bold={true} />
 
       <ScrollView>
-
         {isLoading ? (
           <Loader />
-        )
-          : (
-            <>
-            {
-              data.map((item, index) => {
-                return (
-                  <SurveyViewAllBox
-                    data={item}
-                    key={index}
-                    navigation={navigation}
-                    Active={Active}
-                  />
-                );
-              })
-            }
-            </>
-          )
-        }
+        ) : (
+          <>
+            {data.map((item, index) => {
+              return (
+                <SurveyViewAllBox
+                  data={item}
+                  key={index}
+                  navigation={navigation}
+                  Active={Active}
+                />
+              );
+            })}
+          </>
+        )}
         {/* ==================================================== */}
       </ScrollView>
     </View>

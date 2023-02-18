@@ -26,22 +26,15 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import DropDownPicker from 'react-native-dropdown-picker';
 import {ScrollView} from 'react-native-gesture-handler';
+import API from '../utility/api';
 
 const StartSurveys = ({navigation}) => {
   const [showDropDown1, setShowDropDown1] = useState(false);
   const [Group, setGroup] = useState();
   const [GroupList, setGroupList] = useState([
     {
-      label: 'SIPC',
-      value: '0',
-    },
-    {
-      label: '- Township High School District 214',
-      value: '1',
-    },
-    {
-      label: '- Prospect High School',
-      value: '2',
+      name: 'Select an Organisation first!',
+      id: null,
     },
   ]);
   {
@@ -51,18 +44,48 @@ const StartSurveys = ({navigation}) => {
   const [Group2, setGroup2] = useState();
   const [GroupList2, setGroupList2] = useState([
     {
-      label: 'Carbondale High School',
-      value: '0',
-    },
-    {
-      label: 'SIPC Test Elementary Building',
-      value: '1',
-    },
-    {
-      label: 'SIPC High School',
-      value: '2',
+      name: 'Select an Organisation first!',
+      id: null,
     },
   ]);
+
+  useEffect(() => {
+    API.instance
+      .post(
+        `http://sipcsurvey.devuri.com/sipcsurvey/organization-list-device?is_api=true`,
+        JSON.stringify({
+          appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+          device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+          userId: '1',
+        }),
+      )
+      .then(
+        response => {
+          setGroupList(response.data);
+        },
+        error => console.error(error),
+      );
+  }, []);
+
+  useEffect(() => {
+    if (Group) {
+      API.instance
+        .post(
+          `http://sipcsurvey.devuri.com/sipcsurvey/get-buildings-by-org?is_api=true`,
+          JSON.stringify({
+            appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+            device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+            orgId: Group,
+          }),
+        )
+        .then(
+          response => {
+            setGroupList2(response.data);
+          },
+          error => console.error(error),
+        );
+    }
+  }, [Group]);
 
   return (
     <View style={SIPCStyles.flex}>
@@ -121,7 +144,7 @@ const StartSurveys = ({navigation}) => {
             labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
             open={showDropDown1}
             value={Group}
-            items={GroupList}
+            items={GroupList.map(item => ({label: item.name, value: item.id}))}
             setOpen={setShowDropDown1}
             setValue={setGroup}
             setItems={setGroupList}
@@ -170,7 +193,10 @@ const StartSurveys = ({navigation}) => {
             labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
             open={showDropDown2}
             value={Group2}
-            items={GroupList2}
+            items={GroupList2.map(item => ({
+              label: item.building_name,
+              value: item.id,
+            }))}
             setOpen={setShowDropDown2}
             setValue={setGroup2}
             setItems={setGroupList2}
