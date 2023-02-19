@@ -176,76 +176,90 @@ const SaveSurvey = ({navigation, route}) => {
             {answers.answer}
           </Text>
         </TouchableOpacity>
-        {checked && !completed && (
-          <View>
-            <TextInput
-              style={{minHeight: 40, maxHeight: 60, marginTop: 6}}
-              multiline={true}
-              placeholder={'Add Comment'}
-              value={comment}
-              onChangeText={setComment}
-            />
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                elevation: 16,
-              }}>
-              <TouchableWithoutFeedback
-                onPress={() => openCamera(imagePath, setImagePath)}>
-                <Image
-                  source={require('../assets/camera.png')}
-                  style={SIPCStyles.cameraImage}
-                />
-              </TouchableWithoutFeedback>
+        {checked &&
+          answers.comment_type !== 'noTextImage' &&
+          !completed && ( //TODO: Need to add this same conditions for radio box
+            <View>
+              <TextInput
+                style={{minHeight: 40, maxHeight: 60, marginTop: 6}}
+                multiline={true}
+                placeholder={
+                  answers.comment_type === 'textOptional'
+                    ? 'Add Comment(Optional)'
+                    : 'Add Comment(Required)'
+                }
+                value={comment}
+                onChangeText={setComment}
+              />
+              {(answers.comment_type === 'textWithImageOptional' ||
+                answers.comment_type === 'textWithImageRequired') && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                    elevation: 16,
+                  }}>
+                  <TouchableWithoutFeedback
+                    onPress={() => openCamera(imagePath, setImagePath)}>
+                    <Image
+                      source={require('../assets/camera.png')}
+                      style={SIPCStyles.cameraImage}
+                    />
+                  </TouchableWithoutFeedback>
+                  <View
+                    style={{
+                      borderWidth: 1,
+                      borderColor: '#e6e6e6',
+                    }}
+                  />
+
+                  <TouchableWithoutFeedback onPress={pickImage}>
+                    <Image
+                      source={require('../assets/gallery.png')}
+                      style={SIPCStyles.cameraImage}
+                    />
+                  </TouchableWithoutFeedback>
+                </View>
+              )}
+              {answers.comment_type === 'textWithImageRequired' && (
+                <Text style={{color: 'red', alignSelf: 'center'}}>
+                  Image is Required!
+                </Text>
+              )}
               <View
                 style={{
-                  borderWidth: 1,
-                  borderColor: '#e6e6e6',
-                }}
-              />
-
-              <TouchableWithoutFeedback onPress={pickImage}>
-                <Image
-                  source={require('../assets/gallery.png')}
-                  style={SIPCStyles.cameraImage}
-                />
-              </TouchableWithoutFeedback>
-            </View>
-            <View
-              style={{
-                flex: 1,
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                marginTop: 12,
-              }}>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => {
-                  setChecked(!checked);
+                  flex: 1,
+                  flexDirection: 'row',
+                  justifyContent: 'space-around',
+                  marginVertical: 12,
                 }}>
-                <Text style={{fontFamily: 'Poppins-SemiBold'}}>CANCEL</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => {
-                  var answerObject = {
-                    id: answers.answer_id.toString(),
-                    score: answers.score.toString(),
-                    comment: comment,
-                    images: imagePath,
-                  };
-                  setCompleted(!completed);
-                  setAnswer([...answer, answerObject]); //TODO :  Add condition to replace if data already exists
-                }}>
-                <Text
-                  style={{fontFamily: 'Poppins-SemiBold', color: '#3a7fc4'}}>
-                  SUBMIT
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => {
+                    setChecked(!checked);
+                  }}>
+                  <Text style={{fontFamily: 'Poppins-SemiBold'}}>CANCEL</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => {
+                    var answerObject = {
+                      id: answers.answer_id.toString(),
+                      score: answers.score.toString(),
+                      comment: comment,
+                      images: imagePath,
+                    };
+                    setCompleted(!completed);
+                    setAnswer([...answer, answerObject]); //TODO :  Add condition to replace if data already exists
+                  }}>
+                  <Text
+                    style={{fontFamily: 'Poppins-SemiBold', color: '#3a7fc4'}}>
+                    SUBMIT
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
+          )}
       </>
     );
   };
@@ -642,21 +656,20 @@ const SaveSurvey = ({navigation, route}) => {
       last_name: '',
       questions: finalAnswer.current,
     });
-    console.log(payload);
-    // API.instance
-    //   .post(
-    //     `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
-    //     payload,
-    //   )
-    //   .then(
-    //     response => {
-    //       console.log(response);
-    //       navigation.navigate('SurveyViewAll');
-    //     },
-    //     error => {
-    //       console.error(error);
-    //     },
-    //   );
+    API.instance
+      .post(
+        `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
+        payload,
+      )
+      .then(
+        response => {
+          console.log(response);
+          navigation.navigate('SurveyViewAll');
+        },
+        error => {
+          console.error(error);
+        },
+      );
   };
 
   const submitSurvey = () => {
