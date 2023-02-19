@@ -91,15 +91,6 @@ const StartSurveys = ({navigation, route}) => {
     }
   }, [Group]);
 
-  useEffect(() => {
-    if (Group && Group2) {
-      orgName = GroupList.find(el => el.id === Group.toString()).name;
-      buildingName = GroupList2.find(
-        el => el.id === Group2.toString(),
-      ).building_name;
-    }
-  }, [Group, Group2]);
-
   return (
     <View style={SIPCStyles.flex}>
       <StatusBar barStyle={'dark-content'} backgroundColor="#3a7fc4" />
@@ -267,9 +258,12 @@ const StartSurveys = ({navigation, route}) => {
                 navigation.navigate('SaveSurvey', {
                   surveyId: route?.params?.surveyId,
                   orgId: Group,
-                  orgName: orgName,
+                  orgName: GroupList.find(el => el.id === Group.toString())
+                    .name,
                   buildingId: Group2,
-                  buldingName: buildingName,
+                  buildingName: GroupList2.find(
+                    el => el.id === Group2.toString(),
+                  ).building_name,
                 });
               } else {
                 setError(true);

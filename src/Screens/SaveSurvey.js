@@ -27,6 +27,8 @@ const SaveSurvey = ({navigation, route}) => {
   const [surveyData, setSurveyData] = useState([]);
   const [data, setData] = useState([]);
 
+  const {orgId, orgName, buildingId, buildingName, surveyId} = route?.params;
+
   // const [finalAnswer, setfinalAnswer] = useState([]);
   const finalAnswer = useRef([]);
 
@@ -556,37 +558,36 @@ const SaveSurvey = ({navigation, route}) => {
   };
 
   const saveSurvey = () => {
-    console.log('Save Survey!');
-    let payload = JSON.stringify({
+    var payload = JSON.stringify({
       appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-      surveyId: route?.param?.surveyId,
+      surveyId: surveyId,
       user_id: '1',
       user_survey_result_id: '0',
-      org_id: route?.param?.orgId,
-      org_name: route?.param?.orgName,
-      building_id: route?.param?.buildingId,
-      building_name: route?.param?.buildingName,
+      org_id: orgId,
+      org_name: orgName,
+      building_id: buildingId,
+      building_name: buildingName,
       request_type: '0',
       survey_session_id: '',
       first_name: '',
       last_name: '',
-      questions: finalAnswer,
+      questions: finalAnswer.current,
     });
-    console.log(payload);
-    // API.instance
-    //   .post(
-    //     `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
-    //     payload,
-    //   )
-    //   .then(
-    //     response => {
-    //       console.log(response);
-    //     },
-    //     error => {
-    //       console.error(error);
-    //     },
-    //   );
+    API.instance
+      .post(
+        `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
+        payload,
+      )
+      .then(
+        response => {
+          console.log(response);
+          navigation.navigate('SurveyViewAll');
+        },
+        error => {
+          console.error(error);
+        },
+      );
   };
 
   const submitSurvey = () => {
