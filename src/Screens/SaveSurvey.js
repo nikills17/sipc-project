@@ -29,7 +29,6 @@ const SaveSurvey = ({navigation, route}) => {
 
   const {orgId, orgName, buildingId, buildingName, surveyId} = route?.params;
 
-  // const [finalAnswer, setfinalAnswer] = useState([]);
   const finalAnswer = useRef([]);
 
   {
@@ -306,24 +305,93 @@ const SaveSurvey = ({navigation, route}) => {
   };
 
   const RadioBox = ({answers, selected, setSelected}) => {
+    const [comment, setComment] = useState('');
+    const [completed, setCompleted] = useState(false);
+    const [imagePath, setImagePath] = useState([]);
+
     return (
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
-        <RadioButton
-          status={answers === selected ? 'checked' : 'unchecked'}
-          onPress={() => setSelected(answers)}
-          value="first"
-          color={'#3a7fc4'}
-        />
-        <Text
-          onPress={() => setSelected(answers)}
-          style={{
-            fontFamily: 'Poppins-Medium',
-            marginHorizontal: 16,
-            fontSize: 16,
-          }}>
-          {answers.answer}
-        </Text>
-      </View>
+      <>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <RadioButton
+            status={answers === selected ? 'checked' : 'unchecked'}
+            onPress={() => setSelected(answers)}
+            value="first"
+            color={'#3a7fc4'}
+          />
+          <Text
+            onPress={() => setSelected(answers)}
+            style={{
+              fontFamily: 'Poppins-Medium',
+              marginHorizontal: 16,
+              fontSize: 16,
+            }}>
+            {answers.answer}
+          </Text>
+        </View>
+        {selected && selected.answer_id === answers.answer_id && !completed && (
+          <View>
+            <TextInput
+              style={{minHeight: 40, maxHeight: 60, marginTop: 6}}
+              multiline={true}
+              placeholder={'Add Comment'}
+              value={comment}
+              onChangeText={setComment}
+            />
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+                elevation: 16,
+              }}>
+              <TouchableWithoutFeedback
+                onPress={() => openCamera(imagePath, setImagePath)}>
+                <Image
+                  source={require('../assets/camera.png')}
+                  style={SIPCStyles.cameraImage}
+                />
+              </TouchableWithoutFeedback>
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: '#e6e6e6',
+                }}
+              />
+
+              <TouchableWithoutFeedback onPress={pickImage}>
+                <Image
+                  source={require('../assets/gallery.png')}
+                  style={SIPCStyles.cameraImage}
+                />
+              </TouchableWithoutFeedback>
+            </View>
+            <View
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+                marginTop: 12,
+              }}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => {
+                  setSelected();
+                }}>
+                <Text style={{fontFamily: 'Poppins-SemiBold'}}>CANCEL</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => {
+                  setCompleted(!completed);
+                }}>
+                <Text
+                  style={{fontFamily: 'Poppins-SemiBold', color: '#3a7fc4'}}>
+                  SUBMIT
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </>
     );
   };
 
@@ -574,20 +642,21 @@ const SaveSurvey = ({navigation, route}) => {
       last_name: '',
       questions: finalAnswer.current,
     });
-    API.instance
-      .post(
-        `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
-        payload,
-      )
-      .then(
-        response => {
-          console.log(response);
-          navigation.navigate('SurveyViewAll');
-        },
-        error => {
-          console.error(error);
-        },
-      );
+    console.log(payload);
+    // API.instance
+    //   .post(
+    //     `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
+    //     payload,
+    //   )
+    //   .then(
+    //     response => {
+    //       console.log(response);
+    //       navigation.navigate('SurveyViewAll');
+    //     },
+    //     error => {
+    //       console.error(error);
+    //     },
+    //   );
   };
 
   const submitSurvey = () => {

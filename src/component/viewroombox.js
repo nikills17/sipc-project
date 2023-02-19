@@ -5,7 +5,6 @@ import {Col, Grid} from 'react-native-easy-grid';
 import SIPCStyles from '../screens/styles';
 
 const ViewRoomBox = ({data}) => {
-  // console.log("box" + data)
   const [Show, setShow] = useState(false);
 
   const checkScore = score => {
