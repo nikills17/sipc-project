@@ -106,7 +106,7 @@ const SaveSurvey = ({navigation, route}) => {
     setImages(images.filter((_, i) => i !== index));
   };
 
-  const TextBox = () => {
+  const TextBox = ({data}) => {
     const [answer, setAnswer] = useState('');
 
     return (
@@ -118,6 +118,129 @@ const SaveSurvey = ({navigation, route}) => {
         onChangeText={setAnswer}
         // onEndEditing
       />
+    );
+  };
+
+  const CheckBoxComponent = ({data}) => {
+    const [answer, setAnswer] = useState();
+
+    const CheckBox = ({answers}) => {
+      const [checked, setChecked] = useState(false);
+
+      return (
+        <View
+          style={{
+            flexDirection: 'row',
+            borderWidth: 1,
+            borderColor: '#CCCCCC',
+            borderRadius: 12,
+            marginTop: 2,
+            alignItems: 'center',
+            paddingRight: 12,
+            overflow: 'hidden',
+          }}>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: '#CCCCCC',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderTopLeftRadius: 8,
+              borderBottomLeftRadius: 8,
+              paddingHorizontal: '3%',
+              paddingVertical: '8%',
+            }}>
+            <Checkbox
+              status={checked ? 'checked' : 'unchecked'}
+              onPress={() => {
+                setChecked(!checked);
+              }}
+              color={'#3a7fc4'}
+            />
+          </View>
+          <Text
+            style={{
+              fontFamily: 'Poppins-Medium',
+              marginLeft: 12,
+              marginRight: '18%',
+              paddingVertical: 2,
+            }}>
+            {answers.answer}
+          </Text>
+        </View>
+      );
+    };
+
+    return (
+      <>
+        <View style={{backgroundColor: 'white', padding: 15}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
+            <Image
+              source={require('../assets/question.png')}
+              style={SIPCStyles.headerManImage}
+            />
+            <Text style={[SIPCStyles.SemiBold, {flex: 1, marginLeft: 15}]}>
+              {data.question}
+            </Text>
+          </View>
+          {data.answers.map(item => {
+            return <CheckBox answers={item} key={item.answer_id} />;
+          })}
+        </View>
+      </>
+    );
+  };
+
+  const RadioBox = ({answers, selected, setSelected}) => {
+    return (
+      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <RadioButton
+          status={answers === selected ? 'checked' : 'unchecked'}
+          onPress={() => setSelected(answers)}
+          value="first"
+          color={'#3a7fc4'}
+        />
+        <Text style={{fontFamily: 'Poppins-Medium', marginHorizontal: 8, fontSize: 16}}>
+          {answers.answer}
+        </Text>
+      </View>
+    );
+  };
+
+  const RadioBoxComponent = ({data}) => {
+    const [answer, setAnswer] = useState();
+    return (
+      <>
+        <View style={{backgroundColor: 'white', padding: 15}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
+            <Image
+              source={require('../assets/question.png')}
+              style={SIPCStyles.headerManImage}
+            />
+            <Text style={[SIPCStyles.SemiBold, {flex: 1, marginLeft: 15}]}>
+              {data.question}
+            </Text>
+          </View>
+          {data.answers.map((item, index) => {
+            return (
+              <RadioBox
+                answers={item}
+                key={index}
+                selected={answer}
+                setSelected={setAnswer}
+              />
+            );
+          })}
+        </View>
+      </>
     );
   };
 
@@ -180,14 +303,23 @@ const SaveSurvey = ({navigation, route}) => {
           return (
             <View key={question.id}>
               {question.question_type_id === 1 && (
-                <View>
-                  <Text>{question.question}</Text>
+                <View style={Active !== 1 && {display: 'none'}}>
+                  <RadioBoxComponent data={question} />
                 </View>
               )}
 
-              {question.question_type_id === 2 && <Text>CheckBox</Text>}
+              {question.question_type_id === 2 && (
+                <View style={Active !== 1 && {display: 'none'}}>
+                  <CheckBoxComponent data={question} />
+                </View>
+              )}
+
               {question.question_type_id === 3 && (
-                <View style={{backgroundColor: 'white', padding: 15}}>
+                <View
+                  style={[
+                    Active !== 1 && {display: 'none'},
+                    {backgroundColor: 'white', padding: 15},
+                  ]}>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
                     <Image
                       source={require('../assets/question.png')}
@@ -198,7 +330,7 @@ const SaveSurvey = ({navigation, route}) => {
                       {question.question}
                     </Text>
                   </View>
-                  <TextBox />
+                  <TextBox data={question} />
                 </View>
               )}
             </View>
@@ -210,7 +342,7 @@ const SaveSurvey = ({navigation, route}) => {
 
   return (
     <View style={SIPCStyles.flex}>
-      <StatusBar barStyle={'dark-content'} backgroundColor="#3a7fc4" />
+      <StatusBar barStyle={'dark-content'} backgroundColor="#acbcc6" />
       <ScrollView>
         {/* ======================HEader============================================= */}
         <Surface style={[SIPCStyles.headerSurface, {alignItems: 'center'}]}>
