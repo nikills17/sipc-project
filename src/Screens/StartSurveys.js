@@ -42,6 +42,8 @@ const StartSurveys = ({navigation, route}) => {
   }
   const [showDropDown2, setShowDropDown2] = useState(false);
   const [Group2, setGroup2] = useState();
+  let orgName = '';
+  let buildingName = '';
   const [GroupList2, setGroupList2] = useState([
     {
       name: 'Select an Organisation first!',
@@ -88,6 +90,15 @@ const StartSurveys = ({navigation, route}) => {
         );
     }
   }, [Group]);
+
+  useEffect(() => {
+    if (Group && Group2) {
+      orgName = GroupList.find(el => el.id === Group.toString()).name;
+      buildingName = GroupList2.find(
+        el => el.id === Group2.toString(),
+      ).building_name;
+    }
+  }, [Group, Group2]);
 
   return (
     <View style={SIPCStyles.flex}>
@@ -255,6 +266,10 @@ const StartSurveys = ({navigation, route}) => {
                 setError(false);
                 navigation.navigate('SaveSurvey', {
                   surveyId: route?.params?.surveyId,
+                  orgId: Group,
+                  orgName: orgName,
+                  buildingId: Group2,
+                  buldingName: buildingName,
                 });
               } else {
                 setError(true);

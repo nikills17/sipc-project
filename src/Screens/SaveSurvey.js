@@ -1,49 +1,35 @@
 import {
   View,
-  Alert,
   Image,
   TouchableOpacity,
   StatusBar,
-  Platform,
-  PermissionsAndroid,
   TouchableWithoutFeedback,
   ScrollView,
   Modal,
   Dimensions,
-  FlatList,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
-  Card,
   Text,
-  Button,
   TextInput,
   Surface,
   Divider,
   Checkbox,
   RadioButton,
 } from 'react-native-paper';
-import Icon2 from 'react-native-vector-icons/Entypo';
 import SIPCStyles from './styles';
 import Entypo from 'react-native-vector-icons/Entypo';
-import DropDownPicker from 'react-native-dropdown-picker';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import ImagePicker from 'react-native-image-crop-picker';
-import moment from 'moment';
 import API from '../utility/api';
 
 const SaveSurvey = ({navigation, route}) => {
-  const [RadioChecked, setRadioChecked] = useState();
-  const [Checked, setChecked] = useState(false);
-  const [Checked1, setChecked1] = useState(false);
   const [surveyData, setSurveyData] = useState([]);
   const [data, setData] = useState([]);
 
-  // const [SecChecked, setSecChecked] = useState()
+  // const [finalAnswer, setfinalAnswer] = useState([]);
+  const finalAnswer = useRef([]);
+
   {
     /* ===================== MODAL================ */
   }
@@ -70,20 +56,19 @@ const SaveSurvey = ({navigation, route}) => {
   }, []);
 
   const [images, setImages] = useState([]);
-  const [numColumns, setNumColumns] = useState(3);
   const maxImages = 10;
 
-  const openCamera = () => {
+  const openCamera = (imagePath, setImagePath) => {
     ImagePicker.openCamera({
       width: 300,
       height: 400,
       //cropping: true,
     }).then(image => {
-      if (images.length + 1 > maxImages) {
+      if (imagePath.length + 1 > maxImages) {
         alert(`Max limit reached: ${maxImages}`);
         return;
       }
-      setImages([...images, {path: image.path}]);
+      setImagePath([...imagePath, {image: image.path}]);
     });
   };
 
@@ -102,10 +87,6 @@ const SaveSurvey = ({navigation, route}) => {
       .catch(error => console.error(error));
   };
 
-  const deleteImage = index => {
-    setImages(images.filter((_, i) => i !== index));
-  };
-
   const TextBox = ({data}) => {
     const [answer, setAnswer] = useState('');
 
@@ -116,19 +97,41 @@ const SaveSurvey = ({navigation, route}) => {
         placeholder={'Answer'}
         value={answer}
         onChangeText={setAnswer}
-        // onEndEditing
+        onEndEditing={() => {
+          if (answer) {
+            let answerObject = {
+              question_id: data.id.toString(),
+              question_type_id: data.question_type_id.toString(),
+              answer: answer,
+            };
+            if (
+              !finalAnswer.current.find(
+                el => el.question_id === data.id.toString(),
+              )
+            ) {
+              finalAnswer.current.push(answerObject);
+            } else {
+              var answerIndex = finalAnswer.current.findIndex(
+                el => el.question_id === data.id.toString(),
+              );
+              finalAnswer.current[answerIndex] = answerObject;
+            }
+          }
+        }}
       />
     );
   };
 
-  const CheckBoxComponent = ({data}) => {
-    const [answer, setAnswer] = useState();
+  //Here answers is the for the item being used in check box and answer is the state which contains all the answer for the particular question
+  const CheckBox = ({answers, answer, setAnswer}) => {
+    const [checked, setChecked] = useState(false);
+    const [comment, setComment] = useState('');
+    const [completed, setCompleted] = useState(false);
+    const [imagePath, setImagePath] = useState([]);
 
-    const CheckBox = ({answers}) => {
-      const [checked, setChecked] = useState(false);
-
-      return (
-        <View
+    return (
+      <>
+        <TouchableOpacity
           style={{
             flexDirection: 'row',
             borderWidth: 1,
@@ -138,7 +141,14 @@ const SaveSurvey = ({navigation, route}) => {
             alignItems: 'center',
             paddingRight: 12,
             overflow: 'hidden',
-          }}>
+          }}
+          onPress={() => {
+            setChecked(!checked);
+            if (completed) {
+              setCompleted(false);
+            }
+          }}
+          activeOpacity={0.85}>
           <View
             style={{
               borderWidth: 1,
@@ -152,9 +162,6 @@ const SaveSurvey = ({navigation, route}) => {
             }}>
             <Checkbox
               status={checked ? 'checked' : 'unchecked'}
-              onPress={() => {
-                setChecked(!checked);
-              }}
               color={'#3a7fc4'}
             />
           </View>
@@ -167,9 +174,103 @@ const SaveSurvey = ({navigation, route}) => {
             }}>
             {answers.answer}
           </Text>
-        </View>
-      );
-    };
+        </TouchableOpacity>
+        {checked && !completed && (
+          <View>
+            <TextInput
+              style={{minHeight: 40, maxHeight: 60, marginTop: 6}}
+              multiline={true}
+              placeholder={'Add Comment'}
+              value={comment}
+              onChangeText={setComment}
+            />
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+                elevation: 16,
+              }}>
+              <TouchableWithoutFeedback
+                onPress={() => openCamera(imagePath, setImagePath)}>
+                <Image
+                  source={require('../assets/camera.png')}
+                  style={SIPCStyles.cameraImage}
+                />
+              </TouchableWithoutFeedback>
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: '#e6e6e6',
+                }}
+              />
+
+              <TouchableWithoutFeedback onPress={pickImage}>
+                <Image
+                  source={require('../assets/gallery.png')}
+                  style={SIPCStyles.cameraImage}
+                />
+              </TouchableWithoutFeedback>
+            </View>
+            <View
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+                marginTop: 12,
+              }}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => {
+                  setChecked(!checked);
+                }}>
+                <Text style={{fontFamily: 'Poppins-SemiBold'}}>CANCEL</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => {
+                  var answerObject = {
+                    id: answers.answer_id.toString(),
+                    score: answers.score.toString(),
+                    comment: comment,
+                    images: imagePath,
+                  };
+                  setCompleted(!completed);
+                  setAnswer([...answer, answerObject]); //TODO :  Add condition to replace if data already exists
+                }}>
+                <Text
+                  style={{fontFamily: 'Poppins-SemiBold', color: '#3a7fc4'}}>
+                  SUBMIT
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </>
+    );
+  };
+
+  const CheckBoxComponent = ({data}) => {
+    const [answer, setAnswer] = useState([]);
+
+    useEffect(() => {
+      if (answer.length > 0) {
+        let answerObject = {
+          question_id: data.id.toString(),
+          question_type_id: data.question_type_id.toString(),
+          answer: answer,
+        };
+        if (
+          !finalAnswer.current.find(el => el.question_id === data.id.toString())
+        ) {
+          finalAnswer.current.push(answerObject);
+        } else {
+          var answerIndex = finalAnswer.current.findIndex(
+            el => el.question_id === data.id.toString(),
+          );
+          finalAnswer.current[answerIndex] = answerObject;
+        }
+      }
+    }, [answer]);
 
     return (
       <>
@@ -188,7 +289,14 @@ const SaveSurvey = ({navigation, route}) => {
             </Text>
           </View>
           {data.answers.map(item => {
-            return <CheckBox answers={item} key={item.answer_id} />;
+            return (
+              <CheckBox
+                answers={item}
+                key={item.answer_id}
+                answer={answer}
+                setAnswer={setAnswer}
+              />
+            );
           })}
         </View>
       </>
@@ -204,7 +312,13 @@ const SaveSurvey = ({navigation, route}) => {
           value="first"
           color={'#3a7fc4'}
         />
-        <Text style={{fontFamily: 'Poppins-Medium', marginHorizontal: 8, fontSize: 16}}>
+        <Text
+          onPress={() => setSelected(answers)}
+          style={{
+            fontFamily: 'Poppins-Medium',
+            marginHorizontal: 16,
+            fontSize: 16,
+          }}>
           {answers.answer}
         </Text>
       </View>
@@ -213,6 +327,34 @@ const SaveSurvey = ({navigation, route}) => {
 
   const RadioBoxComponent = ({data}) => {
     const [answer, setAnswer] = useState();
+
+    useEffect(() => {
+      if (answer) {
+        let answerObject = {
+          question_id: data.id.toString(),
+          question_type_id: data.question_type_id.toString(),
+          answer: [
+            {
+              id: answer.answer_id.toString(),
+              score: answer.score.toString(),
+              comment: '',
+              images: [],
+            },
+          ],
+        };
+        if (
+          !finalAnswer.current.find(el => el.question_id === data.id.toString())
+        ) {
+          finalAnswer.current.push(answerObject);
+        } else {
+          var answerIndex = finalAnswer.current.findIndex(
+            el => el.question_id === data.id.toString(),
+          );
+          finalAnswer.current[answerIndex] = answerObject;
+        }
+      }
+    }, [answer]);
+
     return (
       <>
         <View style={{backgroundColor: 'white', padding: 15}}>
@@ -246,21 +388,13 @@ const SaveSurvey = ({navigation, route}) => {
 
   const SurveyQuestions = ({data}) => {
     const [Active, setActive] = useState(0);
-    const [SubActive, setSubActive] = useState(0);
+    const [SubActive, setSubActive] = useState(false);
 
     const switch_tab = x => {
       if (x == Active) {
         setActive(0);
       } else {
         setActive(x);
-      }
-    };
-
-    const switch_subSec = x => {
-      if (x == SubActive) {
-        setSubActive(0);
-      } else {
-        setSubActive(x);
       }
     };
 
@@ -336,8 +470,127 @@ const SaveSurvey = ({navigation, route}) => {
             </View>
           );
         })}
+        {data.sub_section_data.map(sub => {
+          return (
+            <>
+              <View
+                key={sub.sub_section_id}
+                style={[
+                  {
+                    paddingHorizontal: '6%',
+                    backgroundColor: setSubActive === 1 ? '#fffcf8' : 'white',
+                    padding: 15,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderBottomWidth: 1,
+                    borderColor: '#CCCCCC',
+                  },
+                  !Active && {display: 'none'},
+                ]}>
+                <TouchableWithoutFeedback
+                  onPress={() => {
+                    setSubActive(!SubActive);
+                  }}>
+                  {SubActive == 1 ? (
+                    <Image
+                      source={require('../assets/minus.png')}
+                      style={SIPCStyles.PlusMinusImage}
+                    />
+                  ) : (
+                    <Image
+                      source={require('../assets/plus.png')}
+                      style={SIPCStyles.PlusMinusImage}
+                    />
+                  )}
+                </TouchableWithoutFeedback>
+                <Text style={[SIPCStyles.BoldFont, {marginLeft: '5%'}]}>
+                  {sub.sub_section}
+                </Text>
+              </View>
+              {sub.questions_answers.map(question => {
+                return (
+                  <View key={question.id}>
+                    {question.question_type_id === 1 && (
+                      <View style={SubActive !== true && {display: 'none'}}>
+                        <RadioBoxComponent data={question} />
+                      </View>
+                    )}
+
+                    {question.question_type_id === 2 && (
+                      <View style={SubActive !== true && {display: 'none'}}>
+                        <CheckBoxComponent data={question} />
+                      </View>
+                    )}
+
+                    {question.question_type_id === 3 && (
+                      <View
+                        style={[
+                          SubActive !== true && {display: 'none'},
+                          {backgroundColor: 'white', padding: 15},
+                        ]}>
+                        <View
+                          style={{flexDirection: 'row', alignItems: 'center'}}>
+                          <Image
+                            source={require('../assets/question.png')}
+                            style={SIPCStyles.headerManImage}
+                          />
+                          <Text
+                            style={[
+                              SIPCStyles.SemiBold,
+                              {flex: 1, paddingLeft: 15},
+                            ]}>
+                            {question.question}
+                          </Text>
+                        </View>
+                        <TextBox data={question} />
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
+            </>
+          );
+        })}
       </>
     );
+  };
+
+  const saveSurvey = () => {
+    console.log('Save Survey!');
+    let payload = JSON.stringify({
+      appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+      device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+      surveyId: route?.param?.surveyId,
+      user_id: '1',
+      user_survey_result_id: '0',
+      org_id: route?.param?.orgId,
+      org_name: route?.param?.orgName,
+      building_id: route?.param?.buildingId,
+      building_name: route?.param?.buildingName,
+      request_type: '0',
+      survey_session_id: '',
+      first_name: '',
+      last_name: '',
+      questions: finalAnswer,
+    });
+    console.log(payload);
+    // API.instance
+    //   .post(
+    //     `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
+    //     payload,
+    //   )
+    //   .then(
+    //     response => {
+    //       console.log(response);
+    //     },
+    //     error => {
+    //       console.error(error);
+    //     },
+    //   );
+  };
+
+  const submitSurvey = () => {
+    console.log('Submit Survey!');
   };
 
   return (
@@ -392,11 +645,7 @@ const SaveSurvey = ({navigation, route}) => {
         {/* ============================================================ */}
       </ScrollView>
       {/* ================================MODAL=================================== */}
-      <Modal
-        visible={visible}
-        style={{}}
-        transparent={true}
-        animationType="slide">
+      <Modal visible={visible} transparent={true} animationType="slide">
         <View
           style={{
             justifyContent: 'center',
@@ -433,31 +682,31 @@ const SaveSurvey = ({navigation, route}) => {
               marginTop: 10,
               marginHorizontal: 30,
             }}>
-            <View style={SIPCStyles.healthImageView}>
+            <TouchableOpacity
+              onPress={saveSurvey}
+              style={SIPCStyles.healthImageView}>
               <Image
                 source={require('../assets/save.png')}
                 style={SIPCStyles.MainBuilding}
               />
-              <TouchableOpacity>
-                <Text style={[SIPCStyles.NormalFont, {paddingLeft: 10}]}>
-                  Save
-                </Text>
-              </TouchableOpacity>
-            </View>
+              <Text style={[SIPCStyles.NormalFont, {paddingLeft: 10}]}>
+                Save
+              </Text>
+            </TouchableOpacity>
             <Divider bold={true} style={{marginLeft: 30, marginTop: 10}} />
 
             {/* <TouchableWithoutFeedback> */}
-            <View style={[SIPCStyles.healthImageView, {marginTop: 25}]}>
+            <TouchableOpacity
+              onPress={submitSurvey}
+              style={[SIPCStyles.healthImageView, {marginTop: 25}]}>
               <Image
                 source={require('../assets/submit.png')}
                 style={SIPCStyles.MainBuilding}
               />
-              <TouchableOpacity>
-                <Text style={[SIPCStyles.NormalFont, {paddingLeft: 10}]}>
-                  Submit Survey{' '}
-                </Text>
-              </TouchableOpacity>
-            </View>
+              <Text style={[SIPCStyles.NormalFont, {paddingLeft: 10}]}>
+                Submit Survey{' '}
+              </Text>
+            </TouchableOpacity>
             {/* </TouchableWithoutFeedback> */}
 
             <Divider bold={true} style={{marginLeft: 30, marginTop: 10}} />
