@@ -9,7 +9,7 @@ import {
   TouchableWithoutFeedback,
   SafeAreaView,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button,
   Card,
@@ -25,10 +25,10 @@ import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import DropDownPicker from 'react-native-dropdown-picker';
-import {ScrollView} from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
 import API from '../utility/api';
 
-const StartSurveys = ({navigation, route}) => {
+const StartSurveys = ({ navigation, route }) => {
   const [showDropDown1, setShowDropDown1] = useState(false);
   const [Group, setGroup] = useState();
   const [GroupList, setGroupList] = useState([
@@ -42,8 +42,7 @@ const StartSurveys = ({navigation, route}) => {
   }
   const [showDropDown2, setShowDropDown2] = useState(false);
   const [Group2, setGroup2] = useState();
-  let orgName = '';
-  let buildingName = '';
+
   const [GroupList2, setGroupList2] = useState([
     {
       name: 'Select an Organisation first!',
@@ -52,6 +51,9 @@ const StartSurveys = ({navigation, route}) => {
   ]);
 
   const [error, setError] = useState(false);
+  const [errorMsg, setErrorMessage] = useState();
+
+  // =================================ORGANIZATION NAME =================================
 
   useEffect(() => {
     API.instance
@@ -66,11 +68,13 @@ const StartSurveys = ({navigation, route}) => {
       .then(
         response => {
           setGroupList(response.data);
+          setError(false);
+          setErrorMessage("")
         },
         error => console.error(error),
       );
   }, []);
-
+  // =================================BUILDING NAME =================================
   useEffect(() => {
     if (Group) {
       API.instance
@@ -85,6 +89,8 @@ const StartSurveys = ({navigation, route}) => {
         .then(
           response => {
             setGroupList2(response.data);
+            setError(false);
+            setErrorMessage("");
           },
           error => console.error(error),
         );
@@ -107,12 +113,21 @@ const StartSurveys = ({navigation, route}) => {
 
         {/* ============================SELECT ITEM============================= */}
 
-        <View style={{marginHorizontal: 20, marginVertical: 15, zIndex: 10}}>
+        {error && (
+          <View style={{ width: '100%', alignItems: 'center', }}>
+            <Text style={{ color: 'red', fontFamily: 'Poppins-Medium', }}>
+              Error! {errorMsg}
+            </Text>
+          </View>
+        )
+        }
+
+        <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
           <DropDownPicker
             listMode="SCROLLVIEW"
             searchable={true}
             searchPlaceholder=""
-            searchContainerStyle={{backgroundColor: '#fffff6'}}
+            searchContainerStyle={{ backgroundColor: '#fffff6' }}
             itemSeparator={true}
             itemSeparatorStyle={{
               backgroundColor: '#D2D2D2',
@@ -125,7 +140,7 @@ const StartSurveys = ({navigation, route}) => {
                 <Entypo
                   size={16}
                   color={'#808080'}
-                  style={{paddingHorizontal: 5}}
+                  style={{ paddingHorizontal: 5 }}
                   name="chevron-thin-down"
                 />
               );
@@ -135,7 +150,7 @@ const StartSurveys = ({navigation, route}) => {
                 <Entypo
                   size={16}
                   color={'#808080'}
-                  style={{paddingHorizontal: 5}}
+                  style={{ paddingHorizontal: 5 }}
                   name="chevron-thin-up"
                 />
               );
@@ -145,10 +160,10 @@ const StartSurveys = ({navigation, route}) => {
             style={SIPCStyles.DropDownPicker1}
             textStyle={SIPCStyles.textSize}
             dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
-            labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
+            labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
             open={showDropDown1}
             value={Group}
-            items={GroupList.map(item => ({label: item.name, value: item.id}))}
+            items={GroupList.map(item => ({ label: item.name, value: item.id }))}
             setOpen={setShowDropDown1}
             setValue={setGroup}
             setItems={setGroupList}
@@ -156,12 +171,12 @@ const StartSurveys = ({navigation, route}) => {
         </View>
 
         {/* ============================SELECT ISSUE============================= */}
-        <View style={{marginHorizontal: 20, marginVertical: 15, zIndex: 9}}>
+        <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 9 }}>
           <DropDownPicker
             listMode="SCROLLVIEW"
             searchable={true}
             searchPlaceholder=""
-            searchContainerStyle={{backgroundColor: '#fffff6'}}
+            searchContainerStyle={{ backgroundColor: '#fffff6' }}
             itemSeparator={true}
             itemSeparatorStyle={{
               backgroundColor: '#D2D2D2',
@@ -174,7 +189,7 @@ const StartSurveys = ({navigation, route}) => {
                 <Entypo
                   size={16}
                   color={'#808080'}
-                  style={{paddingHorizontal: 5}}
+                  style={{ paddingHorizontal: 5 }}
                   name="chevron-thin-down"
                 />
               );
@@ -184,7 +199,7 @@ const StartSurveys = ({navigation, route}) => {
                 <Entypo
                   size={16}
                   color={'#808080'}
-                  style={{paddingHorizontal: 5}}
+                  style={{ paddingHorizontal: 5 }}
                   name="chevron-thin-up"
                 />
               );
@@ -194,7 +209,7 @@ const StartSurveys = ({navigation, route}) => {
             style={SIPCStyles.DropDownPicker1}
             textStyle={SIPCStyles.textSize}
             dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
-            labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
+            labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
             open={showDropDown2}
             value={Group2}
             items={GroupList2.map(item => ({
@@ -206,28 +221,6 @@ const StartSurveys = ({navigation, route}) => {
             setItems={setGroupList2}
           />
         </View>
-        {error && (
-          <View
-            style={{
-              width: '100%',
-              alignItems: 'center',
-            }}>
-            <Text
-              style={{
-                color: 'red',
-                fontFamily: 'Poppins-Medium',
-              }}>
-              Select An Organization and A Building
-            </Text>
-            <Text
-              style={{
-                color: 'red',
-                fontFamily: 'Poppins-Medium',
-              }}>
-              to Start the Survey!
-            </Text>
-          </View>
-        )}
       </ScrollView>
       {/* =================================================================== */}
       <Card
@@ -239,22 +232,23 @@ const StartSurveys = ({navigation, route}) => {
           position: 'absolute',
           width: '100%',
         }}>
-        <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
           <TouchableWithoutFeedback
             style={{}}
             onPress={() => {
               navigation.navigate('Surveys');
             }}>
-            <Text style={[SIPCStyles.NormalFont, {padding: 15}]}>Cancel</Text>
+            <Text style={[SIPCStyles.NormalFont, { padding: 15 }]}>Cancel</Text>
           </TouchableWithoutFeedback>
 
-          <View style={{borderWidth: 1, borderColor: '#e6e6e6'}} />
+          <View style={{ borderWidth: 1, borderColor: '#e6e6e6' }} />
 
           <TouchableWithoutFeedback
             style={{}}
             onPress={() => {
               if (Group && Group2) {
                 setError(false);
+                setErrorMessage("");
                 navigation.navigate('SaveSurvey', {
                   surveyId: route?.params?.surveyId,
                   orgId: Group,
@@ -266,11 +260,16 @@ const StartSurveys = ({navigation, route}) => {
                   ).building_name,
                 });
               } else {
+                if (!Group) {
+                  setErrorMessage("Organization is required.");
+                } else if (!Group2) {
+                  setErrorMessage("Building is required.");
+                }
                 setError(true);
               }
             }}>
             <Text
-              style={[SIPCStyles.NormalFont, {color: '#199be2', padding: 15}]}>
+              style={[SIPCStyles.NormalFont, { color: '#199be2', padding: 15 }]}>
               Start
             </Text>
           </TouchableWithoutFeedback>
