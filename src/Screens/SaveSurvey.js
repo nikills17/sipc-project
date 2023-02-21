@@ -22,6 +22,11 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import ImagePicker from 'react-native-image-crop-picker';
 import API from '../utility/api';
+import {
+  responsiveScreenHeight,
+  responsiveScreenWidth,
+  responsiveScreenFontSize,
+} from 'react-native-responsive-dimensions';
 import { json } from 'stream/consumers';
 
 const SaveSurvey = ({ navigation, route }) => {
@@ -59,16 +64,16 @@ const SaveSurvey = ({ navigation, route }) => {
   const [visible1, setVisible1] = useState(false);
   const showModal1 = () => {
     setError(false);
+    setErrorMessage("");
     setFirstName('');
     setLastName('');
-    setErrorMessage("");
     setVisible1(true);
   }
   const hideModal1 = () => {
     setError(false);
+    setErrorMessage("");
     setFirstName('');
     setLastName('');
-    setErrorMessage("");
     setVisible1(false);
   }
 
@@ -247,7 +252,7 @@ const SaveSurvey = ({ navigation, route }) => {
                     fontFamily: 'Poppins-Medium',
                     marginLeft: 12,
                     marginRight: '18%',
-                    paddingVertical: 2,
+                    paddingVertical: 2, fontSize: responsiveScreenFontSize(1.8),
                   }}>
                   {answers.answer}
                 </Text>
@@ -362,7 +367,7 @@ const SaveSurvey = ({ navigation, route }) => {
                       </View>
                     )}
                   {answers.comment_type === 'textWithImageRequired' && (
-                    <Text style={{ color: 'red', alignSelf: 'center' }}>
+                    <Text style={{ color: 'red', alignSelf: 'center', fontSize: responsiveScreenFontSize(1.8), }}>
                       Image is Required!
                     </Text>
                   )}
@@ -568,7 +573,7 @@ const SaveSurvey = ({ navigation, route }) => {
 
     return (
       <>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center',marginLeft:deviceWidth>500 ? 50 : 0,marginVertical:deviceWidth>500?5:0 }}>
 
           <RadioButton
             status={answers === selected ? 'checked' : 'unchecked'}
@@ -581,7 +586,7 @@ const SaveSurvey = ({ navigation, route }) => {
             style={{
               fontFamily: 'Poppins-Medium',
               marginHorizontal: 16,
-              fontSize: 16,
+              fontSize: 16, fontSize: responsiveScreenFontSize(1.8),
             }}>
             {answers.answer}
           </Text>
@@ -1074,7 +1079,7 @@ const SaveSurvey = ({ navigation, route }) => {
             <Text
               style={{
                 color: 'red',
-                fontFamily: 'Poppins-Medium',
+                fontFamily: 'Poppins-Medium', fontSize: responsiveScreenFontSize(1.8),
               }}>
               Error! {errorMsg}
             </Text>
@@ -1149,7 +1154,7 @@ const SaveSurvey = ({ navigation, route }) => {
             <Text
               style={{
                 color: 'red',
-                fontFamily: 'Poppins-Medium',
+                fontFamily: 'Poppins-Medium', fontSize: responsiveScreenFontSize(1.8),
               }}>
               Error! {errorMsg}
             </Text>

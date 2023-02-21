@@ -27,6 +27,11 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { ScrollView } from 'react-native-gesture-handler';
 import API from '../utility/api';
+import {
+  responsiveScreenHeight,
+  responsiveScreenWidth,
+  responsiveScreenFontSize,
+} from 'react-native-responsive-dimensions';
 
 const StartSurveys = ({ navigation, route }) => {
   const [showDropDown1, setShowDropDown1] = useState(false);
@@ -115,7 +120,7 @@ const StartSurveys = ({ navigation, route }) => {
 
         {error && (
           <View style={{ width: '100%', alignItems: 'center', }}>
-            <Text style={{ color: 'red', fontFamily: 'Poppins-Medium', }}>
+            <Text style={{ color: 'red', fontFamily: 'Poppins-Medium', fontSize: responsiveScreenFontSize(1.8), }}>
               Error! {errorMsg}
             </Text>
           </View>
