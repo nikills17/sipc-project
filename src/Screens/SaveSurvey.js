@@ -22,6 +22,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import ImagePicker from 'react-native-image-crop-picker';
 import API from '../utility/api';
+import { json } from 'stream/consumers';
 
 const SaveSurvey = ({ navigation, route }) => {
   const [surveyData, setSurveyData] = useState([]);
@@ -30,6 +31,7 @@ const SaveSurvey = ({ navigation, route }) => {
   const [error, setError] = useState(false);
   const [errorMsg, setErrorMessage] = useState();
 
+
   const { orgId, orgName, buildingId, buildingName, surveyId } = route?.params;
 
   const finalAnswer = useRef([]);
@@ -37,12 +39,43 @@ const SaveSurvey = ({ navigation, route }) => {
   const Height = Dimensions.get('window').height;
   const deviceWidth = Dimensions.get('window').width;
 
-  {
-    /* ===================== MODAL================ */
-  }
+
+  /* ===================== MODAL================ */
+
   const [visible, setVisible] = useState(false);
-  const showModal = () => setVisible(true);
-  const hideModal = () => setVisible(false);
+  const showModal = () => {
+    setError(false);
+    setErrorMessage("");
+    setVisible(true);
+  }
+  const hideModal = () => {
+    setError(false);
+    setErrorMessage("");
+    setVisible(false)
+  };
+
+  /* ===================Submit MODAL================ */
+
+  const [visible1, setVisible1] = useState(false);
+  const showModal1 = () => {
+    setError(false);
+    setFirstName('');
+    setLastName('');
+    setErrorMessage("");
+    setVisible1(true);
+  }
+  const hideModal1 = () => {
+    setError(false);
+    setFirstName('');
+    setLastName('');
+    setErrorMessage("");
+    setVisible1(false);
+  }
+
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [totalQuestion, setTotalQuestion] = useState(0)
+
 
   const width = Dimensions.get('window').width;
 
@@ -105,33 +138,33 @@ const SaveSurvey = ({ navigation, route }) => {
     const [answer, setAnswer] = useState('');
 
     return (
-      <View style={{borderRadius:12,flex:1}}>
-      <TextInput
-        mode="text"
-        numberOfLines={8}
-        multiline={true}
-        underlineColor="transparent"
-        theme={{ colors: { primary: '#cccccc' } }}
-        style={[SIPCStyles.TextInput1,{marginHorizontal:20,marginTop:10,borderRadius:12,flex:1}]}
-        placeholder={'Answer'}
-        value={answer}
-        onChangeText={setAnswer}
-        onEndEditing={() => {
-          if (answer) {
-            let answerObject = {
-              question_id: data.id.toString(),
-              question_type_id: data.question_type_id.toString(),
-              answer: answer,
-            };
-            if (!finalAnswer.current.find(el => el.question_id === data.id.toString(),)) {
-              finalAnswer.current.push(answerObject);
-            } else {
-              var answerIndex = finalAnswer.current.findIndex(el => el.question_id === data.id.toString(),);
-              finalAnswer.current[answerIndex] = answerObject;
+      <View style={{ borderRadius: 12, flex: 1 }}>
+        <TextInput
+          mode="text"
+          numberOfLines={8}
+          multiline={true}
+          underlineColor="transparent"
+          theme={{ colors: { primary: '#cccccc' } }}
+          style={[SIPCStyles.TextInput1, { marginHorizontal: 20, marginTop: 10, borderRadius: 12, flex: 1 }]}
+          placeholder={'Answer'}
+          value={answer}
+          onChangeText={setAnswer}
+          onEndEditing={() => {
+            if (answer) {
+              let answerObject = {
+                question_id: data.id.toString(),
+                question_type_id: data.question_type_id.toString(),
+                answer: answer,
+              };
+              if (!finalAnswer.current.find(el => el.question_id === data.id.toString(),)) {
+                finalAnswer.current.push(answerObject);
+              } else {
+                var answerIndex = finalAnswer.current.findIndex(el => el.question_id === data.id.toString(),);
+                finalAnswer.current[answerIndex] = answerObject;
+              }
             }
-          }
-        }}
-      />
+          }}
+        />
       </View>
     );
   };
@@ -171,17 +204,25 @@ const SaveSurvey = ({ navigation, route }) => {
                 borderBottomLeftRadius: checked == 1 ? 0 : 12,
               }}
               onPress={() => {
-                var answerObject = {
-                  id: answers.answer_id,
-                  score: answers.score.toString(),
-                  comment: comment,
-                  images: imagePath,
-                };
+                var elementPos = [...answer].map(function (x) { return x.id; }).indexOf(answers.answer_id.toString());
+                if (elementPos != -1) {
+                  answer.splice(elementPos, 1);
+                  setAnswer([...answer]);
+                } else {
+                  var answerObject = {
+                    id: answers.answer_id.toString(),
+                    score: answers.score.toString(),
+                    comment: comment,
+                    images: imagePath,
+                  };
+                  setAnswer([...answer, answerObject]);
+                }
+
                 setChecked(!checked);
                 if (completed) {
                   setCompleted(false);
                 }
-                setAnswer([...answer, answerObject]); //TODO :  Add condition to replace if data already exists
+
               }}
               activeOpacity={0.85}>
               <View
@@ -464,28 +505,29 @@ const SaveSurvey = ({ navigation, route }) => {
   const CheckBoxComponent = ({ data }) => {
     const [answer, setAnswer] = useState([]);
     useEffect(() => {
-      console.log(answer)
+
       if (answer.length > 0) {
         let answerObject = {
           question_id: data.id.toString(),
           question_type_id: data.question_type_id.toString(),
-          answer: [
-            {
-              id: answer.answer_id,
-              score: answer.score.toString(),
-              comment: '',
-              images: [],
-            },
-          ],
+          answer: answer,
         };
-        console.log("Checkbox answerObject = >"+JSON.stringify(answerObject));
+
         if (!finalAnswer.current.find(el => el.question_id === data.id.toString())) {
           finalAnswer.current.push(answerObject);
         } else {
           var answerIndex = finalAnswer.current.findIndex(el => el.question_id === data.id.toString(),);
           finalAnswer.current[answerIndex] = answerObject;
         }
+      } else {
+        var elementPos = finalAnswer.current.map(function (x) { return x.question_id }).indexOf(data.id.toString());
+        if (elementPos != -1) {
+          if (finalAnswer.current[elementPos].answer.length == 0) {
+            finalAnswer.current.splice(elementPos, 1);
+          }
+        }
       }
+
     }, [answer]);
 
     return (
@@ -628,7 +670,7 @@ const SaveSurvey = ({ navigation, route }) => {
             },
           ],
         };
-        
+
         if (!finalAnswer.current.find(el => el.question_id === data.id.toString())) {
           finalAnswer.current.push(answerObject);
         } else {
@@ -683,22 +725,6 @@ const SaveSurvey = ({ navigation, route }) => {
 
     return (
       <>
-        {error && (
-          <View
-            style={{
-              width: '100%',
-              alignItems: 'center',
-            }}>
-            <Text
-              style={{
-                color: 'red',
-                fontFamily: 'Poppins-Medium',
-              }}>
-              Error! {errorMsg}
-            </Text>
-          </View>
-        )}
-
         <View
           style={{
             paddingHorizontal: '5%',
@@ -733,8 +759,10 @@ const SaveSurvey = ({ navigation, route }) => {
           </Text>
         </View>
         {data.section_data[0].questions_answers.map(question => {
+          //setTotalQuestion(totalQuestion+1);
           return (
             <View key={question.id}>
+            
               {question.question_type_id === 1 && (
                 <View style={Active !== 1 && { display: 'none' }}>
                   <RadioBoxComponent data={question} />
@@ -759,7 +787,7 @@ const SaveSurvey = ({ navigation, route }) => {
                       style={SIPCStyles.headerManImage}
                     />
                     <Text
-                      style={[SIPCStyles.SemiBold, {flex:1, paddingLeft:15 }]}>
+                      style={[SIPCStyles.SemiBold, { flex: 1, paddingLeft: 15 }]}>
                       {question.question}
                     </Text>
                   </View>
@@ -807,6 +835,7 @@ const SaveSurvey = ({ navigation, route }) => {
                 </Text>
               </View>
               {sub.questions_answers.map(question => {
+                //setTotalQuestion(totalQuestion + 1);
                 return (
                   <View key={question.id}>
                     {question.question_type_id === 1 && (
@@ -873,36 +902,71 @@ const SaveSurvey = ({ navigation, route }) => {
     });
     console.log(payload)
     setIsLoading(true);
-    // API.instance
-    //   .post(
-    //     `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
-    //     payload,
-    //   )
-    //   .then(
-    //     response => {
-    //       setIsLoading(false);
-    //       if (response.status == "success") {
-    //         navigation.navigate('SurveyViewAll');
-    //       } else {
-    //         setError(true);
-    //         setErrorMessage(response.error);
-    //         if (!Group) {
-    //           setErrorMessage("Organization is required.");
-    //         } else if (!Group2) {
-    //           setErrorMessage("Building is required.");
-    //         }
-    //         setError(true);
-    //       }
-    //     },
-    //     error => {
-    //       setIsLoading(false);
-    //       console.error(error);
-    //     },
-    //   );
+    API.instance
+      .post(
+        `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
+        payload,
+      )
+      .then(
+        response => {
+          setIsLoading(false);
+          if (response.status == "success") {
+            navigation.navigate('SurveyViewAll');
+          } else {
+            setError(true);
+            setErrorMessage(response.error);
+          }
+        },
+        error => {
+          setIsLoading(false);
+          console.error(error);
+        },
+      );
   };
 
   const submitSurvey = () => {
-    console.log('Submit Survey!');
+    //var actualQuestionLength = finalAnswer.current.length;
+    //console.log("Actual Questions=>"+totalQuestion+" Given Questions =>"+actualQuestionLength);
+
+    var payload = JSON.stringify({
+      appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+      device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+      surveyId: surveyId,
+      user_id: '1',
+      user_survey_result_id: '0',
+      org_id: orgId,
+      org_name: orgName,
+      building_id: buildingId,
+      building_name: buildingName,
+      request_type: '1',
+      survey_session_id: '',
+      first_name: firstName,
+      last_name: lastName,
+      questions: finalAnswer.current,
+    });
+    
+    setIsLoading(true);
+    API.instance
+      .post(
+        `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
+        payload,
+      )
+      .then(
+        response => {
+          setIsLoading(false);
+          if (response.status == "success") {
+            navigation.navigate('SurveyViewAll');
+          } else {
+            setError(true);
+            setErrorMessage(response.error);
+            
+          }
+        },
+        error => {
+          setIsLoading(false);
+          console.error(error);
+        },
+      );
   };
 
   return (
@@ -958,6 +1022,8 @@ const SaveSurvey = ({ navigation, route }) => {
       </ScrollView>
       {/* ================================MODAL=================================== */}
       <Modal visible={visible} transparent={true} animationType="slide">
+
+      
         <View
           style={{
             justifyContent: 'center',
@@ -967,6 +1033,8 @@ const SaveSurvey = ({ navigation, route }) => {
             paddingBottom: 20,
             top: hp('11%'),
           }}>
+      
+      
           <View
             style={{
               flexDirection: 'row',
@@ -985,6 +1053,8 @@ const SaveSurvey = ({ navigation, route }) => {
             </TouchableWithoutFeedback>
           </View>
 
+
+
           <Surface
             elevation={4}
             style={{
@@ -994,6 +1064,23 @@ const SaveSurvey = ({ navigation, route }) => {
               marginTop: 10,
               marginHorizontal: 30,
             }}>
+
+{error && (
+          <View
+            style={{
+              width: '100%',
+              alignItems: 'center',
+            }}>
+            <Text
+              style={{
+                color: 'red',
+                fontFamily: 'Poppins-Medium',
+              }}>
+              Error! {errorMsg}
+            </Text>
+          </View>
+        )}
+
             <TouchableOpacity
               onPress={saveSurvey}
               style={SIPCStyles.healthImageView}>
@@ -1009,14 +1096,14 @@ const SaveSurvey = ({ navigation, route }) => {
 
             {/* <TouchableWithoutFeedback> */}
             <TouchableOpacity
-              onPress={submitSurvey}
+              onPress={showModal1}
               style={[SIPCStyles.healthImageView, { marginTop: 25 }]}>
               <Image
                 source={require('../assets/submit.png')}
                 style={SIPCStyles.MainBuilding}
               />
               <Text style={[SIPCStyles.NormalFont, { paddingLeft: 10 }]}>
-                Submit Survey{' '}
+                Submit Survey
               </Text>
             </TouchableOpacity>
             {/* </TouchableWithoutFeedback> */}
@@ -1025,6 +1112,96 @@ const SaveSurvey = ({ navigation, route }) => {
           </Surface>
         </View>
       </Modal>
+      {/* ===============================================Submit Modal============== */}
+      <Modal visible={visible1} transparent={true} animationType="slide">
+        <View
+          style={{
+            justifyContent: 'center',
+            backgroundColor: '#e2e0eb',
+            borderBottomLeftRadius: 20,
+            borderBottomRightRadius: 20,
+            paddingBottom: 20,
+            // top: hp('11%'),
+          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              backgroundColor: '#e2e0eb',
+              padding: 25, backgroundColor: '#1281ca'
+            }}>
+            <Text style={[SIPCStyles.NormalFont, { textAlign: 'center', color: 'white', }]}>Survey Completed By</Text>
+          </View>
+
+          <Surface
+            elevation={4}
+            style={{
+              padding: 15,
+              backgroundColor: 'white',
+            }}>
+
+{error && (
+          <View
+            style={{
+              width: '100%',
+              alignItems: 'center',
+            }}>
+            <Text
+              style={{
+                color: 'red',
+                fontFamily: 'Poppins-Medium',
+              }}>
+              Error! {errorMsg}
+            </Text>
+          </View>
+        )}
+
+            <TextInput
+              onChangeText ={value => setFirstName(value)}
+              mode="flat"
+              //  label="Outlined input
+              placeholder="First Name"
+              placeholderTextColor={'black'}
+              underlineColor="transparent"
+              theme={{ colors: { primary: '#cccccc' } }}
+              style={[SIPCStyles.TextInput, { height: Height / 18, marginTop: 15, borderRadius: 0 }]}
+            />
+
+            <TextInput
+              onChangeText ={value => setLastName(value)}
+              mode="flat"
+              //  label="Outlined inpu
+              placeholder="Last Name"
+              placeholderTextColor={'black'}
+              underlineColor="transparent"
+              theme={{ colors: { primary: '#cccccc' } }}
+              style={[SIPCStyles.TextInput, { height: Height / 18, marginTop: 25, borderRadius: 0 }]}
+            />
+
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end', marginVertical: 15
+              }}>
+              <TouchableWithoutFeedback onPress={hideModal1} style={{ borderWidth: 1 }}>
+                <Text style={[SIPCStyles.NormalFont, { marginRight: 15 }]}>Cancel</Text>
+              </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback onPress={submitSurvey}>
+                <Text style={[SIPCStyles.NormalFont, { color: '#199be2', }]}>
+                  Continue
+                </Text>
+              </TouchableWithoutFeedback>
+            </View>
+
+
+
+          </Surface>
+        </View>
+      </Modal>
+
+      {/* ============================================================= */}
+
+
     </View>
   );
 };
