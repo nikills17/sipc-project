@@ -1,4 +1,4 @@
-import {StyleSheet, TouchableWithoutFeedback, View, Image} from 'react-native';
+import {StyleSheet, TouchableWithoutFeedback,TouchableOpacity, View, Image} from 'react-native';
 import React, {useState} from 'react';
 import {Surface, Divider, Text} from 'react-native-paper';
 import {Col, Grid} from 'react-native-easy-grid';
@@ -211,25 +211,34 @@ const SurveyViewAllBox = ({data, navigation, Active}) => {
                     justifyContent: 'space-around',
                   }}>
                   <View style={{flexDirection: 'column'}}>
-                    <TouchableWithoutFeedback>
+                    <TouchableOpacity onPress={()=>{
+                      navigation.navigate('SavePendingSurvey', {
+                        surveyId: data.survey_id,
+                        surveySessionId: data.survey_session_id,
+                        userSurveyResultId: data.id,
+                          userId: data.user_id,
+                      });
+                    }}>
                       <Image
                         source={require('../assets/continue.png')}
                         style={SIPCStyles.playImage}
                       />
-                    </TouchableWithoutFeedback>
-                    <Text style={SIPCStyles.SurfacePlayImageText}>
+                      <Text style={SIPCStyles.SurfacePlayImageText}>
                       Continue
                     </Text>
+                    </TouchableOpacity>
+                    
                   </View>
 
                   <View style={{flexDirection: 'column'}}>
-                    <TouchableWithoutFeedback>
+                    <TouchableOpacity>
                       <Image
                         source={require('../assets/delete.png')}
                         style={SIPCStyles.playImage}
                       />
-                    </TouchableWithoutFeedback>
-                    <Text style={SIPCStyles.SurfacePlayImageText}> Delete</Text>
+                      <Text style={SIPCStyles.SurfacePlayImageText}> Delete</Text>
+                    </TouchableOpacity>
+                    
                   </View>
                 </View>
               </Col>

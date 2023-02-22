@@ -38,7 +38,7 @@ const SurveyViewAll = ({navigation}) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const params = JSON.stringify({
-    pageSize: '25',
+    pageSize: '10',
     pageNumber: '1',
     appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
     device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',

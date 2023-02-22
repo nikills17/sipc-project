@@ -14,6 +14,7 @@ import CleaningInspectionsScreen from './src/screens/CleaningInspections';
 import StartSurveysScreen from './src/screens/StartSurveys';
 import SurveyViewAllScreen from './src/screens/SurveyViewAll';
 import SaveSurveyScreen from './src/screens/SaveSurvey';
+import SavePendingSurveyScreen from './src/screens/SavePendingSurvey';
 import AssignmentScreen from './src/screens/Assignment';
 import InspectionViewRoomScreen from './src/screens/InspectionViewRoom';
 import {responsiveScreenFontSize} from 'react-native-responsive-dimensions';
@@ -145,10 +146,6 @@ const App = () => {
         <Stack.Navigator screenOptions={{headerShown: false}}>
           <Stack.Screen name="SurveyViewAll" component={MyTabScreen} />
           <Stack.Screen name="Surveys" component={SurveysScreen} />
-          {/* <Stack.Screen name="Inspections" component={InspectionsScreen} /> */}
-          {/* <Stack.Screen name="WorkOrders" component={WorkOrdersScreen} /> */}
-          {/* <Stack.Screen name="Reports" component={ReportsScreen} /> */}
-          {/* <Stack.Screen name="Dashboard" component={DashboardScreen} /> */}
           <Stack.Screen name="AddWorkOrders" component={AddWorkOrdersScreen} />
           <Stack.Screen
             name="StartInspections"
@@ -160,6 +157,7 @@ const App = () => {
           />
           <Stack.Screen name="StartSurveys" component={StartSurveysScreen} />
           <Stack.Screen name="SaveSurvey" component={SaveSurveyScreen} />
+          <Stack.Screen name="SavePendingSurvey" component={SavePendingSurveyScreen} />
           <Stack.Screen name="Assignment" component={AssignmentScreen} />
           <Stack.Screen
             name="InspectionViewRoom"
