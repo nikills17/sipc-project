@@ -200,6 +200,10 @@ const CheckBox = ({ answers, answer, setAnswer }) => {
   const [comment, setComment] = useState(answerComment);
   const [completed, setCompleted] = useState(false);
   const [imagePath, setImagePath] = useState([]);
+
+  if(answers.isSelected == 1){
+    //setChecked(true);
+  }
   
   return (
     <View
@@ -588,7 +592,10 @@ const RadioBox = ({ answers, selected, setSelected }) => {
   const [comment, setComment] = useState('');
   const [completed, setCompleted] = useState(false);
   const [imagePath, setImagePath] = useState([]);
-
+  if(answers.isSelected == 1){
+    //setSelected(answers);
+  }
+  
   return (
     <>
       <View style={{
@@ -808,64 +815,8 @@ answers.comment_type=="textWithImageOptional" || answers.comment_type=="textWith
 }
 
 
-
-
 {/* ====================================== */}
-
-
-
-          {/* <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-              elevation: 16,
-            }}>
-            <TouchableWithoutFeedback
-              onPress={() => openCamera(imagePath, setImagePath)}>
-              <Image
-                source={require('../assets/camera.png')}
-                style={SIPCStyles.cameraImage}
-              />
-            </TouchableWithoutFeedback>
-            <View
-              style={{
-                borderWidth: 1,
-                borderColor: '#e6e6e6',
-              }}
-            />
-
-            <TouchableWithoutFeedback onPress={pickImage}>
-              <Image
-                source={require('../assets/gallery.png')}
-                style={SIPCStyles.cameraImage}
-              />
-            </TouchableWithoutFeedback>
-          </View> */}
-          {/* <View
-            style={{
-              flex: 1,
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-              marginTop: 12,
-            }}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => {
-                setSelected();
-              }}>
-              <Text style={{ fontFamily: 'Poppins-SemiBold' }}>CANCEL</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => {
-                setCompleted(!completed);
-              }}>
-              <Text
-                style={{ fontFamily: 'Poppins-SemiBold', color: '#3a7fc4' }}>
-                SUBMIT
-              </Text>
-            </TouchableOpacity>
-          </View> */}
+         
         </View>
       )}
     </>
