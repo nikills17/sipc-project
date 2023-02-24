@@ -136,7 +136,6 @@ const uploadImage = async (imagePath) => {
             setImages([...images, {path: response.uploaded_url, name: response.image_name}]);
             setError(false);
             setErrorMessage("");
-            console.log(JSON.stringify(response));
           },
           error => console.error(error),
         );

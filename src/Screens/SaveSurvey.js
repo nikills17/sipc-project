@@ -107,8 +107,8 @@ const SaveSurvey = ({ navigation, route }) => {
   const [numColumns, setNumColumns] = useState(3);
   const maxImages = 10;
 
-  const uploadImage = async (imagePath, answer, setAnswer, answers, questionId, images, setImages, imageNames, setImageNames) => {
-    // Check selected image is not null
+  const uploadImage = async (imagePath, answer, setAnswer, answers, images, setImages, imageNames, setImageNames, questionTypeId) => {
+    // Check answer image is not null
     if (imagePath != null) {
       // Create FormData
       const data = new FormData();
@@ -117,7 +117,7 @@ const SaveSurvey = ({ navigation, route }) => {
       data.append("survey_id", surveyId);
       data.append("user_id", "1");
       data.append("org_id", "1");
-      data.append("question_id", questionId);
+      data.append("question_id", answers.question_id);
       data.append("answer_id", answers.answer_id);
       data.append("survey_session_id", surveySessionId);
       data.append("user_survey_result_id", userSurveyResultId);
@@ -144,6 +144,7 @@ const SaveSurvey = ({ navigation, route }) => {
               }else{
                 imageNames = response.image_name;
               }
+
               setImageNames(imageNames);
               // var answerObject = {
               //   id: answers.answer_id.toString(),
@@ -153,19 +154,34 @@ const SaveSurvey = ({ navigation, route }) => {
               //   comment: '',
               //   images: imageNames,
               // };
-              setAnswer([...answer]);
-              
+
+              if(questionTypeId == "2"){ //checkbox
+                var elementPos = [...answer].map(function (x) { return x.id; }).indexOf(answers.answer_id.toString());
+                var currentAnswerObj = [...answer][elementPos];
+                const newObj = {
+                  ...currentAnswerObj,
+                  // replace the value of the key with a new value
+                  images: imageNames
+                };
+                if (elementPos != -1) {
+                  answer.splice(elementPos, 1);
+                  setAnswer([...answer, newObj]);
+                }
+              }else{ // Radio
+                setAnswer(answers);
+              }
+                
+                            
               setImages([...images, {path: response.uploaded_url, name: response.image_name}]);
               setError(false);
               setErrorMessage("");
-              console.log("Image Response: "+JSON.stringify(response));
             },
             error => console.error(error),
           );
     }
   };
 
-  const openCamera = (answer, setAnswer, answers, questionId, images, setImages, imageNames, setImageNames) => {
+  const openCamera = (answer, setAnswer, answers, images, setImages, imageNames, setImageNames, questionTypeId) => {
     ImagePicker.openCamera({
       width: 300,
       height: 400,
@@ -175,24 +191,24 @@ const SaveSurvey = ({ navigation, route }) => {
         alert(`Max limit reached: ${maxImages}`);
         return;
       }
-      uploadImage(image.path, answer, setAnswer, answers, questionId, images, setImages, imageNames, setImageNames);
+      uploadImage(image.path, answer, setAnswer, answers, images, setImages, imageNames, setImageNames, questionTypeId);
     });
   };
 
-  const pickImage = (answer, setAnswer, answers, questionId, images, setImages, imageNames, setImageNames) => {
+  const pickImage = (answer, setAnswer, answers, images, setImages, imageNames, setImageNames, questionTypeId) => {
     ImagePicker.openPicker({})
       .then(image => {
         if (images.length + 1 > maxImages) {
           alert(`Max limit reached: ${maxImages}`);
           return;
         }
-        uploadImage(image.path, answer, setAnswer, answers, questionId, images, setImages, imageNames, setImageNames);
+        uploadImage(image.path, answer, setAnswer, answers, images, setImages, imageNames, setImageNames, questionTypeId);
       })
       .catch(error => console.error(error));
   };
 
   const deleteImage = index => {
-    setImages(images.filter((_, i) => i !== index));
+    //setImages(images.filter((_, i) => i !== index));
   };
 
   const TextBox = ({ data }) => {
@@ -275,8 +291,8 @@ const SaveSurvey = ({ navigation, route }) => {
                     score: answers.score.toString(),
                     is_comment_required: answers.is_comment_required.toString(),
                     answer_name: answers.answer.toString(),
-                    comment: comment,
-                    images: imageNames,
+                    comment: '',
+                    images: '',
                   };
                   setAnswer([...answer, answerObject]);
                 }
@@ -456,7 +472,7 @@ const SaveSurvey = ({ navigation, route }) => {
                                       justifyContent: 'space-around',
                                     }}>
                                     <TouchableWithoutFeedback 
-                                    onPress={() => openCamera(answer, setAnswer, answers, answers.question_id, images, setImages, imageNames, setImageNames)}>
+                                    onPress={() => openCamera(answer, setAnswer, answers, images, setImages, imageNames, setImageNames, 2)}>
                                       <Image
                                         source={require('../assets/camera.png')}
                                         style={SIPCStyles.cameraImage}
@@ -468,7 +484,7 @@ const SaveSurvey = ({ navigation, route }) => {
                                     />
 
                                     <TouchableWithoutFeedback 
-                                    onPress={() => pickImage(answer, setAnswer, answers, answers.question_id, images, setImages, imageNames, setImageNames)}>
+                                    onPress={() => pickImage(answer, setAnswer, answers, images, setImages, imageNames, setImageNames, 2)}>
                                       <Image
                                         source={require('../assets/gallery.png')}
                                         style={SIPCStyles.cameraImage}
@@ -539,27 +555,16 @@ const SaveSurvey = ({ navigation, route }) => {
     useEffect(() => {
 
       if (answer.length > 0) {
-        console.log(JSON.stringify(answer));
         let answerObject = {
           question_id: data.id.toString(),
           question_type_id: data.question_type_id.toString(),
-          answer: [
-            {
-              id: answer.id,
-              score: answer.score,
-              is_comment_required: answer.is_comment_required,
-              answer_name: answer.answer,
-              comment: comment,
-              images: imageNames,
-            }
-          ],
+          answer: answer,
         };
         
         if (!finalAnswer.current.find(el => el.question_id === data.id.toString())) {
           finalAnswer.current.push(answerObject);
         } else {
           var answerIndex = finalAnswer.current.findIndex(el => el.question_id === data.id.toString(),);
-          console.log("answerIndex: "+answerIndex+" and answerObject=>"+JSON.stringify(answerObject));
           finalAnswer.current[answerIndex] = answerObject;
         }
       } else {
@@ -608,7 +613,7 @@ const SaveSurvey = ({ navigation, route }) => {
     );
   };
 
-  const RadioBox = ({ answers, selected, setSelected, imageNames, setImageNames, comment, setComment}) => {
+  const RadioBox = ({ answers, answer, setAnswer, imageNames, setImageNames, comment, setComment}) => {
     const [completed, setCompleted] = useState(false);
     const [images, setImages] = useState([]);
 
@@ -624,14 +629,14 @@ const SaveSurvey = ({ navigation, route }) => {
           // overflow: 'hidden',
           height: Height / 12,
 
-          borderBottomRightRadius: selected ? 0 : 10,
-          borderBottomLeftRadius: selected ? 0 : 10,
+          borderBottomRightRadius: answer ? 0 : 10,
+          borderBottomLeftRadius: answer ? 0 : 10,
 
         }}>
           <View style={{ paddingHorizontal: 10 }}>
             <RadioButton
-              status={answers === selected ? 'checked' : 'unchecked'}
-              onPress={() => setSelected(answers)}
+              status={answers === answer ? 'checked' : 'unchecked'}
+              onPress={() => setAnswer(answers)}
               value="first"
               color={'#3a7fc4'}
             />
@@ -646,12 +651,12 @@ const SaveSurvey = ({ navigation, route }) => {
                 (
                   <>
                     {
-                      selected == 1 ? (
+                      answer == 1 ? (
                         <>
                           <View style={{}}></View>
                           <TouchableWithoutFeedback
                             onPress={() => {
-                              setSelected(!selected);
+                              setAnswer(!answer);
                             }}>
                             <Text
                               style={[
@@ -664,7 +669,7 @@ const SaveSurvey = ({ navigation, route }) => {
 
                           <TouchableWithoutFeedback
                             onPress={() => {
-                              setSelected(!selected);
+                              setAnswer(!answer);
                             }}>
                             <Text
                               style={[
@@ -682,7 +687,7 @@ const SaveSurvey = ({ navigation, route }) => {
                               (
                                 <>
                                   <TouchableWithoutFeedback
-                                    onPress={() => setSelected(answers)}>
+                                    onPress={() => setAnswer(answers)}>
                                     <Image
                                       source={require('../assets/msg.png')}
                                       style={SIPCStyles.commentImage}
@@ -693,7 +698,7 @@ const SaveSurvey = ({ navigation, route }) => {
                               (
                                 <>
                                   <TouchableWithoutFeedback
-                                    onPress={() => setSelected(answers)}>
+                                    onPress={() => setAnswer(answers)}>
                                     <Image
                                       source={require('../assets/msg.png')}
                                       style={SIPCStyles.commentImage}
@@ -701,7 +706,7 @@ const SaveSurvey = ({ navigation, route }) => {
                                   </TouchableWithoutFeedback>
 
                                   <TouchableWithoutFeedback
-                                    onPress={() => setSelected(answers)}>
+                                    onPress={() => setAnswer(answers)}>
                                     <Image
                                       source={require('../assets/img.png')}
                                       style={SIPCStyles.commentImage}
@@ -725,7 +730,7 @@ const SaveSurvey = ({ navigation, route }) => {
         </View>
 
         {/* ============================================== */}
-        {selected && selected.answer_id === answers.answer_id && !completed && (
+        {answer && answer.answer_id === answers.answer_id && !completed && (
           <View>
             {
               answers.comment_type != "noTextImage" ?
@@ -772,7 +777,7 @@ const SaveSurvey = ({ navigation, route }) => {
                             justifyContent: 'space-around',
                           }}>
                           <TouchableWithoutFeedback 
-                          onPress={() => openCamera(selected, setSelected, answers, answers.question_id, images, setImages, imageNames, setImageNames)}>
+                          onPress={() => openCamera(answer, setAnswer, answers, images, setImages, imageNames, setImageNames, 1)}>
                             <Image
                               source={require('../assets/camera.png')}
                               style={SIPCStyles.cameraImage}
@@ -784,7 +789,7 @@ const SaveSurvey = ({ navigation, route }) => {
                           />
 
                           <TouchableWithoutFeedback
-                            onPress={() => pickImage(selected, setSelected, answers, answers.question_id, images, setImages, imageNames, setImageNames)}>
+                            onPress={() => pickImage(answer, setAnswer, answers, images, setImages, imageNames, setImageNames, 1)}>
                             <Image
                               source={require('../assets/gallery.png')}
                               style={SIPCStyles.cameraImage}
@@ -893,8 +898,8 @@ const SaveSurvey = ({ navigation, route }) => {
               <RadioBox
                 answers={item}
                 key={index}
-                selected={answer}
-                setSelected={setAnswer}
+                answer={answer}
+                setAnswer={setAnswer}
                 comment={comment}
                 setComment={setComment}
                 imageNames={imageNames}
@@ -1098,26 +1103,26 @@ const SaveSurvey = ({ navigation, route }) => {
     });
     console.log("Save Answer: "+payload);
     setIsLoading(true);
-    // API.instance
-    //   .post(
-    //     `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
-    //     payload,
-    //   )
-    //   .then(
-    //     response => {
-    //       setIsLoading(false);
-    //       if (response.status == "success") {
-    //         navigation.navigate('SurveyViewAll');
-    //       } else {
-    //         setError(true);
-    //         setErrorMessage(response.error);
-    //       }
-    //     },
-    //     error => {
-    //       setIsLoading(false);
-    //       console.error(error);
-    //     },
-    //   );
+    API.instance
+      .post(
+        `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
+        payload,
+      )
+      .then(
+        response => {
+          setIsLoading(false);
+          if (response.status == "success") {
+            navigation.navigate('SurveyViewAll');
+          } else {
+            setError(true);
+            setErrorMessage(response.error);
+          }
+        },
+        error => {
+          setIsLoading(false);
+          console.error(error);
+        },
+      );
   };
 
   const submitSurvey = () => {
