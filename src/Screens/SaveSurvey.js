@@ -119,8 +119,8 @@ const SaveSurvey = ({ navigation, route }) => {
       data.append("org_id", "1");
       data.append("question_id", answers.question_id);
       data.append("answer_id", answers.answer_id);
-      data.append("survey_session_id", surveySessionId);
-      data.append("user_survey_result_id", userSurveyResultId);
+      data.append("survey_session_id", surveySessionId==undefined?'':surveySessionId.toString());
+      data.append("user_survey_result_id", userSurveyResultId == undefined?0:userSurveyResultId.toString());
 
       data.append("file", {
         name: "image.png",
@@ -139,13 +139,12 @@ const SaveSurvey = ({ navigation, route }) => {
               
               setSurveySessionId(response.survey_session_id);
               setUserSurveyResultId(response.user_survey_result_id);
-              if(imageNames != ""){
-                imageNames = imageNames+","+response.image_name;
-              }else{
-                imageNames = response.image_name;
-              }
-
-              setImageNames(imageNames);
+              var imageName = response.image_name;
+              
+              imageNames.push({imageName});
+              setImageNames([...imageNames]);
+              
+              
               // var answerObject = {
               //   id: answers.answer_id.toString(),
               //   score: answers.score.toString(),
@@ -551,7 +550,7 @@ const SaveSurvey = ({ navigation, route }) => {
   const CheckBoxComponent = ({ data }) => {
     const [answer, setAnswer] = useState([]);
     const [comment, setComment] = useState('');
-    const [imageNames, setImageNames] = useState('');
+    const [imageNames, setImageNames] = useState([]);
     useEffect(() => {
 
       if (answer.length > 0) {
@@ -849,7 +848,7 @@ const SaveSurvey = ({ navigation, route }) => {
   const RadioBoxComponent = ({ data }) => {
     const [answer, setAnswer] = useState();
     const [comment, setComment] = useState('');
-    const [imageNames, setImageNames] = useState('');
+    const [imageNames, setImageNames] = useState([]);
     
     useEffect(() => {
       if (answer) {
@@ -1131,13 +1130,13 @@ const SaveSurvey = ({ navigation, route }) => {
       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
       surveyId: surveyId,
       user_id: '1',
-      user_survey_result_id: '0',
+      user_survey_result_id: userSurveyResultId,
       org_id: orgId,
       org_name: orgName,
       building_id: buildingId,
       building_name: buildingName,
       request_type: '1',
-      survey_session_id: '',
+      survey_session_id: surveySessionId,
       first_name: firstName,
       last_name: lastName,
       questions: finalAnswer.current,
