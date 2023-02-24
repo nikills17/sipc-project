@@ -41,6 +41,26 @@ export default class API {
     }
   };
 
+  // data should always come with JSON.Stringify() for upload
+  upload = async (url, data) => {
+    try {
+      let config = {
+        method: 'POST',
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Accept: "application/json",
+        },
+        body: data,
+      };
+      let response = await fetch(url, config);
+      // give 401 Object only. So we need to call the method again, to get the right res
+      let jsonData = await response.json();
+      return jsonData;
+    } catch (error) {
+      console.log(`${error} while fetching data from ${url}`);
+    }
+  };
+
   // METHOD TO UPDATE THE DATA
   // data should always come in JSON.stringify() format from the dev side
   put = async (url, data) => {

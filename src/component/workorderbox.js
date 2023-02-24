@@ -23,7 +23,33 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import DropDownPicker from 'react-native-dropdown-picker';
 import {useNavigation} from '@react-navigation/native';
+import API from '../utility/api';
 import {Col, Grid} from 'react-native-easy-grid';
+
+const updateWorkOrderStatus = (workOrderId, status, navigation) => {
+  var payload = JSON.stringify({
+    "appKey":"f9285c6c2d6a6b531ae1f70d2853f612",
+    "device_id":"68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
+    "workOrderId": workOrderId,
+    "status": status,
+  });
+  console.log(payload);
+  
+  API.instance
+    .post(
+      `http://sipcsurvey.devuri.com/sipcsurvey/update-workorder-status-api?is_api=true`,
+      payload,
+    )
+    .then(
+      response => {
+        console.log(response.status);
+        if (response.status == "success") {
+          navigation.navigate('Work Orders');
+        }
+      },
+      error => console.error(error),
+    );
+}
 
 const WorkOrderBox = ({data, Active, navigation}) => {
   const images = data.images.split(',');
@@ -40,89 +66,30 @@ const WorkOrderBox = ({data, Active, navigation}) => {
   //   }, []);
 
   const [Show, setShow] = useState(false);
-
-  const dropDownData = {
-    '-1': 'UNASSIGNED',
-    0: 'IN-PROGRESS',
-    1: 'COMPLETED',
-  };
-
   const [showDropDown1, setShowDropDown1] = useState(false);
-  const [Group, setGroup] = useState(data.work_order_status);
+  const [currentWOStatus, setCurrentWOStatus] = useState(data.work_order_status);
+  const [workOrderStatus, setWorkOrderStatus] = useState(data.work_order_status);
 
-  const GroupList = [
+  const statusList = [
     {
-      label: dropDownData[-1],
+      label: "UNASSIGNED",
       value: '-1',
     },
     {
-      label: dropDownData[0],
+      label: "IN-PROGRESS",
       value: '0',
     },
     {
-      label: dropDownData[1],
+      label: "COMPLETED",
       value: '1',
     },
   ];
 
   const handleDropDownChange = () => {
-    if (Group === '0') {
+    // if (workOrderStatus === '-1' || workOrderStatus === '0' ||workOrderStatus === '1') {
       navigation.navigate('Assignment');
-    } else if (Group === '1') {
-      navigation.navigate('Assignment');
-    }
+    // }
   };
-
-  // //  -----------------InProgress DropDown
-  // const [showDropDown2, setShowDropDown2] = useState(false);
-  // const [Group2, setGroup2] = useState(data.work_order_status);
-  // const GroupList2 = ([
-  //     {
-  //         label: dropDownData[-1],
-  //         value: '-1',
-  //     },
-  //     {
-  //         label: dropDownData[0],
-  //         value: '0',
-  //     },
-  //     {
-  //         label: dropDownData[1],
-  //         value: '1',
-  //     },
-  // ]);
-
-  // const handleDropDownChange2 = () => {
-  //     if (Group2 === '-1') {
-  //         navigation.navigate('Assignment');
-  //     } else if (Group2 === '1') {
-  //         navigation.navigate('Assignment');
-  //     }
-  // };
-  // //  -----------------Completed DropDown
-  // const [showDropDown3, setShowDropDown3] = useState(false);
-  // const [Group3, setGroup3] = useState(data.work_order_status);
-  // const [GroupList3, setGroupList3] = useState([
-  //     {
-  //         label: dropDownData[-1],
-  //         value: '-1',
-  //     },
-  //     {
-  //         label: dropDownData[0],
-  //         value: '0',
-  //     },
-  //     {
-  //         label: dropDownData[1],
-  //         value: '1',
-  //     },
-  // ]);
-
-  // const handleDropDownChange3 = () => {
-  //     if (Group3 === '0') {
-  //         navigation.navigate('Assignment');
-  //     } else if (Group3 === '1') {
-  //         navigation.navigate('Assignment');
-  //     }
-  // };
 
   return (
     <View>
@@ -283,22 +250,22 @@ const WorkOrderBox = ({data, Active, navigation}) => {
                     SIPCStyles.textSize,
                     {
                       color:
-                        Group === '-1'
-                          ? '#e63757'
-                          : Group === '0'
-                          ? '#f6c343'
-                          : '#00d97e',
-                    },
+                      workOrderStatus === '-1'? '#e63757': workOrderStatus === '0'? '#f6c343': '#00d97e', },
                   ]}
                   dropDownContainerStyle={SIPCStyles.dropDownContainerStyle}
-                  labelStyle={[SIPCStyles.RedColor, {paddingHorizontal: 5}]}
+                  labelStyle={[SIPCStyles.DropDownLabelFont, {paddingHorizontal: 5}]}
                   open={showDropDown1}
-                  value={Group}
-                  items={GroupList}
+                  value={workOrderStatus}
+                  items={statusList}
                   setOpen={setShowDropDown1}
-                  setValue={setGroup}
-                  onChangeValue={value => {
-                    handleDropDownChange(value);
+                  setValue={setWorkOrderStatus}
+                  onSelectItem={(item) => {
+                    console.log(item);
+                    if(currentWOStatus == "0" && item.value == "-1"){
+                        //changing In-Progress to Unassign
+                        updateWorkOrderStatus(data.id, item.value, navigation);
+                    }
+                    //handleDropDownChange(item);
                   }}
                 />
               </View>
@@ -549,10 +516,10 @@ const WorkOrderBox = ({data, Active, navigation}) => {
                   dropDownContainerStyle={SIPCStyles.dropDownContainerStyle}
                   labelStyle={[SIPCStyles.RedColor, {paddingHorizontal: 5}]}
                   open={showDropDown1}
-                  value={Group}
-                  items={GroupList}
+                  value={workOrderStatus}
+                  items={statusList}
                   setOpen={setShowDropDown1}
-                  setValue={setGroup}
+                  setValue={setWorkOrderStatus}
                   onChangeValue={value => {
                     handleDropDownChange(value);
                   }}
@@ -811,10 +778,10 @@ const WorkOrderBox = ({data, Active, navigation}) => {
                   dropDownContainerStyle={SIPCStyles.dropDownContainerStyle}
                   labelStyle={[SIPCStyles.RedColor, {paddingHorizontal: 5}]}
                   open={showDropDown1}
-                  value={Group}
-                  items={GroupList}
+                  value={workOrderStatus}
+                  items={statusList}
                   setOpen={setShowDropDown1}
-                  setValue={setGroup}
+                  setValue={setWorkOrderStatus}
                   onChangeValue={value => {
                     handleDropDownChange(value);
                   }}

@@ -29,136 +29,281 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {ScrollView} from 'react-native-gesture-handler';
 import ImagePicker from 'react-native-image-crop-picker';
+import API from '../utility/api';
+import {
+  responsiveScreenHeight,
+  responsiveScreenWidth,
+  responsiveScreenFontSize,
+} from 'react-native-responsive-dimensions';
+import { floor } from 'react-native-reanimated';
 
-const AddWorkOrders = ({navigation}) => {
+
+
+const AddWorkOrders = ({navigation, route}) => {
   const deviceWidth = Dimensions.get('window').width;
 
+  const {selectedId} = route?.params;
+
+  const [workOrderId, setWorkOrderId] = useState(selectedId);
+  const [Item, setItem] = useState(0);
+  const [Issue, setIssue] = useState(0);
+  const [IssueType, setIssueType] = useState(0);
+  const [locationTypeId, setLocationTypeId] = useState(-1);
+  const [buildingId, setBuildingId] = useState(0);
+  const [floorId, setFloorId] = useState(0);
+  const [roomId, setRoomId] = useState(0);
+  const [comment, setComment] = useState('');
+  const [location, setLocation] = useState('');
   
+  //Items
   const [showDropDown1, setShowDropDown1] = useState(false);
-  const [Group, setGroup] = useState();
-  const [GroupList, setGroupList] = useState([
-    {
-      label: 'Projector',
-      value: '0',
-    },
-    {
-      label: 'Floor-Wood',
-      value: '1',
-    },
-    {
-      label: 'Lockers',
-      value: '2',
-    },
-    {
-      label: 'Lockers',
-      value: '3',
-    },
-    {
-      label: 'Lockers',
-      value: '4',
-    },
-  ]);
-  {
-    /* ============================SELECT ISSUE============================= */
-  }
+  const [workOrderData, setWorkOrderData] = useState([]);
+  const [ItemList, setItemList] = useState([]);
+  
+  //Issues
   const [showDropDown2, setShowDropDown2] = useState(false);
-  const [Group2, setGroup2] = useState();
-  const [GroupList2, setGroupList2] = useState([
-    {
-      label: 'Worn',
-      value: '0',
-    },
-    {
-      label: 'Broken',
-      value: '1',
-    },
-    {
-      label: 'Light Out',
-      value: '2',
-    },
-  ]);
-  {
-    /* ============================SELECT Issue Type============================= */
-  }
+  const [IssueList, setIssueList] = useState([]);
+  
+  //Issue Type
   const [showDropDown3, setShowDropDown3] = useState(false);
-  const [Group3, setGroup3] = useState();
-  const [GroupList3, setGroupList3] = useState([
+  const [IssueTypeList, setIssueTypeList] = useState([
     {
       label: 'Cleaning',
-      value: '0',
+      value: '1',
     },
     {
       label: 'Maintenance',
-      value: '1',
+      value: '2',
     },
+
   ]);
-  {
-    /* ============================SELECT Location TYPE============================= */
-  }
-  const [showDropDown4, setShowDropDown4] = useState(false);
-  const [Group4, setGroup4] = useState(0);
-  const [GroupList4, setGroupList4] = useState([
+  
+  //Location Type
+  const [showLocationDropDown, setLocationDropDown] = useState(false);
+  const [locationType, setLocationType] = useState([
     {
       label: 'Building',
       value: '1',
     },
     {
       label: 'Others',
-      value: '2',
-    },
-  ]);
-  {
-    /* ============================SELECT  Building ============================= */
-  }
-  const [showDropDown5, setShowDropDown5] = useState(false);
-  const [Group5, setGroup5] = useState();
-  const [GroupList5, setGroupList5] = useState([
-    {
-      label: 'SIPC High School',
       value: '0',
     },
-    {
-      label: 'Test Building',
-      value: '1',
-    },
-    {
-      label: 'Carbondale High School',
-      value: '2',
-    },
   ]);
-  {
-    /* ============================SELECT Floor============================= */
+  
+  //Buildings
+  const [showBuildingDropDown, setShowBuildingDropDown] = useState(false);
+  const [buildings, setBuildings] = useState([]);
+  
+  //Floors
+  const [showFloorDropDown, setShowFloorDropDown] = useState(false);
+  const [floors, setFloors] = useState([]);
+  
+  //Rooms
+  const [showRoomDropDown, setShowRoomDropDown] = useState(false);
+  const [rooms, setRooms] = useState([]);
+  
+  const [error, setError] = useState(false);
+  const [errorMsg, setErrorMessage] = useState();
+
+
+//API Calls
+
+const uploadImage = async (imagePath) => {
+  // Check selected image is not null
+  if (imagePath != null) {
+    // Create FormData
+    const data = new FormData();
+    data.append("workOrderId", workOrderId);
+    data.append("userId", "1");
+    data.append("appKey", "f9285c6c2d6a6b531ae1f70d2853f612");
+    data.append("device_id", "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1");
+    data.append("file", {
+      name: "image.png",
+      fileName:"image",
+      type: "image/png",
+      uri: Platform.OS === "android"? imagePath: imagePath.replace("file://", "")
+    });
+    
+    API.instance
+        .upload(
+          `http://sipcsurvey.devuri.com/sipcsurvey/upload-workorder-image-api?is_api=true`,
+          data,
+        )
+        .then(
+          response => {
+            setWorkOrderId(response.workOrderId);
+            setImages([...images, {path: response.uploaded_url, name: response.image_name}]);
+            setError(false);
+            setErrorMessage("");
+            console.log(JSON.stringify(response));
+          },
+          error => console.error(error),
+        );
+  } else {
+    // Validation Alert
+    Alert.alert("Please Select image first");
   }
-  const [showDropDown6, setShowDropDown6] = useState(false);
-  const [Group6, setGroup6] = useState();
-  const [GroupList6, setGroupList6] = useState([
-    {
-      label: '1st Floor',
-      value: '0',
-    },
-    {
-      label: '2nd Floor',
-      value: '1',
-    },
-  ]);
-  {
-    /* ============================SELECT Room============================= */
+};
+
+const saveWorkOrder = () => {
+  var payload = JSON.stringify({
+    "appKey":"f9285c6c2d6a6b531ae1f70d2853f612",
+    "device_id":"68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
+    "workOrderId": workOrderId,
+    "conditionId": Issue,
+    "conditionTypeId":IssueType,
+    "itemId": Item,
+    "locationType": locationTypeId,
+    "location": location,
+    "userId":"1",
+    "buildingId": buildingId,
+    "floorId": floorId,
+    "roomId": roomId,
+    "comment": comment,
+  });
+  console.log(payload);
+  API.instance
+    .post(
+      `http://sipcsurvey.devuri.com/sipcsurvey/save-workorder-api?is_api=true`,
+      payload,
+    )
+    .then(
+      response => {
+        if (response.status == "success") {
+          navigation.navigate('Work Orders');
+        } else {
+          setError(true);
+          setErrorMessage(response.error);
+        }
+      },
+      error => console.error(error),
+    );
+};
+
+useEffect(() => {
+  console.log("buildingId"+buildingId);
+  if (buildingId) {
+    setFloors([]);
+    setFloorId(0);
+    console.log("floorId"+floorId);
+    setRooms([]);
+    setRoomId(0);
+    var payload = JSON.stringify({
+      "appKey":"f9285c6c2d6a6b531ae1f70d2853f612",
+      "device_id":"68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
+      "userId":"1",
+      "buildingId": buildingId
+    });
+    API.instance
+      .post(
+        `http://sipcsurvey.devuri.com/sipcsurvey/floor-by-building-device?is_api=true`,
+        payload,
+      )
+      .then(
+        response => {
+          if (response.status == "success") {
+            setFloors(response.data);
+            setError(false);
+            setErrorMessage("");
+          } else {
+            setError(true);
+            setErrorMessage(response.error);
+          }
+        },
+        error => console.error(error),
+      );
   }
-  const [showDropDown7, setShowDropDown7] = useState(false);
-  const [Group7, setGroup7] = useState();
-  const [GroupList7, setGroupList7] = useState([
-    {
-      label: '101',
-      value: '0',
-    },
-    {
-      label: '102',
-      value: '1',
-    },
-  ]);
+}, [buildingId]);
+
+useEffect(() => {
+  if (floorId) {
+    setRoomId(0);
+    var payload = JSON.stringify({
+      "appKey":"f9285c6c2d6a6b531ae1f70d2853f612",
+      "device_id":"68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
+      "floorId": floorId,
+      "buildingId": buildingId
+    });
+    API.instance
+      .post(
+        `http://sipcsurvey.devuri.com/sipcsurvey/room-by-floor-device?is_api=true`,
+        payload,
+      )
+      .then(
+        response => {
+          //setIsLoading(false);
+          if (response.status == "success") {
+            setRooms(response.data);
+            setError(false);
+            setErrorMessage("");
+          } else {
+            setError(true);
+            setErrorMessage(response.error);
+          }
+        },
+        error => console.error(error),
+      );
+  }
+}, [floorId]);
+
+useEffect(() => {
+  API.instance
+    .post(
+      `http://sipcsurvey.devuri.com/sipcsurvey/buildings-device?is_api=true`,
+      JSON.stringify({
+        appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+        userId: '1'
+      }),
+    )
+    .then(
+      response => {
+        if (response.status == "success") {
+          setBuildings(response.data);
+          setError(false);
+          setErrorMessage("");
+        } else {
+          setError(true);
+          setErrorMessage(response.error);
+        }
+      },
+      error => console.error(error),
+    );
+}, []);
+
+ useEffect(() => {
+  API.instance
+    .post(
+      `http://sipcsurvey.devuri.com/sipcsurvey/workorder-condition-item-list-api?is_api=true`,
+      JSON.stringify({
+        appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+        userId: '1',
+        workOrderId: workOrderId,
+      }),
+    )
+    .then(
+      response => {
+        setWorkOrderData(response.workorder_data);
+        setItemList(response.item_data);
+        setIssueList(response.issue_data);
+        setError(false);
+        setErrorMessage("")
+        // console.log(response.item_data)
+      },
+      error => console.error(error),
+    );
+}, []);
+
+
+
+
+
+
   // -----------------------IMAGE PICKER------------------------
   const [filePath, setFilePath] = useState({});
-
+  
   const requestCameraPermission = async () => {
     if (Platform.OS === 'android') {
       try {
@@ -248,6 +393,7 @@ const AddWorkOrders = ({navigation}) => {
   DropDownPicker.setListMode('SCROLLVIEW');
 
   const [images, setImages] = useState([]);
+  const [image, setImage] = useState(null);
   const [numColumns, setNumColumns] = useState(3);
   const maxImages = 10;
 
@@ -261,27 +407,45 @@ const AddWorkOrders = ({navigation}) => {
         alert(`Max limit reached: ${maxImages}`);
         return;
       }
-      setImages([...images, {path: image.path}]);
+     uploadImage(image.path);
     });
   };
 
   const pickImage = () => {
-    ImagePicker.openPicker({
-      multiple: true,
-      maxFiles: maxImages - images.length,
-    })
+    ImagePicker.openPicker({})
       .then(newImages => {
-        if (images.length + newImages.length > maxImages) {
-          alert(`Max limit reached: ${maxImages}`);
-          return;
-        }
-        setImages([...images, ...newImages.map(i => ({path: i.path}))]);
+         if (images.length + newImages.length > maxImages) {
+           alert(`Max limit reached: ${maxImages}`);
+           return;
+         }
+        uploadImage(newImages.path);
       })
       .catch(error => console.error(error));
   };
 
-  const deleteImage = index => {
-    setImages(images.filter((_, i) => i !== index));
+  const deleteImage = (index, imageName) => {
+    var payload = JSON.stringify({
+      "appKey":"f9285c6c2d6a6b531ae1f70d2853f612",
+      "device_id":"68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
+      "workOrderId": workOrderId,
+      "userId": "1",
+      "imageName": imageName,
+    });
+    
+    API.instance
+      .post(
+        `http://sipcsurvey.devuri.com/sipcsurvey/remove-workorder-image-api?is_api=true`,
+        payload,
+      )
+      .then(
+        response => {
+          if(response.status == "success"){
+            setImages(images.filter((_, i) => i !== index));
+          }
+        },
+        error => console.error(error),
+      );
+    
   };
 
   return (
@@ -298,6 +462,15 @@ const AddWorkOrders = ({navigation}) => {
           <Text style={SIPCStyles.AddNewText}>Add New Work Order</Text>
         </Surface>
         {/* ============================SELECT ITEM============================= */}
+
+        {error && (
+          <View style={{ width: '100%',  }}>
+            <Text style={{ color: 'red', fontFamily: 'Poppins-Medium', fontSize: responsiveScreenFontSize(1.8),marginHorizontal:20,marginTop:20 }}>
+              Error! {errorMsg}
+            </Text>
+          </View>
+        )
+        }
 
         <View style={{marginHorizontal: 20, marginVertical: 15, zIndex: 10}}>
           <DropDownPicker
@@ -339,11 +512,11 @@ const AddWorkOrders = ({navigation}) => {
             dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
             labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
             open={showDropDown1}
-            value={Group}
-            items={GroupList}
+            value={Item}
+            items={ItemList.map(item => ({ label: item.item_name, value: item.id }))}
             setOpen={setShowDropDown1}
-            setValue={setGroup}
-            setItems={setGroupList}
+            setValue={setItem}
+            setItems={setItemList}
           />
         </View>
 
@@ -388,11 +561,11 @@ const AddWorkOrders = ({navigation}) => {
             dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
             labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
             open={showDropDown2}
-            value={Group2}
-            items={GroupList2}
+            value={Issue}
+            items={IssueList.map(item => ({ label: item.condition_name, value: item.id }))}
             setOpen={setShowDropDown2}
-            setValue={setGroup2}
-            setItems={setGroupList2}
+            setValue={setIssue}
+            setItems={setIssueList}
           />
         </View>
         {/* ============================SELECT ISSUE TYPE============================= */}
@@ -436,11 +609,11 @@ const AddWorkOrders = ({navigation}) => {
             dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
             labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
             open={showDropDown3}
-            value={Group3}
-            items={GroupList3}
+            value={IssueType}
+            items={IssueTypeList}
             setOpen={setShowDropDown3}
-            setValue={setGroup3}
-            setItems={setGroupList3}
+            setValue={setIssueType}
+            // setItems={setIssueTypeList}
           />
         </View>
 
@@ -484,20 +657,29 @@ const AddWorkOrders = ({navigation}) => {
             textStyle={SIPCStyles.textSize}
             dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
             labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
-            open={showDropDown4}
-            value={Group4}
-            items={GroupList4}
-            setOpen={setShowDropDown4}
-            setValue={setGroup4}
-            setItems={setGroupList4}
-            onChangeSearchText={() => {
-              setGroup4(0);
-            }}
+            open={showLocationDropDown}
+            value={locationTypeId}
+            items={locationType}
+            setOpen={setLocationDropDown}
+            setValue={setLocationTypeId}
+            setItems={setLocationType}
           />
 
-          {Group4 == 0 ? (
-            ''
-          ) : Group4 == 1 ? (
+          {locationTypeId == 0 ? (
+            <TextInput
+              mode="flat"
+              //  label="Outlined input"
+              numberOfLines={2}
+              multiline={true}
+              placeholder="Location"
+              placeholderTextColor={'black'}
+              underlineColor="transparent"
+              theme={{colors: {primary: '#cccccc'}}}
+              style={[SIPCStyles.TextInput, {marginTop: 30}]}
+              onChangeText={value => setLocation(value)}
+            />
+          ) : locationTypeId == 1 ? (
+            
             <>
               {/* ----------------------------------SELECT BUILDING=================== */}
               <View style={{marginHorizontal: 0, marginTop: 30, zIndex: 8}}>
@@ -539,12 +721,12 @@ const AddWorkOrders = ({navigation}) => {
                   textStyle={SIPCStyles.textSize}
                   dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
                   labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
-                  open={showDropDown5}
-                  value={Group5}
-                  items={GroupList5}
-                  setOpen={setShowDropDown5}
-                  setValue={setGroup5}
-                  setItems={setGroupList5}
+                  open={showBuildingDropDown}
+                  value={buildingId}
+                  items={buildings.map(building => ({ label: building.building_name, value: building.id }))}
+                  setOpen={setShowBuildingDropDown}
+                  setValue={setBuildingId}
+                  setItems={setBuildings}
                 />
               </View>
               {/* ====================================SELECT FLOOR ===================== */}
@@ -587,12 +769,12 @@ const AddWorkOrders = ({navigation}) => {
                   textStyle={SIPCStyles.textSize}
                   dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
                   labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
-                  open={showDropDown6}
-                  value={Group6}
-                  items={GroupList6}
-                  setOpen={setShowDropDown6}
-                  setValue={setGroup6}
-                  setItems={setGroupList6}
+                  open={showFloorDropDown}
+                  value={floorId}
+                  items={floors.map(floor => ({ label: floor.name, value: floor.id }))}
+                  setOpen={setShowFloorDropDown}
+                  setValue={setFloorId}
+                  setItems={setFloors}
                 />
               </View>
               {/* ===============================SELECT ROOM==================== */}
@@ -635,30 +817,16 @@ const AddWorkOrders = ({navigation}) => {
                   textStyle={SIPCStyles.textSize}
                   dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
                   labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
-                  open={showDropDown7}
-                  value={Group7}
-                  items={GroupList7}
-                  setOpen={setShowDropDown7}
-                  setValue={setGroup7}
-                  setItems={setGroupList7}
+                  open={showRoomDropDown}
+                  value={roomId}
+                  items={rooms.map(room => ({ label: room.room_name, value: room.id }))}
+                  setOpen={setShowRoomDropDown}
+                  setValue={setRoomId}
+                  setItems={setRooms}
                 />
               </View>
             </>
-          ) : (
-            // ------------------------------------------------------------------------
-
-            <TextInput
-              mode="flat"
-              //  label="Outlined input"
-              numberOfLines={2}
-              multiline={true}
-              placeholder="Location"
-              placeholderTextColor={'black'}
-              underlineColor="transparent"
-              theme={{colors: {primary: '#cccccc'}}}
-              style={[SIPCStyles.TextInput, {marginTop: 30}]}
-            />
-          )}
+          ):(<></>)}
         </View>
 
         {/* ==========================TextInput===================== */}
@@ -673,6 +841,7 @@ const AddWorkOrders = ({navigation}) => {
             underlineColor="transparent"
             theme={{colors: {primary: '#cccccc'}}}
             style={SIPCStyles.TextInput}
+            onChangeText={value => setComment(value)}
           />
         </View>
         {/* ================================================================ */}
@@ -717,7 +886,7 @@ const AddWorkOrders = ({navigation}) => {
                   />
                   <TouchableOpacity
                     style={SIPCStyles.crossImage}
-                    onPress={() => deleteImage(index)}>
+                    onPress={() => deleteImage(index, item.name)}>
                     <Text style={{color: 'white', fontWeight: 'bold'}}>X</Text>
                   </TouchableOpacity>
                 </View>
@@ -738,8 +907,7 @@ const AddWorkOrders = ({navigation}) => {
             <View style={{borderWidth: 1, borderColor: '#e6e6e6'}} />
 
             <TouchableWithoutFeedback
-              onPress={() => navigation.navigate('Work Orders')}
-              style={{}}>
+              onPress={saveWorkOrder}>
               <Text
                 style={[
                   SIPCStyles.NormalFont,

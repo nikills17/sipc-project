@@ -119,8 +119,8 @@ const StartSurveys = ({ navigation, route }) => {
         {/* ============================SELECT ITEM============================= */}
 
         {error && (
-          <View style={{ width: '100%', alignItems: 'center', }}>
-            <Text style={{ color: 'red', fontFamily: 'Poppins-Medium', fontSize: responsiveScreenFontSize(1.8), }}>
+          <View style={{ width: '100%',}}>
+            <Text style={{ color: 'red', fontFamily: 'Poppins-Medium', fontSize: responsiveScreenFontSize(1.8),marginHorizontal:20,marginTop:20 }}>
               Error! {errorMsg}
             </Text>
           </View>

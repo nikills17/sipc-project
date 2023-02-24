@@ -273,7 +273,7 @@ const CheckBox = ({ answers, answer, setAnswer }) => {
                   fontFamily: 'Poppins-Medium',
                   marginLeft: 12,
                   marginRight: '18%',
-                  paddingVertical: 2, fontSize: responsiveScreenFontSize(1.8),
+                  paddingVertical: 2, fontSize: responsiveScreenFontSize(1.8),width:'60%',
                 }}>
                 {answers.answer}
               </Text>
@@ -288,9 +288,9 @@ const CheckBox = ({ answers, answer, setAnswer }) => {
                 {answers.comment_type!="noTextImage" ?
                   (
                     <>
+                          <View style={{justifyContent:'center'}}>
                       {checked == 1? (
                         <>
-                          <View style={{}}></View>
                           <TouchableWithoutFeedback
                             onPress={() => {
                               setChecked(!checked);
@@ -327,9 +327,10 @@ const CheckBox = ({ answers, answer, setAnswer }) => {
                                   onPress={() => {
                                     setChecked(!checked);
                                   }}>
+
                                   <Image
                                     source={require('../assets/msg.png')}
-                                    style={SIPCStyles.commentImage}
+                                    style={[SIPCStyles.commentImage,{right:0,position:'absolute',}]}
                                   />
                                 </TouchableWithoutFeedback>
                               </>    
@@ -342,7 +343,7 @@ const CheckBox = ({ answers, answer, setAnswer }) => {
                                     }}>
                                     <Image
                                       source={require('../assets/msg.png')}
-                                      style={SIPCStyles.commentImage}
+                                      style={[SIPCStyles.commentImage,{right:0,position:'absolute',}]}
                                     />
                                   </TouchableWithoutFeedback>
                                   
@@ -352,7 +353,7 @@ const CheckBox = ({ answers, answer, setAnswer }) => {
                                     }}>
                                     <Image
                                       source={require('../assets/img.png')}
-                                      style={SIPCStyles.commentImage}
+                                      style={[SIPCStyles.commentImage,{right:0,position:'absolute',}]}
                                     />
                                   </TouchableWithoutFeedback>
 
@@ -362,6 +363,7 @@ const CheckBox = ({ answers, answer, setAnswer }) => {
                           
                         </>
                       )}
+                      </View>
                     </>
                   ):
                   (<></>)

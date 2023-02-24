@@ -43,7 +43,7 @@ const WorkOrders = ({ navigation }) => {
           response => {
             setIsLoading(false);
             setData(response.data);
-            console.log(response.data);
+            // console.log(response.data);
           },
           error => {
             console.error(error);
@@ -81,7 +81,9 @@ const WorkOrders = ({ navigation }) => {
           )}
         />
         <TouchableWithoutFeedback
-          onPress={() => navigation.navigate('AddWorkOrders')}>
+          onPress={() => navigation.navigate('AddWorkOrders',{
+            selectedId: 0,
+          })}>
           <Image
             source={require('../assets/plusScreen.png')}
             style={SIPCStyles.headerManImage}
