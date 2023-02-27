@@ -29,6 +29,8 @@ import {
     responsiveScreenFontSize,
   } from 'react-native-responsive-dimensions';
   import { json } from 'stream/consumers';
+import RBSheet from "react-native-raw-bottom-sheet";
+
 
 const SavePendingSurvey = ({ navigation, route }) => {
     const [surveyData, setSurveyData] = useState([]);
@@ -41,6 +43,11 @@ const SavePendingSurvey = ({ navigation, route }) => {
     const { surveyId, surveySessionId, userSurveyResultId, userId } = route?.params;
 
     const finalAnswer = useRef([]);
+    const refRBSheet = useRef();
+    const refRBSheet1 = useRef();
+    const screenHeight = Dimensions.get("window").height;
+
+
     const Width = Dimensions.get('window').width;
     const Height = Dimensions.get('window').height;
     const deviceWidth = Dimensions.get('window').width;
@@ -1153,7 +1160,7 @@ return (
           </Text>
         </View>
 
-        <TouchableWithoutFeedback onPress={showModal}>
+        <TouchableWithoutFeedback onPress={() => refRBSheet.current.open()}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text style={[SIPCStyles.NormalFont, { color: '#199be2' }]}>
               Save/Submit
@@ -1184,7 +1191,7 @@ return (
       {/* ============================================================ */}
     </ScrollView>
     {/* ================================MODAL=================================== */}
-    <Modal visible={visible} transparent={true} animationType="slide">
+    {/* <Modal visible={visible} transparent={true} animationType="slide">
 
 
       <View
@@ -1257,7 +1264,7 @@ return (
           </TouchableOpacity>
           <Divider bold={true} style={{ marginLeft: 30, marginTop: 10 }} />
 
-          {/* <TouchableWithoutFeedback> */}
+       
           <TouchableOpacity
             onPress={showModal1}
             style={[SIPCStyles.healthImageView, { marginTop: 25 }]}>
@@ -1269,14 +1276,114 @@ return (
               Submit Survey
             </Text>
           </TouchableOpacity>
-          {/* </TouchableWithoutFeedback> */}
-
+         
           <Divider bold={true} style={{ marginLeft: 30, marginTop: 10 }} />
         </Surface>
       </View>
-    </Modal>
+    </Modal> */}
+
+    <RBSheet
+        ref={refRBSheet}
+        closeOnDragDown={false}
+        closeOnPressMask={false}
+        dragFromTopOnly={true}
+        height={screenHeight}
+        customStyles={{
+          wrapper: {
+            backgroundColor: "transparent"
+          },
+          draggableIcon: {
+            backgroundColor: "#000"
+          }
+        }}
+      >
+        <View
+          style={{
+            justifyContent: 'center',
+            backgroundColor: '#e2e0eb',
+            borderBottomLeftRadius: 20,
+            borderBottomRightRadius: 20,
+            paddingBottom: 20,
+            // top: hp('11%'),
+          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              backgroundColor: '#e2e0eb',
+              paddingTop: 15,
+              paddingHorizontal: 15,
+            }}>
+            <TouchableWithoutFeedback onPress={() => refRBSheet.current.close()}>
+              <Text style={[SIPCStyles.NormalFont, {}]}>Cancel</Text>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback onPress={() => refRBSheet.current.close()}>
+              <Text style={[SIPCStyles.NormalFont, { color: '#199be2' }]}>
+                Done
+              </Text>
+            </TouchableWithoutFeedback>
+          </View>
+          <Surface
+            elevation={4}
+            style={{
+              padding: 15,
+              backgroundColor: 'white',
+              borderRadius: 10,
+              marginTop: 10,
+              marginHorizontal: 30,
+            }}>
+
+            {error && (
+              <View
+                style={{
+                  width: '100%',
+
+                }}>
+                <Text
+                  style={{
+                    color: 'red',
+                    fontFamily: 'Poppins-Medium', fontSize: responsiveScreenFontSize(1.8), marginHorizontal: 20
+                  }}>
+                  Error! {errorMsg}
+                </Text>
+              </View>
+            )}
+
+            <TouchableOpacity
+              onPress={saveSurvey}
+              style={SIPCStyles.healthImageView}>
+              <Image
+                source={require('../assets/save.png')}
+                style={SIPCStyles.MainBuilding}
+              />
+              <Text style={[SIPCStyles.NormalFont, { paddingLeft: 10 }]}>
+                Save
+              </Text>
+            </TouchableOpacity>
+            <Divider bold={true} style={{ marginLeft: 30, marginTop: 10 }} />
+
+
+            <TouchableOpacity
+             onPress={() => refRBSheet1.current.open()}
+              style={[SIPCStyles.healthImageView, { marginTop: 25 }]}>
+              <Image
+                source={require('../assets/submit.png')}
+                style={SIPCStyles.MainBuilding}
+              />
+              <Text style={[SIPCStyles.NormalFont, { paddingLeft: 10 }]}>
+                Submit Survey
+              </Text>
+            </TouchableOpacity>
+
+
+            <Divider bold={true} style={{ marginLeft: 30, marginTop: 10 }} />
+          </Surface>
+        </View>
+      </RBSheet>
+
+
     {/* ===============================================Submit Modal============== */}
-    <Modal visible={visible1} transparent={true} animationType="slide">
+    {/* <Modal visible={visible1} transparent={true} animationType="slide">
       <View
         style={{
           justifyContent: 'center',
@@ -1284,7 +1391,7 @@ return (
           borderBottomLeftRadius: 20,
           borderBottomRightRadius: 20,
           paddingBottom: 20,
-          // top: hp('11%'),
+    
         }}>
         <View
           style={{
@@ -1322,7 +1429,7 @@ return (
           <TextInput
             onChangeText={value => setFirstName(value)}
             mode="flat"
-            //  label="Outlined input
+           
             placeholder="First Name"
             placeholderTextColor={'black'}
             underlineColor="transparent"
@@ -1333,7 +1440,7 @@ return (
           <TextInput
             onChangeText={value => setLastName(value)}
             mode="flat"
-            //  label="Outlined inpu
+           
             placeholder="Last Name"
             placeholderTextColor={'black'}
             underlineColor="transparent"
@@ -1360,7 +1467,112 @@ return (
 
         </Surface>
       </View>
-    </Modal>
+    </Modal> */}
+
+
+
+    <RBSheet
+        ref={refRBSheet1}
+        closeOnDragDown={false}
+        closeOnPressMask={false}
+        dragFromTopOnly={true}
+        height={screenHeight}
+        customStyles={{
+          wrapper: {
+            backgroundColor: "transparent"
+          },
+          draggableIcon: {
+            backgroundColor: "#000"
+          }
+        }}
+      >
+  <View
+          style={{
+            justifyContent: 'center',
+            backgroundColor: '#e2e0eb',
+            borderBottomLeftRadius: 20,
+            borderBottomRightRadius: 20,
+            paddingBottom: 20,
+           
+          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              backgroundColor: '#e2e0eb',
+              padding: 25, backgroundColor: '#1281ca'
+            }}>
+            <Text style={[SIPCStyles.NormalFont, { textAlign: 'center', color: 'white', }]}>Survey Completed By</Text>
+          </View>
+
+          <Surface
+            elevation={4}
+            style={{
+              padding: 15,
+              backgroundColor: 'white',
+            }}>
+
+            {error && (
+              <View
+                style={{
+                  width: '100%',
+
+                }}>
+                <Text
+                  style={{
+                    color: 'red',
+                    fontFamily: 'Poppins-Medium', fontSize: responsiveScreenFontSize(1.8), marginHorizontal: 20
+                  }}>
+                  Error! {errorMsg}
+                </Text>
+              </View>
+            )}
+
+            <TextInput
+              onChangeText={value => setFirstName(value)}
+              mode="flat"
+            
+              placeholder="First Name"
+              placeholderTextColor={'black'}
+              underlineColor="transparent"
+              theme={{ colors: { primary: '#cccccc' } }}
+              style={[SIPCStyles.TextInput, { height: Height / 18, marginTop: 15, borderRadius: 0 }]}
+            />
+
+            <TextInput
+              onChangeText={value => setLastName(value)}
+              mode="flat"
+             
+              placeholder="Last Name"
+              placeholderTextColor={'black'}
+              underlineColor="transparent"
+              theme={{ colors: { primary: '#cccccc' } }}
+              style={[SIPCStyles.TextInput, { height: Height / 18, marginTop: 25, borderRadius: 0 }]}
+            />
+
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end', marginVertical: 15
+              }}>
+              <TouchableWithoutFeedback onPress={() => refRBSheet1.current.close()} style={{ borderWidth: 1 }}>
+                <Text style={[SIPCStyles.NormalFont, { marginRight: 15 }]}>Cancel</Text>
+              </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback onPress={() => refRBSheet1.current.close()}>
+                <Text style={[SIPCStyles.NormalFont, { color: '#199be2', }]}>
+                  Continue
+                </Text>
+              </TouchableWithoutFeedback>
+            </View>
+
+
+
+          </Surface>
+        </View>
+
+
+
+      </RBSheet>
 
     {/* ============================================================= */}
 
