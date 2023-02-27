@@ -208,14 +208,26 @@ const SavePendingSurvey = ({navigation, route}) => {
   };
   //Here answers is the for the item being used in check box and answer is the state which contains all the answer for the particular question
   const CheckBox = ({answers, answer, setAnswer}) => {
-    var answerComment = '';
-    if (answers.comment != undefined && answers.comment != null) {
-      answerComment = answers.comment;
-    }
-    const [checked, setChecked] = useState(false);
-    const [comment, setComment] = useState(answerComment);
+    const [checked, setChecked] = useState(answers.isSelected === '1');
+    const [comment, setComment] = useState(answers.comment);
     const [completed, setCompleted] = useState(false);
-    const [imagePath, setImagePath] = useState([]);
+    const [imagePath, setImagePath] = useState(
+      answers.isSelected === '1' ? answers.images.split(',') : '',
+    );
+
+    useEffect(() => {
+      if (answers.isSelected === '1') {
+        let answerObject = {
+          id: answers.answer_id.toString(),
+          score: answers.score.toString(),
+          is_comment_required: answers.is_comment_required.toString(),
+          answer_name: answers.answer.toString(),
+          comment: answers.comment,
+          images: answers.images,
+        };
+        setAnswer(answer.push(answerObject));
+      }
+    }, []);
 
     return (
       <View
@@ -400,36 +412,6 @@ const SavePendingSurvey = ({navigation, route}) => {
               answers.comment_type !== 'noTextImage' &&
               !completed && ( //TODO: Need to add this same conditions for radio box
                 <View>
-                  {(answers.comment_type === 'textWithImageOptional' ||
-                    answers.comment_type === 'textWithImageRequired') && (
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-around',
-                        elevation: 16,
-                      }}>
-                      <TouchableWithoutFeedback
-                        onPress={() => openCamera(imagePath, setImagePath)}>
-                        <Image
-                          source={require('../assets/camera.png')}
-                          style={SIPCStyles.cameraImage}
-                        />
-                      </TouchableWithoutFeedback>
-                      <View
-                        style={{
-                          borderWidth: 1,
-                          borderColor: '#e6e6e6',
-                        }}
-                      />
-
-                      <TouchableWithoutFeedback onPress={pickImage}>
-                        <Image
-                          source={require('../assets/gallery.png')}
-                          style={SIPCStyles.cameraImage}
-                        />
-                      </TouchableWithoutFeedback>
-                    </View>
-                  )}
                   {answers.comment_type === 'textWithImageRequired' && (
                     <Text
                       style={{
@@ -509,19 +491,15 @@ const SavePendingSurvey = ({navigation, route}) => {
                                 flexWrap: 'wrap',
                                 flex: 1,
                               }}>
-                              <ScrollView
-                                nestedScrollEnabled={true}
-                                horizontal={true}>
+                              {imagePath[0] !== '' && (
                                 <FlatList
-                                  numColumns={numColumns}
-                                  data={images}
-                                  keyExtractor={(item, index) =>
-                                    index.toString()
-                                  }
+                                  horizontal
+                                  data={imagePath}
+                                  keyExtractor={(item, index) => index}
                                   renderItem={({item, index}) => (
                                     <View style={{position: 'relative'}}>
                                       <Image
-                                        source={{uri: item.path}}
+                                        source={{uri: item}}
                                         style={SIPCStyles.CameraClickImage}
                                       />
                                       <TouchableOpacity
@@ -538,7 +516,7 @@ const SavePendingSurvey = ({navigation, route}) => {
                                     </View>
                                   )}
                                 />
-                              </ScrollView>
+                              )}
                             </View>
                           </View>
                         </>
@@ -626,7 +604,7 @@ const SavePendingSurvey = ({navigation, route}) => {
     );
     const [completed, setCompleted] = useState(false);
     const [imagePath, setImagePath] = useState(
-      answers.isSelected === '1' ? answers.images.split(',') : [],
+      answers.isSelected === '1' ? answers.images.split(',') : '',
     );
 
     return (
@@ -893,8 +871,8 @@ const SavePendingSurvey = ({navigation, route}) => {
               score: answer.score.toString(),
               is_comment_required: answer.is_comment_required.toString(),
               answer_name: answer.answer.toString(),
-              comment: '',
-              images: [],
+              comment: answer.comment,
+              images: answer.images,
             },
           ],
         };
