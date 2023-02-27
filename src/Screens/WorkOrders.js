@@ -1,4 +1,4 @@
-import { View, Alert, Image, ScrollView, TouchableWithoutFeedback, StatusBar, } from 'react-native';
+import { View, Alert, Image, ScrollView, TouchableWithoutFeedback, StatusBar,Dimensions } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Button, Card, Searchbar, TextInput, Surface, Divider, Text, } from 'react-native-paper';
 import Icon2 from 'react-native-vector-icons/Entypo';
@@ -17,6 +17,9 @@ import Loader from '../component/activityindicator';
 const WorkOrders = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const onChangeSearch = query => setSearchQuery(query);
+
+  const Width = Dimensions.get('window').width;
+  const Height = Dimensions.get('window').height;
 
   const [Active, setActive] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,7 +66,7 @@ const WorkOrders = ({ navigation }) => {
       <Surface style={SIPCStyles.headerSurface}>
         <Image
           source={require('../assets/man.png')}
-          style={SIPCStyles.headerManImage}
+          style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}
         />
 
         <Searchbar

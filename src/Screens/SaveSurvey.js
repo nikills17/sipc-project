@@ -123,8 +123,8 @@ const SaveSurvey = ({ navigation, route }) => {
       data.append("org_id", "1");
       data.append("question_id", answers.question_id);
       data.append("answer_id", answers.answer_id);
-      data.append("survey_session_id", surveySessionId == undefined?'':surveySessionId);
-      data.append("user_survey_result_id", userSurveyResultId == undefined?0:userSurveyResultId);
+      data.append("survey_session_id", surveySessionId == undefined ? '' : surveySessionId);
+      data.append("user_survey_result_id", userSurveyResultId == undefined ? 0 : userSurveyResultId);
 
       data.append("file", {
         name: "image.png",
@@ -132,6 +132,7 @@ const SaveSurvey = ({ navigation, route }) => {
         type: "image/png",
         uri: Platform.OS === "android" ? imagePath : imagePath.replace("file://", "")
       });
+
 
       API.instance
         .upload(
@@ -142,10 +143,10 @@ const SaveSurvey = ({ navigation, route }) => {
           response => {
             surveySessionId = response.survey_session_id;
             userSurveyResultId = response.user_survey_result_id;
-            
+
             var imageName = response.image_name;
 
-            imageNames.push({"image":imageName});
+            imageNames.push({ "image": imageName });
             setImageNames([...imageNames]);
 
 
@@ -273,15 +274,17 @@ const SaveSurvey = ({ navigation, route }) => {
                 flexDirection: 'row',
                 borderWidth: 1,
                 borderColor: '#CCCCCC',
-                borderRadius: 12,
+                // borderRadius: 12,
                 marginTop: 15,
                 alignItems: 'center',
                 paddingRight: 12,
                 overflow: 'hidden',
                 height: Height / 12,
                 marginHorizontal: 20,
-                borderBottomRightRadius: checked == 1 ? 0 : 12,
-                borderBottomLeftRadius: checked == 1 ? 0 : 12,
+                borderBottomRightRadius: checked == 1 && answers.comment_type != "noTextImage" ? 0 : 12,
+                borderBottomLeftRadius: checked == 1 && answers.comment_type != "noTextImage" ? 0 : 12,
+                borderTopRightRadius: 12,
+                borderTopLeftRadius: 12
               }}
               onPress={() => {
                 var elementPos = [...answer].map(function (x) { return x.id; }).indexOf(answers.answer_id.toString());
@@ -462,10 +465,7 @@ const SaveSurvey = ({ navigation, route }) => {
                                   borderWidth: 1,
                                   paddingBottom: 10,
                                   borderColor: '#ccc',
-                                  borderBottomLeftRadius: 10,
-                                  borderBottomRightRadius: 10,
-                                  borderTopLeftRadius: 0,
-                                  borderTopRightRadius: 0,
+
                                 }}>
 
                                 <Card style={SIPCStyles.CameraImageCard}>
@@ -631,12 +631,10 @@ const SaveSurvey = ({ navigation, route }) => {
           // overflow: 'hidden',
           height: Height / 12,
 
-          borderRadius: 10,
-          borderBottomRightRadius:
-            answers.comment_type !== "noTextImage" ? (answer ? 0 : 10) : 0,
-
-          borderBottomLeftRadius:
-            answers.comment_type !== "noTextImage" ? (answer ? 0 : 10) : 10,
+          borderBottomRightRadius: answers.comment_type != "noTextImage" && answer && answer.answer_id == answers.answer_id ? 0 : 12,
+          borderBottomLeftRadius: answers.comment_type != "noTextImage" && answer && answer.answer_id == answers.answer_id ? 0 : 12,
+          borderTopRightRadius: 12,
+          borderTopLeftRadius: 12
 
         }}>
           <View style={{ paddingHorizontal: 10 }}>
@@ -770,10 +768,10 @@ const SaveSurvey = ({ navigation, route }) => {
                         borderWidth: 1,
                         paddingBottom: 10,
                         borderColor: '#ccc',
-                        borderBottomLeftRadius: 10,
-                        borderBottomRightRadius: 10,
-                        borderTopLeftRadius: 0,
-                        borderTopRightRadius: 0,
+                        // borderBottomLeftRadius: 10,
+                        // borderBottomRightRadius: 10,
+                        // borderTopLeftRadius: 0,
+                        // borderTopRightRadius: 0,
                         marginHorizontal: 20
                       }}>
                       <Card style={SIPCStyles.CameraImageCard}>
@@ -1096,13 +1094,13 @@ const SaveSurvey = ({ navigation, route }) => {
       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
       surveyId: surveyId,
       user_id: '1',
-      user_survey_result_id: userSurveyResultId == undefined?0:userSurveyResultId,
+      user_survey_result_id: userSurveyResultId == undefined ? 0 : userSurveyResultId,
       org_id: orgId,
       org_name: orgName,
       building_id: buildingId,
       building_name: buildingName,
       request_type: '0',
-      survey_session_id: surveySessionId == undefined?'':surveySessionId,
+      survey_session_id: surveySessionId == undefined ? '' : surveySessionId,
       first_name: '',
       last_name: '',
       questions: finalAnswer.current,
@@ -1137,8 +1135,8 @@ const SaveSurvey = ({ navigation, route }) => {
       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
       surveyId: surveyId,
       user_id: '1',
-      user_survey_result_id: userSurveyResultId == undefined?0:userSurveyResultId,
-      survey_session_id: surveySessionId == undefined?'':surveySessionId,
+      user_survey_result_id: userSurveyResultId == undefined ? 0 : userSurveyResultId,
+      survey_session_id: surveySessionId == undefined ? '' : surveySessionId,
       org_id: orgId,
       org_name: orgName,
       building_id: buildingId,

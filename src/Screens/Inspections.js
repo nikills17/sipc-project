@@ -111,10 +111,13 @@ const Inspections = ({ navigation }) => {
 
       {/* ====================================== */}
       <Surface style={SIPCStyles.headerSurface}>
+      <TouchableOpacity >
         <Image
           source={require('../assets/man.png')}
-          style={SIPCStyles.headerManImage}
+          style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}
         />
+
+      </TouchableOpacity>
 
         <Searchbar
           placeholder="Search Inspection"

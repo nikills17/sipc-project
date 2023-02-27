@@ -341,6 +341,14 @@ const SIPCStyles = StyleSheet.create({
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
+  LoginTextInput: {
+    fontSize: responsiveScreenFontSize(1.8),
+    fontFamily: Poppins,
+    backgroundColor: 'white',
+    // borderBottomWidth: .1,
+    borderColor: '#ccc',
+    width:"90%"
+  },
   TextInput1: {
     fontSize: responsiveScreenFontSize(1.5),
     fontFamily: Poppins,
@@ -440,7 +448,7 @@ const SIPCStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderColor: '#ccc',
-    borderWidth: 1,
+    borderBottomWidth: 1,
     borderRadius: 10,
     paddingHorizontal: 10,
     marginHorizontal: 10,

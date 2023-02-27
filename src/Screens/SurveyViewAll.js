@@ -76,7 +76,7 @@ const SurveyViewAll = ({navigation}) => {
       <Surface style={SIPCStyles.headerSurface}>
         <Image
           source={require('../assets/man.png')}
-          style={SIPCStyles.headerManImage}
+          style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}
         />
 
         <Searchbar

@@ -28,6 +28,8 @@ import Loader from '../component/activityindicator';
 const Surveys = ({navigation}) => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const onChangeSearch = query => setSearchQuery(query);
+  const Width = Dimensions.get('window').width;
+  const Height = Dimensions.get('window').height;
 
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -85,7 +87,7 @@ const Surveys = ({navigation}) => {
         <TouchableWithoutFeedback>
           <Image
             source={require('../assets/man.png')}
-            style={SIPCStyles.headerManImage}
+            style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}
           />
         </TouchableWithoutFeedback>
         <Searchbar

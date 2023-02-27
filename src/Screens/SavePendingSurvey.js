@@ -230,15 +230,16 @@ const CheckBox = ({ answers, answer, setAnswer }) => {
               flexDirection: 'row',
               borderWidth: 1,
               borderColor: '#CCCCCC',
-              borderRadius: 12,
               marginTop: 15,
               alignItems: 'center',
               paddingRight: 12,
               overflow: 'hidden',
               height: Height / 12,
               marginHorizontal: 20,
-              borderBottomRightRadius: checked == 1 ? 0 : 12,
-              borderBottomLeftRadius: checked == 1 ? 0 : 12,
+              borderBottomRightRadius: checked == 1 && answers.comment_type != "noTextImage" ? 0 : 12,
+                borderBottomLeftRadius: checked == 1 && answers.comment_type != "noTextImage" ? 0 : 12,
+                borderTopRightRadius: 12,
+                borderTopLeftRadius: 12
             }}
             onPress={() => {
               var elementPos = [...answer].map(function (x) { return x.id; }).indexOf(answers.answer_id.toString());
@@ -451,10 +452,10 @@ const CheckBox = ({ answers, answer, setAnswer }) => {
                             borderWidth: 1,
                             paddingBottom: 10,
                             borderColor: '#ccc',
-                            borderBottomLeftRadius: 10,
-                            borderBottomRightRadius: 10,
-                            borderTopLeftRadius: 0,
-                            borderTopRightRadius: 0,
+                            // borderBottomLeftRadius: 10,
+                            // borderBottomRightRadius: 10,
+                            // borderTopLeftRadius: 0,
+                            // borderTopRightRadius: 0,
                           }}>
 
                           <Card style={SIPCStyles.CameraImageCard}>
