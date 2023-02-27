@@ -28,6 +28,7 @@
     "react-native-gesture-handler": "^2.8.0",
     "react-native-image-crop-picker": "^0.38.0",
     "react-native-image-picker": "^5.0.1",
+    "react-native-mmkv": "^2.6.2",
     "react-native-modal-datetime-picker": "^14.0.1",
     "react-native-paper": "^5.1.2",
     "react-native-permissions": "^3.6.1",
