@@ -123,8 +123,8 @@ const SaveSurvey = ({ navigation, route }) => {
       data.append("org_id", "1");
       data.append("question_id", answers.question_id);
       data.append("answer_id", answers.answer_id);
-      data.append("survey_session_id", surveySessionId);
-      data.append("user_survey_result_id", userSurveyResultId);
+      data.append("survey_session_id", surveySessionId == undefined?'':surveySessionId);
+      data.append("user_survey_result_id", userSurveyResultId == undefined?0:userSurveyResultId);
 
       data.append("file", {
         name: "image.png",
@@ -1096,13 +1096,13 @@ const SaveSurvey = ({ navigation, route }) => {
       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
       surveyId: surveyId,
       user_id: '1',
-      user_survey_result_id: userSurveyResultId,
+      user_survey_result_id: userSurveyResultId == undefined?0:userSurveyResultId,
       org_id: orgId,
       org_name: orgName,
       building_id: buildingId,
       building_name: buildingName,
       request_type: '0',
-      survey_session_id: surveySessionId,
+      survey_session_id: surveySessionId == undefined?'':surveySessionId,
       first_name: '',
       last_name: '',
       questions: finalAnswer.current,
@@ -1137,13 +1137,13 @@ const SaveSurvey = ({ navigation, route }) => {
       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
       surveyId: surveyId,
       user_id: '1',
-      user_survey_result_id: userSurveyResultId,
+      user_survey_result_id: userSurveyResultId == undefined?0:userSurveyResultId,
+      survey_session_id: surveySessionId == undefined?'':surveySessionId,
       org_id: orgId,
       org_name: orgName,
       building_id: buildingId,
       building_name: buildingName,
       request_type: '1',
-      survey_session_id: surveySessionId,
       first_name: firstName,
       last_name: lastName,
       questions: finalAnswer.current,
