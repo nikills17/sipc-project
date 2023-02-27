@@ -35,8 +35,8 @@ const SaveSurvey = ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
   const [errorMsg, setErrorMessage] = useState();
-  const [surveySessionId, setSurveySessionId] = useState('');
-  const [userSurveyResultId, setUserSurveyResultId] = useState(0);
+  var surveySessionId = '';
+  var userSurveyResultId = 0;
 
 
   const { orgId, orgName, buildingId, buildingName, surveyId } = route?.params;
@@ -123,8 +123,8 @@ const SaveSurvey = ({ navigation, route }) => {
       data.append("org_id", "1");
       data.append("question_id", answers.question_id);
       data.append("answer_id", answers.answer_id);
-      data.append("survey_session_id", surveySessionId == undefined ? '' : surveySessionId.toString());
-      data.append("user_survey_result_id", userSurveyResultId == undefined ? 0 : userSurveyResultId.toString());
+      data.append("survey_session_id", surveySessionId);
+      data.append("user_survey_result_id", userSurveyResultId);
 
       data.append("file", {
         name: "image.png",
@@ -140,12 +140,12 @@ const SaveSurvey = ({ navigation, route }) => {
         )
         .then(
           response => {
-
-            setSurveySessionId(response.survey_session_id);
-            setUserSurveyResultId(response.user_survey_result_id);
+            surveySessionId = response.survey_session_id;
+            userSurveyResultId = response.user_survey_result_id;
+            
             var imageName = response.image_name;
 
-            imageNames.push({ imageName });
+            imageNames.push({"image":imageName});
             setImageNames([...imageNames]);
 
 
@@ -625,15 +625,18 @@ const SaveSurvey = ({ navigation, route }) => {
         <View style={{
           flexDirection: 'row', alignItems: 'center', marginHorizontal: deviceWidth > 500 ? 50 : 20, marginVertical: deviceWidth > 500 ? 5 : 0, borderWidth: 1,
           borderColor: '#CCCCCC',
-          borderRadius: 10,
           marginTop: 15,
           alignItems: 'center',
           // paddingRight: 12,
           // overflow: 'hidden',
           height: Height / 12,
 
-          borderBottomRightRadius: answer ? 0 : 10,
-          borderBottomLeftRadius: answer ? 0 : 10,
+          borderRadius: 10,
+          borderBottomRightRadius:
+            answers.comment_type !== "noTextImage" ? (answer ? 0 : 10) : 0,
+
+          borderBottomLeftRadius:
+            answers.comment_type !== "noTextImage" ? (answer ? 0 : 10) : 10,
 
         }}>
           <View style={{ paddingHorizontal: 10 }}>
@@ -1399,7 +1402,7 @@ const SaveSurvey = ({ navigation, route }) => {
 
 
             <TouchableOpacity
-             onPress={() => refRBSheet1.current.open()}
+              onPress={() => refRBSheet1.current.open()}
               style={[SIPCStyles.healthImageView, { marginTop: 25 }]}>
               <Image
                 source={require('../assets/submit.png')}
@@ -1521,14 +1524,14 @@ const SaveSurvey = ({ navigation, route }) => {
           }
         }}
       >
-  <View
+        <View
           style={{
             justifyContent: 'center',
             backgroundColor: '#e2e0eb',
             borderBottomLeftRadius: 20,
             borderBottomRightRadius: 20,
             paddingBottom: 20,
-           
+
           }}>
           <View
             style={{
@@ -1566,7 +1569,7 @@ const SaveSurvey = ({ navigation, route }) => {
             <TextInput
               onChangeText={value => setFirstName(value)}
               mode="flat"
-            
+
               placeholder="First Name"
               placeholderTextColor={'black'}
               underlineColor="transparent"
@@ -1577,7 +1580,7 @@ const SaveSurvey = ({ navigation, route }) => {
             <TextInput
               onChangeText={value => setLastName(value)}
               mode="flat"
-             
+
               placeholder="Last Name"
               placeholderTextColor={'black'}
               underlineColor="transparent"
