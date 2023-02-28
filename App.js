@@ -50,7 +50,7 @@ const MyTabScreen = () => {
         ],
       }}>
       <Tab.Screen
-        name="Dashboard"
+        name="Dashboards"
         component={DashboardScreen}
         options={{
           tabBarLabel: 'Dashboard',
