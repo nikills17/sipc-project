@@ -5,9 +5,9 @@ import {
   ScrollView,
   Dimensions,
   TouchableWithoutFeedback,
-  StatusBar,TouchableOpacity,FlatList
+  StatusBar, TouchableOpacity, FlatList
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button,
   Card,
@@ -20,19 +20,19 @@ import {
 import SIPCStyles from './styles';
 import Icon2 from 'react-native-vector-icons/Entypo';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
-import {Col, Grid} from 'react-native-easy-grid';
+import { Col, Grid } from 'react-native-easy-grid';
 import SurveyViewAllBox from '../component/surveyviewallbox';
 import API from '../utility/api';
-import {useFocusEffect} from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import Loader from '../component/activityindicator';
 import { responsiveScreenHeight, responsiveScreenWidth, responsiveScreenFontSize } from 'react-native-responsive-dimensions';
 
 import { MMKV } from 'react-native-mmkv'
 export const storage = new MMKV();
 
-const SurveyViewAll = ({navigation}) => {
+const SurveyViewAll = ({ navigation }) => {
   const jsonUser = storage.getString('user')
-  if(jsonUser == null || jsonUser == ''){
+  if (jsonUser == null || jsonUser == '') {
     navigation.navigate("Login");
   }
   const user = JSON.parse(jsonUser);
@@ -81,9 +81,8 @@ const SurveyViewAll = ({navigation}) => {
     }, [Active]),
   );
 
-  const renderItem = ({ item,navigation,index }) => (
-    <SurveyViewAllBox data={item} key={index} navigation={navigation} Active={Active}/>
-
+  const renderItem = ({ item, navigation, index }) => (
+    <SurveyViewAllBox data={item} key={index} navigation={navigation} Active={Active} />
   );
 
 
@@ -93,14 +92,14 @@ const SurveyViewAll = ({navigation}) => {
 
       {/* ====================================== */}
       <Surface style={SIPCStyles.headerSurface}>
-      {
-        user.profile_picture!=''?
-          <TouchableOpacity>
-            <Image source={{uri: user.profile_picture}} style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}/>
-        </TouchableOpacity>
-        :
-          <Image source={require('../assets/man.png')} style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}/>
-      }
+        {
+          user.profile_picture != '' ?
+            <TouchableOpacity>
+              <Image source={{ uri: user.profile_picture }} style={[SIPCStyles.headerManImage, { borderRadius: 100, width: Width / 10, height: Height / 20 }]} />
+            </TouchableOpacity>
+            :
+            <Image source={require('../assets/man.png')} style={[SIPCStyles.headerManImage, { borderRadius: 100, width: Width / 10, height: Height / 20 }]} />
+        }
 
         <Searchbar
           placeholder="Search Survey"
@@ -112,7 +111,7 @@ const SurveyViewAll = ({navigation}) => {
             <SimpleLineIcons
               name="magnifier"
               size={20}
-              style={{color: 'grey'}}
+              style={{ color: 'grey' }}
             />
           )}
         />
@@ -148,7 +147,7 @@ const SurveyViewAll = ({navigation}) => {
           <Text
             style={[
               SIPCStyles.NormalFont,
-              {textAlign: 'center', color: Active == 1 ? '#1485cc' : '#525252'},
+              { textAlign: 'center', color: Active == 1 ? '#1485cc' : '#525252' },
             ]}>
             Completed
           </Text>
@@ -168,7 +167,7 @@ const SurveyViewAll = ({navigation}) => {
           <Text
             style={[
               SIPCStyles.NormalFont,
-              {color: Active == 0 ? '#1485cc' : '#525252', textAlign: 'center'},
+              { color: Active == 0 ? '#1485cc' : '#525252', textAlign: 'center' },
             ]}>
             Pending
           </Text>
@@ -176,49 +175,66 @@ const SurveyViewAll = ({navigation}) => {
       </View>
       <Divider bold={true} />
 
-      {/* <ScrollView>
+
+
+{/* ===================================================================================== */}
+      <ScrollView>
+        {isLoading ? (
+          <Loader />
+        ) : totalCount > 0 ? (
+          <>
+            {data.map((item, index) => (
+              <SurveyViewAllBox data={item} key={index} navigation={navigation} Active={Active} />
+            ))}
+          </>
+        ) : (
+          <>
+            <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
+              <Image source={require('../assets/no-survey-found.png')} style={{ height: Height / 3.5, width: Width / 2, resizeMode: 'contain' }} />
+              <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>{Active == 1 ? "No Completed Survey" : "No Pending Survey"}</Text>
+              <Text style={{ textAlign: 'center', fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular' }}>{Active == 1 ? "No Completed Survey were found yet." : "No Pending Survey were found yet."}</Text>
+            </View>
+          </>
+        )}
+
+      </ScrollView>
+
+
+
+
+      {/* <View>
         {isLoading ? (
           <Loader />
         ) : (
           <>
-            {data.map((item, index) => {
-              return (
-                <SurveyViewAllBox data={item} key={index} navigation={navigation} Active={Active}/>
-              );
-            })}
+            {totalCount > 0 ? (
+               data.map((item, index) => {
+                  return (
+                    <SurveyViewAllBox
+                      data={item}
+                      key={index}
+                      navigation={navigation}
+                      Active={Active}
+                    />
+                  )
+                  }
+               )
+            ) :
+              (
+                <>
+                  <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
+                    <Image source={require('../assets/no-survey-found.png')} style={{ height: Height / 3.5, width: Width / 2, resizeMode: 'contain' }} />
+                    <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>{Active == 1 ? "No Completed Survey" : "No Pending Survey"}</Text>
+                    <Text style={{ textAlign: 'center', fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular' }}>{Active == 1 ? "No Completed Survey were found yet." : "No Pending Survey were found yet."}</Text>
+                  </View>
+                </>
+              )
+
+            }
           </>
         )}
-    
-      </ScrollView> */}
+      </View> */}
 
-
-
-      <View>
-          {isLoading ? (
-            <Loader />
-          ) : (
-            <>
-              {totalCount > 0 ? (
-                <FlatList
-                  data={data}
-                  renderItem={renderItem}
-                  // keyExtractor={keyExtractor}
-                />
-              ) :
-              (   
-                  <>
-                    <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
-                      <Image source={require('../assets/no-survey-found.png')} style={{ height: Height /3.5, width: Width / 2, resizeMode:'contain' }} />
-                      <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>{Active == 1?"No Completed Survey":"No Pending Survey"}</Text>
-                      <Text style={{ textAlign: 'center', fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular' }}>{Active == 1?"No Completed Survey were found yet.":"No Pending Survey were found yet."}</Text>
-                    </View>
-                  </>
-                )
-              
-              }
-            </>
-          )}
-        </View>
 
 
 
