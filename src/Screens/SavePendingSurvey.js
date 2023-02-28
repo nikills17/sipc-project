@@ -739,11 +739,7 @@ const SavePendingSurvey = ({navigation, route}) => {
             )}
 
             {/* ====================================== */}
-
-            {answers.comment_type == 'textWithImageOptional' ||
-            answers.comment_type == 'textWithImageRequired' ? (
-              <>
-                <View
+            <View
                   style={{
                     borderWidth: 1,
                     paddingBottom: 10,
@@ -754,6 +750,10 @@ const SavePendingSurvey = ({navigation, route}) => {
                     borderTopRightRadius: 0,
                     marginHorizontal: 20,
                   }}>
+            {answers.comment_type == 'textWithImageOptional' ||
+            answers.comment_type == 'textWithImageRequired' ? (
+              <>
+                <View>
                   <Card style={SIPCStyles.CameraImageCard}>
                     <View
                       style={{
@@ -843,7 +843,7 @@ const SavePendingSurvey = ({navigation, route}) => {
                 )}
               />
             )}
-
+</View>
             {/* ====================================== */}
           </View>
         )}
