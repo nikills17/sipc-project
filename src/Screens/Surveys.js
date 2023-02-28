@@ -6,7 +6,7 @@ import {
   Dimensions,
   TouchableOpacity,
   StatusBar,
-  TouchableWithoutFeedback,
+  TouchableWithoutFeedback,FlatList
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {
@@ -20,12 +20,24 @@ import {
 } from 'react-native-paper';
 import SIPCStyles from './styles';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
-import SurveyBox from '../component/surveybox';
 import API from '../utility/api';
 import {useFocusEffect} from '@react-navigation/native';
 import Loader from '../component/activityindicator';
+import { responsiveScreenHeight, responsiveScreenWidth, responsiveScreenFontSize } from 'react-native-responsive-dimensions';
+import SurveyBox from '../component/surveybox';
+
+
+import { MMKV } from 'react-native-mmkv'
+export const storage = new MMKV();
 
 const Surveys = ({navigation}) => {
+
+  const jsonUser = storage.getString('user')
+  if(jsonUser == null || jsonUser == ''){
+    navigation.navigate("Login");
+  }
+  const user = JSON.parse(jsonUser);
+
   const [searchQuery, setSearchQuery] = React.useState('');
   const onChangeSearch = query => setSearchQuery(query);
   const Width = Dimensions.get('window').width;
@@ -33,14 +45,16 @@ const Surveys = ({navigation}) => {
 
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [totalCount, setTotalCount] = useState();
+
 
   const params = JSON.stringify({
     pageSize: '10',
     pageNumber: '1',
     appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
     device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-    userId: '1',
-    orgId: '1',
+    userId:user.id,
+    orgId:user.orgId,
   });
 
   // useEffect(() => {
@@ -70,6 +84,7 @@ const Surveys = ({navigation}) => {
           response => {
             setIsLoading(false);
             setData(response.data);
+            setTotalCount(response.totalCount);
           },
           error => {
             console.error(error);
@@ -79,17 +94,27 @@ const Surveys = ({navigation}) => {
     }, []),
   );
 
+  const renderItem = ({ item,index, }) => (
+    <SurveyBox data={item} key={index} navigation={navigation} />
+
+  );
+
   return (
     <View style={SIPCStyles.flex}>
       <StatusBar barStyle={'dark-content'} backgroundColor="white" />
       {/* ====================================== */}
       <Surface style={SIPCStyles.headerSurface}>
-        <TouchableWithoutFeedback>
-          <Image
-            source={require('../assets/man.png')}
-            style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}
-          />
-        </TouchableWithoutFeedback>
+
+      {
+        user.profile_picture!=''?
+          <TouchableOpacity>
+            <Image source={{uri: user.profile_picture}} style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}/>
+        </TouchableOpacity>
+        :
+          <Image source={require('../assets/man.png')} style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}/>
+      }
+
+
         <Searchbar
           placeholder="Search Survey"
           onChangeText={onChangeSearch}
@@ -106,8 +131,8 @@ const Surveys = ({navigation}) => {
         />
       </Surface>
 
-      <ScrollView>
-        {/* =================Data With====Loop ================ */}
+      {/* <ScrollView>
+
         {isLoading ? (
           <Loader />
         ) : (
@@ -119,8 +144,38 @@ const Surveys = ({navigation}) => {
             })}
           </>
         )}
-        {/* ------------------------------------------------------------ */}
-      </ScrollView>
+
+      </ScrollView> */}
+    
+      <View>
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <>
+              {totalCount > 0 ? (
+                <FlatList
+                  data={data}
+                  renderItem={renderItem}
+                  // keyExtractor={keyExtractor}
+                />
+              ) :
+              (   
+                  <>
+                    <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
+                      <Image source={require('../assets/no-survey-found.png')} style={{ height: Height /3.5, width: Width / 2, resizeMode:'contain' }} />
+                      <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>No Survey</Text>
+                      <Text style={{ textAlign: 'center', fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular' }}>No survey available</Text>
+                    </View>
+                  </>
+                )
+              
+              }
+            </>
+          )}
+        </View>
+    
+    
+    
     </View>
   );
 };

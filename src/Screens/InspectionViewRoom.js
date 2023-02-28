@@ -16,15 +16,17 @@ import API from '../utility/api';
 import { useFocusEffect } from '@react-navigation/native';
 import Loader from '../component/activityindicator';
 
-const InspectionViewRoom = () => {
+const InspectionViewRoom = ({ navigation, route }) => {
 
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const { inspectionResultId } = route?.params;
+
   const params = JSON.stringify({
     "appKey":"f9285c6c2d6a6b531ae1f70d2853f612",
     "device_id":"68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
-    "inspectionResultId":"3"
+    "inspectionResultId": inspectionResultId
   });
 
 
@@ -40,8 +42,6 @@ const InspectionViewRoom = () => {
           response => {
             setIsLoading(false)
             setData(JSON.parse(JSON.stringify(response.data)));
-    console.log("Response", response)
-    // console.table("Data", data)
           },
           error => {
             console.error(error);

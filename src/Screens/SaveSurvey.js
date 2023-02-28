@@ -29,7 +29,18 @@ import {
 } from 'react-native-responsive-dimensions';
 import RBSheet from "react-native-raw-bottom-sheet";
 
+import { MMKV } from 'react-native-mmkv'
+export const storage = new MMKV();
+
 const SaveSurvey = ({ navigation, route }) => {
+
+  const jsonUser = storage.getString('user')
+  if(jsonUser == null || jsonUser == ''){
+    navigation.navigate("Login");
+  }
+  const user = JSON.parse(jsonUser);
+
+
   const [surveyData, setSurveyData] = useState([]);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -68,6 +79,7 @@ const SaveSurvey = ({ navigation, route }) => {
   /* ===================Submit MODAL================ */
 
   const [visible1, setVisible1] = useState(false);
+
   const showModal1 = () => {
     setError(false);
     setErrorMessage("");
@@ -119,8 +131,8 @@ const SaveSurvey = ({ navigation, route }) => {
       data.append("appKey", "f9285c6c2d6a6b531ae1f70d2853f612");
       data.append("device_id", "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1");
       data.append("survey_id", surveyId);
-      data.append("user_id", "1");
-      data.append("org_id", "1");
+      data.append("user_id",  user.id);
+      data.append("org_id",  user.orgId);
       data.append("question_id", answers.question_id);
       data.append("answer_id", answers.answer_id);
       data.append("survey_session_id", surveySessionId == undefined ? '' : surveySessionId);
@@ -1087,13 +1099,19 @@ const SaveSurvey = ({ navigation, route }) => {
       </>
     );
   };
-  // ====================================================================
+  
+  const close = (sheetObj) => {
+    setError(false);
+    setErrorMessage('');
+    sheetObj.current.close();
+  }
+
   const saveSurvey = () => {
     var payload = JSON.stringify({
       appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
       surveyId: surveyId,
-      user_id: '1',
+      user_id:  user.id,
       user_survey_result_id: userSurveyResultId == undefined ? 0 : userSurveyResultId,
       org_id: orgId,
       org_name: orgName,
@@ -1134,7 +1152,7 @@ const SaveSurvey = ({ navigation, route }) => {
       appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
       surveyId: surveyId,
-      user_id: '1',
+      user_id: user.id,
       user_survey_result_id: userSurveyResultId == undefined ? 0 : userSurveyResultId,
       survey_session_id: surveySessionId == undefined ? '' : surveySessionId,
       org_id: orgId,
@@ -1350,10 +1368,10 @@ const SaveSurvey = ({ navigation, route }) => {
               paddingTop: 15,
               paddingHorizontal: 15,
             }}>
-            <TouchableWithoutFeedback onPress={() => refRBSheet.current.close()}>
+            <TouchableWithoutFeedback onPress={() => close(refRBSheet)}>
               <Text style={[SIPCStyles.NormalFont, {}]}>Cancel</Text>
             </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback onPress={() => refRBSheet.current.close()}>
+            <TouchableWithoutFeedback onPress={() => close(refRBSheet)}>
               <Text style={[SIPCStyles.NormalFont, { color: '#199be2' }]}>
                 Done
               </Text>
@@ -1591,10 +1609,11 @@ const SaveSurvey = ({ navigation, route }) => {
                 flexDirection: 'row',
                 justifyContent: 'flex-end', marginVertical: 15
               }}>
-              <TouchableWithoutFeedback onPress={() => refRBSheet1.current.close()} style={{ borderWidth: 1 }}>
+              <TouchableWithoutFeedback onPress={() => close(refRBSheet1)} style={{ borderWidth: 1 }}>
                 <Text style={[SIPCStyles.NormalFont, { marginRight: 15 }]}>Cancel</Text>
               </TouchableWithoutFeedback>
-              <TouchableWithoutFeedback onPress={() => refRBSheet1.current.close()}>
+
+              <TouchableWithoutFeedback onPress={() => submitSurvey()}>
                 <Text style={[SIPCStyles.NormalFont, { color: '#199be2', }]}>
                   Continue
                 </Text>

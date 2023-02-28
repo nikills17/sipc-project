@@ -1,13 +1,20 @@
-import { View, Text, Image, Dimensions, StatusBar ,TextInput,} from 'react-native'
+import { View, Text, Image, Dimensions, StatusBar, TextInput, } from 'react-native'
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import SIPCStyles from './styles'
-import {  Button } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 import API from '../utility/api';
 import { responsiveScreenHeight, responsiveScreenWidth, responsiveScreenFontSize } from 'react-native-responsive-dimensions';
 import { ScrollView } from 'react-native';
+import { MMKV } from 'react-native-mmkv'
 
+export const storage = new MMKV();
 
 const Login = ({ navigation }) => {
+
+    const jsonUser = storage.getString('user');
+    if(jsonUser!=null && jsonUser!=''){
+        // navigation.navigate("Dashboard");
+    }
 
     const Width = Dimensions.get('window').width;
     const Height = Dimensions.get('window').height;
@@ -34,7 +41,7 @@ const Login = ({ navigation }) => {
             .then(
                 response => {
                     if (response.status == "success") {
-                        //TODO add response to local storage data here and then redirect to dashboard
+                        storage.set('user', JSON.stringify(response.data))
                         navigation.navigate("Dashboard");
                     } else {
                         setError(true);
@@ -49,7 +56,7 @@ const Login = ({ navigation }) => {
 
     return (
         <View style={{ flex: 2, backgroundColor: 'white' }}>
-        <ScrollView>
+            <ScrollView>
 
                 <View>
                     <StatusBar barStyle={'dark-content'} backgroundColor="white" />
@@ -83,7 +90,7 @@ const Login = ({ navigation }) => {
                             </View>
                         )}
 
-                        <Text style={{ fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular', marginHorizontal: 20,  }}>Email</Text>
+                        <Text style={{ fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular', marginHorizontal: 20, }}>Email</Text>
                         <View style={[SIPCStyles.container, { marginTop: 10, marginHorizontal: 20 }]}>
 
                             <Image
@@ -97,7 +104,7 @@ const Login = ({ navigation }) => {
                                 placeholderTextColor={'black'}
                                 underlineColor="transparent"
                                 theme={{ colors: { primary: '#cccccc' } }}
-                                style={[SIPCStyles.LoginTextInput, {marginLeft:10}]}
+                                style={[SIPCStyles.LoginTextInput, { marginLeft: 10 }]}
                                 onChangeText={value => setEmail(value)}
                             />
                         </View>
@@ -117,7 +124,7 @@ const Login = ({ navigation }) => {
                                 underlineColor="transparent"
                                 secureTextEntry={true}
                                 theme={{ colors: { primary: '#cccccc' } }}
-                                style={[SIPCStyles.LoginTextInput, {marginLeft:10}]}
+                                style={[SIPCStyles.LoginTextInput, { marginLeft: 10 }]}
                                 onChangeText={value => setPassword(value)}
                             />
                         </View>
@@ -146,8 +153,8 @@ const Login = ({ navigation }) => {
 
 
 
-        </ScrollView>
-            </View>
+            </ScrollView>
+        </View>
     )
 }
 

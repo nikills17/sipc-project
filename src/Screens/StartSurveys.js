@@ -32,8 +32,18 @@ import {
   responsiveScreenWidth,
   responsiveScreenFontSize,
 } from 'react-native-responsive-dimensions';
+import { MMKV } from 'react-native-mmkv'
+export const storage = new MMKV();
+
 
 const StartSurveys = ({ navigation, route }) => {
+
+  const jsonUser = storage.getString('user')
+  if(jsonUser == null || jsonUser == ''){
+    navigation.navigate("Login");
+  }
+  const user = JSON.parse(jsonUser);
+
   const [showDropDown1, setShowDropDown1] = useState(false);
   const [Group, setGroup] = useState();
   const [GroupList, setGroupList] = useState([
@@ -67,7 +77,7 @@ const StartSurveys = ({ navigation, route }) => {
         JSON.stringify({
           appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
           device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-          userId: '1',
+          userId: user.id,
         }),
       )
       .then(

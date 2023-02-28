@@ -9,8 +9,21 @@ import InspectionBox from '../component/inspectionbox';
 import SurveyBox from '../component/surveybox';
 import API from '../utility/api';
 import Loader from '../component/activityindicator';
+import { responsiveScreenHeight, responsiveScreenWidth, responsiveScreenFontSize } from 'react-native-responsive-dimensions';
+
+
+import { MMKV } from 'react-native-mmkv'
+export const storage = new MMKV();
 
 const Inspections = ({ navigation }) => {
+
+  const jsonUser = storage.getString('user')
+  if(jsonUser == null || jsonUser == ''){
+    navigation.navigate("Login");
+  }
+  const user = JSON.parse(jsonUser);
+  
+
   const Width = Dimensions.get('window').width;
   const Height = Dimensions.get('window').height;
 
@@ -31,12 +44,10 @@ const Inspections = ({ navigation }) => {
     pageNumber: '1',
     appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
     device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-    userId: '1',
+    userId: user.id,
     inspectionStatus: Active === null ? '' : Active,
     searchKeyword: '',
   });
-
-
 
   useFocusEffect(
     React.useCallback(() => {
@@ -49,9 +60,10 @@ const Inspections = ({ navigation }) => {
         .then(
           response => {
             setIsLoading(false);
-            setData(response.data);
-            setTotalCount(response.totalCount);
-            console.log("totCount" + totalCount)
+            if(response.status == "success"){
+              setData(response.data);
+              setTotalCount(response.totalCount);
+            }
           },
           error => {
             console.error(error);
@@ -62,13 +74,12 @@ const Inspections = ({ navigation }) => {
   );
 
   const loadMoreData = () => {
-
     let newParams = JSON.stringify({
       pageSize: '10',
       pageNumber: pageNumber,
       appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-      userId: '1',
+      userId: user.id,
       inspectionStatus: Active === null ? '' : Active,
       searchKeyword: '',
     });
@@ -90,20 +101,11 @@ const Inspections = ({ navigation }) => {
       );
   }
 
-  // useEffect(() => {
-  //   if (totalCount > pageNumber * pageSize ) {
-  //     setPageNumber (pageNumber + 1)
-  //       loadMoreData()
-  //   } else (totalCount > pageNumber * pageSize )
-  //   {
-  //     Alert.alert('NO')
-  //   }
-
-  // }, [])
+  const renderItem = ({ item,navigation,index }) => (
+    <InspectionBox data={item} navigation={navigation} key={index}  />
+  );
 
 
-
-  // console.log( "data number" + setPageNumber)
 
   return (
     <View style={SIPCStyles.flex}>
@@ -111,13 +113,15 @@ const Inspections = ({ navigation }) => {
 
       {/* ====================================== */}
       <Surface style={SIPCStyles.headerSurface}>
-      <TouchableOpacity >
-        <Image
-          source={require('../assets/man.png')}
-          style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}
-        />
-
-      </TouchableOpacity>
+      {
+        user.profile_picture!=''?
+          <TouchableOpacity>
+            <Image source={{uri: user.profile_picture}} style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}/>
+        </TouchableOpacity>
+        :
+          <Image source={require('../assets/man.png')} style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}/>
+      }
+      
 
         <Searchbar
           placeholder="Search Inspection"
@@ -211,29 +215,39 @@ const Inspections = ({ navigation }) => {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* ==========INSPECTIONS ==================================== */}
-        {isLoading ? (
-          <Loader />
-        ) : (
-          <>
-            {data.map((item, index) => {
-              return (
-                <InspectionBox
-                  data={item}
-                  key={index}
-                  navigation={navigation}
+      
+
+        
+        <View>
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <>
+              {totalCount > 0 ? (
+                <FlatList
+                  data={data}
+                  renderItem={renderItem}
+                  // keyExtractor={keyExtractor}
                 />
-              );
-            })}
-            <TouchableOpacity onPress={loadMoreData} >
-              <Text>Load More</Text>
-            </TouchableOpacity>
-          </>
-        )}
+              ) :
+              (   
+                  <>
+                    <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
+                      <Image source={require('../assets/no-inspection-found.png')} style={{ height: Height / 3, width: Width / 2,resizeMode:'contain' }} />
+                      <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>{Active == null?"No Inspections":Active == 1?"No Completed Inspections":"No Pending Inspections"}</Text>
+                      <Text style={{ textAlign: 'center', fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular' }}>{Active == null?"No inspection were found yet.":Active == 1?"No completed inspection were found yet.":"No pending inspection were found yet."}</Text>
+                    </View>
+                  </>
+                )
+              
+              }
+            </>
+          )}
+        </View>
 
-        {/* 
 
 
-        {/* ========================================== */}
+
       </ScrollView>
     </View>
   );

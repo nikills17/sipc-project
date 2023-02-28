@@ -126,7 +126,9 @@ const InspectionBox = ({ data, navigation }) => {
               <Text
                 style={[SIPCStyles.ValueFont, { color: '#1485cc' }]}
                 onPress={() => {
-                  navigation.navigate('InspectionViewRoom');
+                  navigation.navigate('InspectionViewRoom', {
+                    inspectionResultId: data.id,
+                  });
                 }}>
                 View Rooms
               </Text>

@@ -37,9 +37,17 @@ import {
 } from 'react-native-responsive-dimensions';
 import { floor } from 'react-native-reanimated';
 
+import { MMKV } from 'react-native-mmkv'
+export const storage = new MMKV();
 
 
 const AddWorkOrders = ({navigation, route}) => {
+
+  const jsonUser = storage.getString('user')
+  if(jsonUser == null || jsonUser == ''){
+    navigation.navigate("Login");
+  }
+  const user = JSON.parse(jsonUser);
   const deviceWidth = Dimensions.get('window').width;
 
   const {selectedId} = route?.params;
@@ -115,7 +123,7 @@ const uploadImage = async (imagePath) => {
     // Create FormData
     const data = new FormData();
     data.append("workOrderId", workOrderId);
-    data.append("userId", "1");
+    data.append("userId", user.id);
     data.append("appKey", "f9285c6c2d6a6b531ae1f70d2853f612");
     data.append("device_id", "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1");
     data.append("file", {
@@ -155,7 +163,7 @@ const saveWorkOrder = () => {
     "itemId": Item,
     "locationType": locationTypeId,
     "location": location,
-    "userId":"1",
+    "userId":user.id,
     "buildingId": buildingId,
     "floorId": floorId,
     "roomId": roomId,
@@ -191,7 +199,7 @@ useEffect(() => {
     var payload = JSON.stringify({
       "appKey":"f9285c6c2d6a6b531ae1f70d2853f612",
       "device_id":"68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
-      "userId":"1",
+      "userId": user.id,
       "buildingId": buildingId
     });
     API.instance
@@ -253,7 +261,7 @@ useEffect(() => {
       JSON.stringify({
         appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
         device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-        userId: '1'
+        userId: user.id
       }),
     )
     .then(
@@ -278,7 +286,7 @@ useEffect(() => {
       JSON.stringify({
         appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
         device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-        userId: '1',
+        userId:user.id,
         workOrderId: workOrderId,
       }),
     )
@@ -427,7 +435,7 @@ useEffect(() => {
       "appKey":"f9285c6c2d6a6b531ae1f70d2853f612",
       "device_id":"68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
       "workOrderId": workOrderId,
-      "userId": "1",
+      "userId":user.id,
       "imageName": imageName,
     });
     
