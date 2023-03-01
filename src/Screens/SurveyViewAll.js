@@ -81,7 +81,7 @@ const SurveyViewAll = ({navigation}) => {
     }, [Active]),
   );
 
-  const renderItem = ({ item,navigation,index }) => (
+  const renderItem = ({ item,index }) => (
     <SurveyViewAllBox data={item} key={index} navigation={navigation} Active={Active}/>
 
   );
