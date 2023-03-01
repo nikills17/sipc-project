@@ -5,7 +5,6 @@ import {Col, Grid} from 'react-native-easy-grid';
 import SIPCStyles from '../screens/styles';
 
 const SurveyViewAllBox = ({data, navigation, Active}) => {
-  console.log(navigation)
   const [Show, setShow] = useState(false);
   const [PendingShow, setPendingShow] = useState(false);
 

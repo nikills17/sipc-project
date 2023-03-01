@@ -244,17 +244,3 @@ const SurveyViewAll = ({ navigation }) => {
 };
 
 export default SurveyViewAll;
-
-// useEffect(() => {
-//     API.instance
-//         .post(
-//             'http://sipcsurvey.devuri.com/sipcsurvey/user-surveys-device?is_api=true', params,
-//         ).then(response => {
-//             setData(response.data);
-//             console.log(Active)
-//         },
-//             error => {
-//                 console.error(error);
-//             },
-//         );
-// }, [Active]);

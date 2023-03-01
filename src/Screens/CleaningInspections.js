@@ -1205,6 +1205,8 @@ const CleaningInspections = ({navigation}) => {
                           </>
                         )}
                       </View>
+
+                      
                     </View>
                     {checked1 == 1 ? (
                       <View style={{marginHorizontal: 20}}>
