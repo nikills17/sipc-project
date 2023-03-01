@@ -403,6 +403,10 @@ const SavePendingSurvey = ({navigation, route}) => {
                   setAnswer([...answer, answerObject]);
                 }
 
+                if (checked) {
+                  setImagePath('');
+                  setComment('');
+                }
                 setChecked(!checked);
                 if (completed) {
                   setCompleted(false);
