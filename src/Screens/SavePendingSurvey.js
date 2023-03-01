@@ -1075,8 +1075,8 @@ const SavePendingSurvey = ({navigation, route}) => {
     );
   };
 
-  const SurveyQuestions = ({data}) => {
-    const [Active, setActive] = useState(0);
+  const SurveyQuestions = ({data, index}) => {
+    const [Active, setActive] = useState(index === 0 ? 1 : 0);
     const [SubActive, setSubActive] = useState(false);
 
     const switch_tab = x => {
@@ -1368,7 +1368,7 @@ const SavePendingSurvey = ({navigation, route}) => {
         <Divider bold={true} />
         {/* ===============================MULTIPLE============================ */}
         {data.map((item, index) => {
-          return <SurveyQuestions data={item} key={index} />;
+          return <SurveyQuestions data={item} key={index} index={index} />;
         })}
         {/* ============================================================ */}
       </ScrollView>
