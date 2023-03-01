@@ -179,7 +179,7 @@ const SavePendingSurvey = ({navigation, route}) => {
             ? imagePath
             : imagePath.replace('file://', ''),
       });
-
+      console.log('-----------------------------' + JSON.stringify(data));
       API.instance
         .upload(
           `http://sipcsurvey.devuri.com/sipcsurvey/upload-survey-image-api?is_api=true`,
@@ -187,41 +187,36 @@ const SavePendingSurvey = ({navigation, route}) => {
         )
         .then(
           response => {
-            var imageName = response.uploaded_url;
-            setImageNames([...imageNames, imageName]);
-
-            // var answerObject = {
-            //   id: answers.answer_id.toString(),
-            //   score: answers.score.toString(),
-            //   is_comment_required: answers.is_comment_required.toString(),
-            //   answer_name: answers.answer.toString(),
-            //   comment: '',
-            //   images: imageNames,
-            // };
-
-            if (questionTypeId == '2') {
-              //checkbox
-              var elementPos = [...answer]
-                .map(function (x) {
-                  return x.id;
-                })
-                .indexOf(answers.answer_id.toString());
-              var currentAnswerObj = [...answer][elementPos];
-              const newObj = {
-                ...currentAnswerObj,
-                // replace the value of the key with a new value
-                images: imageNames,
-              };
-              if (elementPos != -1) {
-                answer.splice(elementPos, 1);
-                setAnswer([...answer, newObj]);
+            if (response.status === 'success') {
+              var imageName = response.uploaded_url;
+              setImageNames([...imageNames, imageName]);
+              if (questionTypeId == '2') {
+                //checkbox
+                var elementPos = [...answer]
+                  .map(function (x) {
+                    return x.id;
+                  })
+                  .indexOf(answers.answer_id.toString());
+                var currentAnswerObj = [...answer][elementPos];
+                const newObj = {
+                  ...currentAnswerObj,
+                  // replace the value of the key with a new value
+                  images: imageNames,
+                };
+                if (elementPos != -1) {
+                  answer.splice(elementPos, 1);
+                  setAnswer([...answer, newObj]);
+                }
+              } else {
+                // Radio
+                setAnswer(answers);
               }
+              setError(false);
+              setErrorMessage('');
             } else {
-              // Radio
-              setAnswer(answers);
+              setError(true);
+              setErrorMessage(response.error);
             }
-            setError(false);
-            setErrorMessage('');
           },
           error => console.error(error),
         );
@@ -373,7 +368,9 @@ const SavePendingSurvey = ({navigation, route}) => {
                   setImagePath('');
                   setComment('');
                   setChecked(false);
-                  setAnswer(answer.filter(el => el.id !== answers.answer_id.toString()));
+                  setAnswer(
+                    answer.filter(el => el.id !== answers.answer_id.toString()),
+                  );
                 } else {
                   setChecked(true);
                   var answerObject = {
@@ -405,113 +402,108 @@ const SavePendingSurvey = ({navigation, route}) => {
                   borderColor: '#CCCCCC',
                 }}
               />
+              {/* ================================================================ */}
+              <Text
+                style={{
+                  fontFamily: 'Poppins-Medium',
+                  marginLeft: 12,
+                  // marginRight: '18%',
+                  paddingVertical: 2,
+                  fontSize: responsiveScreenFontSize(1.8),
+                  width: '30%',
+                }}>
+                {answers.answer}
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  position: 'absolute',
+                  right: 0,
+                  alignSelf: 'center',
+                }}>
+                {answers.comment_type != 'noTextImage' ? (
+                  <>
+                    {checked == 1 ? (
+                      <>
+                        <TouchableWithoutFeedback
+                          onPress={() => {
+                            setChecked(!checked);
+                          }}>
+                          <Text
+                            style={[
+                              SIPCStyles.checkboxFont,
+                              {marginHorizontal: 10},
+                            ]}>
+                            Cancel
+                          </Text>
+                        </TouchableWithoutFeedback>
 
-              <View style={{flexDirection: 'row'}}>
-                <Text
-                  style={{
-                    fontFamily: 'Poppins-Medium',
-                    marginLeft: 12,
-                    marginRight: '18%',
-                    paddingVertical: 2,
-                    fontSize: responsiveScreenFontSize(1.8),
-                    width: '60%',
-                  }}>
-                  {answers.answer}
-                </Text>
-
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    // position: 'absolute',
-                    // left:'60%',
-                    alignSelf: 'center',
-                  }}>
-                  {answers.comment_type != 'noTextImage' ? (
-                    <>
-                      <View style={{justifyContent: 'center'}}>
-                        {checked == 1 ? (
+                        <TouchableWithoutFeedback
+                          onPress={() => {
+                            setChecked(!checked);
+                          }}>
+                          <Text
+                            style={[
+                              SIPCStyles.checkboxFont,
+                              {color: '#199be2', marginHorizontal: 10},
+                            ]}>
+                            Submit
+                          </Text>
+                        </TouchableWithoutFeedback>
+                      </>
+                    ) : (
+                      <>
+                        {answers.comment_type == 'textOptional' ||
+                        answers.comment_type == 'textRequired' ? (
                           <>
                             <TouchableWithoutFeedback
                               onPress={() => {
                                 setChecked(!checked);
                               }}>
-                              <Text
+                              <Image
+                                source={require('../assets/msg.png')}
                                 style={[
-                                  SIPCStyles.checkboxFont,
-                                  {marginHorizontal: 10},
-                                ]}>
-                                Cancel
-                              </Text>
-                            </TouchableWithoutFeedback>
-
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setChecked(!checked);
-                              }}>
-                              <Text
-                                style={[
-                                  SIPCStyles.checkboxFont,
-                                  {color: '#199be2', marginHorizontal: 10},
-                                ]}>
-                                Submit
-                              </Text>
+                                  SIPCStyles.commentImage,
+                                  {right: 0, position: 'absolute'},
+                                ]}
+                              />
                             </TouchableWithoutFeedback>
                           </>
                         ) : (
                           <>
-                            {answers.comment_type == 'textOptional' ||
-                            answers.comment_type == 'textRequired' ? (
-                              <>
-                                <TouchableWithoutFeedback
-                                  onPress={() => {
-                                    setChecked(!checked);
-                                  }}>
-                                  <Image
-                                    source={require('../assets/msg.png')}
-                                    style={[
-                                      SIPCStyles.commentImage,
-                                      {right: 0, position: 'absolute'},
-                                    ]}
-                                  />
-                                </TouchableWithoutFeedback>
-                              </>
-                            ) : (
-                              <>
-                                <TouchableWithoutFeedback
-                                  onPress={() => {
-                                    setChecked(!checked);
-                                  }}>
-                                  <Image
-                                    source={require('../assets/msg.png')}
-                                    style={[
-                                      SIPCStyles.commentImage,
-                                      {right: 0, position: 'absolute'},
-                                    ]}
-                                  />
-                                </TouchableWithoutFeedback>
+                            <TouchableWithoutFeedback
+                              onPress={() => {
+                                setChecked(!checked);
+                              }}>
+                              <Image
+                                source={require('../assets/msg.png')}
+                                style={[
+                                  SIPCStyles.commentImage,
+                                  {right: 0, position: 'absolute'},
+                                ]}
+                              />
+                            </TouchableWithoutFeedback>
 
-                                <TouchableWithoutFeedback
-                                  onPress={() => {
-                                    setChecked(!checked);
-                                  }}>
-                                  <Image
-                                    source={require('../assets/img.png')}
-                                    style={[
-                                      SIPCStyles.commentImage,
-                                      {right: 0, position: 'absolute'},
-                                    ]}
-                                  />
-                                </TouchableWithoutFeedback>
-                              </>
-                            )}
+                            <TouchableWithoutFeedback
+                              onPress={() => {
+                                setChecked(!checked);
+                              }}>
+                              <Image
+                                source={require('../assets/img.png')}
+                                style={[
+                                  SIPCStyles.commentImage,
+                                  {right: 0, position: 'absolute'},
+                                ]}
+                              />
+                            </TouchableWithoutFeedback>
                           </>
                         )}
-                      </View>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                </View>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <></>
+                )}
               </View>
             </TouchableOpacity>
 
@@ -576,7 +568,6 @@ const SavePendingSurvey = ({navigation, route}) => {
                                       answers,
                                       imagePath,
                                       setImagePath,
-                                      2,
                                     )
                                   }>
                                   <Image
@@ -600,7 +591,6 @@ const SavePendingSurvey = ({navigation, route}) => {
                                       answers,
                                       imagePath,
                                       setImagePath,
-                                      2,
                                     )
                                   }>
                                   <Image
@@ -799,7 +789,7 @@ const SavePendingSurvey = ({navigation, route}) => {
           <View
             style={{borderWidth: 0.8, height: '100%', borderColor: '#CCCCCC'}}
           />
-
+          {/* ======================================== */}
           <Text
             style={{
               fontFamily: 'Poppins-Medium',
@@ -809,12 +799,17 @@ const SavePendingSurvey = ({navigation, route}) => {
             {answers.answer}
           </Text>
 
-          <View style={{flexDirection: 'row', alignSelf: 'center'}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              position: 'absolute',
+              right: 0,
+              alignSelf: 'center',
+            }}>
             {answers.comment_type != 'noTextImage' ? (
               <>
-                {answer == 1 ? (
+                {answer === 1 ? (
                   <>
-                    <View style={{}}></View>
                     <TouchableWithoutFeedback
                       onPress={() => {
                         setAnswer(!answer);
@@ -850,7 +845,10 @@ const SavePendingSurvey = ({navigation, route}) => {
                           onPress={() => setAnswer(answers)}>
                           <Image
                             source={require('../assets/msg.png')}
-                            style={SIPCStyles.commentImage}
+                            style={[
+                              SIPCStyles.commentImage,
+                              {right: 0, position: 'absolute'},
+                            ]}
                           />
                         </TouchableWithoutFeedback>
                       </>
@@ -860,7 +858,10 @@ const SavePendingSurvey = ({navigation, route}) => {
                           onPress={() => setAnswer(answers)}>
                           <Image
                             source={require('../assets/msg.png')}
-                            style={SIPCStyles.commentImage}
+                            style={[
+                              SIPCStyles.commentImage,
+                              {right: 0, position: 'absolute'},
+                            ]}
                           />
                         </TouchableWithoutFeedback>
 
@@ -868,7 +869,10 @@ const SavePendingSurvey = ({navigation, route}) => {
                           onPress={() => setAnswer(answers)}>
                           <Image
                             source={require('../assets/img.png')}
-                            style={SIPCStyles.commentImage}
+                            style={[
+                              SIPCStyles.commentImage,
+                              {right: 0, position: 'absolute'},
+                            ]}
                           />
                         </TouchableWithoutFeedback>
                       </>
@@ -880,6 +884,114 @@ const SavePendingSurvey = ({navigation, route}) => {
               <></>
             )}
           </View>
+
+          {/*==========================================  */}
+          {/* <Text
+                style={{
+                  fontFamily: 'Poppins-Medium',
+                  marginLeft: 12,
+                  // marginRight: '18%',
+                  paddingVertical: 2,
+                  fontSize: responsiveScreenFontSize(1.8),
+                  width: '30%',
+                }}>
+                {answers.answer}
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  position: 'absolute',
+                  right: 0,
+                  alignSelf: 'center',
+                }}>
+
+                  {answers.comment_type != 'noTextImage' ? (
+                    <>                     
+                        {checked == 1 ? (
+                          <>
+                            <TouchableWithoutFeedback
+                              onPress={() => {
+                                setChecked(!checked);
+                              }}>
+                              <Text
+                                style={[
+                                  SIPCStyles.checkboxFont,
+                                  { marginHorizontal: 10 },
+                                ]}>
+                                Cancel
+                              </Text>
+                            </TouchableWithoutFeedback>
+
+                            <TouchableWithoutFeedback
+                              onPress={() => {
+                                setChecked(!checked);
+                              }}>
+                              <Text
+                                style={[
+                                  SIPCStyles.checkboxFont,
+                                  { color: '#199be2', marginHorizontal: 10 },
+                                ]}>
+                                Submit
+                              </Text>
+                            </TouchableWithoutFeedback>
+                          </>
+                        ) : (
+                          <>
+                            {answers.comment_type == 'textOptional' ||
+                              answers.comment_type == 'textRequired' ? (
+                              <>
+                                <TouchableWithoutFeedback
+                                  onPress={() => {
+                                    setChecked(!checked);
+                                  }}>
+                                  <Image
+                                    source={require('../assets/msg.png')}
+                                    style={[
+                                      SIPCStyles.commentImage,
+                                      { right: 0, position: 'absolute' },
+                                    ]}
+                                  />
+                                </TouchableWithoutFeedback>
+                              </>
+                            ) : (
+                              <>
+                                <TouchableWithoutFeedback
+                                  onPress={() => {
+                                    setChecked(!checked);
+                                  }}>
+                                  <Image
+                                    source={require('../assets/msg.png')}
+                                    style={[
+                                      SIPCStyles.commentImage,
+                                      { right: 0, position: 'absolute' },
+                                    ]}
+                                  />
+                                </TouchableWithoutFeedback>
+
+                                <TouchableWithoutFeedback
+                                  onPress={() => {
+                                    setChecked(!checked);
+                                  }}>
+                                  <Image
+                                    source={require('../assets/img.png')}
+                                    style={[
+                                      SIPCStyles.commentImage,
+                                      { right: 0, position: 'absolute' },
+                                    ]}
+                                  />
+                                </TouchableWithoutFeedback>
+                              </>
+                            )}
+                          </>
+                        )}
+                     
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </View> */}
+
+          {/*==========================================  */}
         </View>
 
         {/* ============================================== */}
@@ -907,97 +1019,99 @@ const SavePendingSurvey = ({navigation, route}) => {
 
               {/* ====================================== */}
 
-              {answers.comment_type == 'textWithImageOptional' ||
-              answers.comment_type == 'textWithImageRequired' ? (
-                <>
-                  <View
-                    style={{
-                      borderWidth: 1,
-                      paddingBottom: 10,
-                      borderColor: '#ccc',
-                      borderBottomLeftRadius: 10,
-                      borderBottomRightRadius: 10,
-                      borderTopLeftRadius: 0,
-                      borderTopRightRadius: 0,
-                      marginHorizontal: 20,
-                    }}>
-                    <Card style={SIPCStyles.CameraImageCard}>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          justifyContent: 'space-around',
-                        }}>
-                        <TouchableWithoutFeedback
-                          onPress={() =>
-                            openCamera(
-                              answer,
-                              setAnswer,
-                              answers,
-                              imagePath,
-                              setImagePath,
-                              1,
-                            )
-                          }>
-                          <Image
-                            source={require('../assets/camera.png')}
-                            style={SIPCStyles.cameraImage}
-                          />
-                        </TouchableWithoutFeedback>
-
+              <View>
+                {answers.comment_type == 'textWithImageOptional' ||
+                answers.comment_type == 'textWithImageRequired' ? (
+                  <>
+                    <View
+                      style={{
+                        borderWidth: 1,
+                        paddingBottom: 10,
+                        borderColor: '#ccc',
+                        borderBottomLeftRadius: 10,
+                        borderBottomRightRadius: 10,
+                        borderTopLeftRadius: 0,
+                        borderTopRightRadius: 0,
+                        marginHorizontal: 20,
+                      }}>
+                      <Card style={SIPCStyles.CameraImageCard}>
                         <View
-                          style={{borderWidth: 1, borderColor: '#e6e6e6'}}
-                        />
-
-                        <TouchableWithoutFeedback
-                          onPress={() =>
-                            pickImage(
-                              answer,
-                              setAnswer,
-                              answers,
-                              imagePath,
-                              setImagePath,
-                              1,
-                            )
-                          }>
-                          <Image
-                            source={require('../assets/gallery.png')}
-                            style={SIPCStyles.cameraImage}
-                          />
-                        </TouchableWithoutFeedback>
-                      </View>
-                    </Card>
-                  </View>
-                </>
-              ) : (
-                <></>
-              )}
-              {imagePath[0] !== '' && (
-                <FlatList
-                  horizontal
-                  data={imagePath}
-                  keyExtractor={(item, index) => index}
-                  renderItem={({item, index}) => (
-                    <View style={{position: 'relative'}}>
-                      <Image
-                        source={{uri: item}}
-                        style={SIPCStyles.CameraClickImage}
-                      />
-                      <TouchableOpacity
-                        style={SIPCStyles.crossImage}
-                        onPress={() => deleteImage(index)}>
-                        <Text
                           style={{
-                            color: 'white',
-                            fontWeight: 'bold',
+                            flexDirection: 'row',
+                            justifyContent: 'space-around',
                           }}>
-                          X
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                />
-              )}
+                          <TouchableWithoutFeedback
+                            onPress={() =>
+                              openCamera(
+                                answer,
+                                setAnswer,
+                                answers,
+                                imagePath,
+                                setImagePath,
+                                1,
+                              )
+                            }>
+                            <Image
+                              source={require('../assets/camera.png')}
+                              style={SIPCStyles.cameraImage}
+                            />
+                          </TouchableWithoutFeedback>
 
+                          <View
+                            style={{borderWidth: 1, borderColor: '#e6e6e6'}}
+                          />
+
+                          <TouchableWithoutFeedback
+                            onPress={() =>
+                              pickImage(
+                                answer,
+                                setAnswer,
+                                answers,
+                                imagePath,
+                                setImagePath,
+                                1,
+                              )
+                            }>
+                            <Image
+                              source={require('../assets/gallery.png')}
+                              style={SIPCStyles.cameraImage}
+                            />
+                          </TouchableWithoutFeedback>
+                        </View>
+                      </Card>
+                    </View>
+                  </>
+                ) : (
+                  <></>
+                )}
+
+                {imagePath[0] !== '' && (
+                  <FlatList
+                    horizontal
+                    data={imagePath}
+                    keyExtractor={(item, index) => index}
+                    renderItem={({item, index}) => (
+                      <View style={{position: 'relative'}}>
+                        <Image
+                          source={{uri: item}}
+                          style={SIPCStyles.CameraClickImage}
+                        />
+                        <TouchableOpacity
+                          style={SIPCStyles.crossImage}
+                          onPress={() => deleteImage(index)}>
+                          <Text
+                            style={{
+                              color: 'white',
+                              fontWeight: 'bold',
+                            }}>
+                            X
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  />
+                )}
+              </View>
               {/* ====================================== */}
             </View>
           )}
@@ -1109,7 +1223,7 @@ const SavePendingSurvey = ({navigation, route}) => {
             onPress={() => {
               switch_tab(1);
             }}>
-            {Active == 1 ? (
+            {Active === 1 ? (
               <Image
                 source={require('../assets/minus.png')}
                 style={SIPCStyles.PlusMinusImage}
@@ -1126,7 +1240,6 @@ const SavePendingSurvey = ({navigation, route}) => {
           </Text>
         </View>
         {data.section_data[0].questions_answers.map(question => {
-          //setTotalQuestion(totalQuestion+1);
           return (
             <View key={question.id}>
               {question.question_type_id === 1 && (
@@ -1375,97 +1488,6 @@ const SavePendingSurvey = ({navigation, route}) => {
         })}
         {/* ============================================================ */}
       </ScrollView>
-      {/* ================================MODAL=================================== */}
-      {/* <Modal visible={visible} transparent={true} animationType="slide">
-
-
-      <View
-        style={{
-          justifyContent: 'center',
-          backgroundColor: '#e2e0eb',
-          borderBottomLeftRadius: 20,
-          borderBottomRightRadius: 20,
-          paddingBottom: 20,
-          top: hp('11%'),
-        }}>
-
-
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            backgroundColor: '#e2e0eb',
-            paddingTop: 15,
-            paddingHorizontal: 15,
-          }}>
-          <TouchableWithoutFeedback onPress={hideModal}>
-            <Text style={[SIPCStyles.NormalFont, {}]}>Cancel</Text>
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={hideModal}>
-            <Text style={[SIPCStyles.NormalFont, { color: '#199be2' }]}>
-              Done
-            </Text>
-          </TouchableWithoutFeedback>
-        </View>
-
-
-
-        <Surface
-          elevation={4}
-          style={{
-            padding: 15,
-            backgroundColor: 'white',
-            borderRadius: 10,
-            marginTop: 10,
-            marginHorizontal: 30,
-          }}>
-
-          {error && (
-            <View
-              style={{
-                width: '100%',
-                alignItems: 'center',
-              }}>
-              <Text
-                style={{
-                  color: 'red',
-                  fontFamily: 'Poppins-Medium', fontSize: responsiveScreenFontSize(1.8),
-                }}>
-                Error! {errorMsg}
-              </Text>
-            </View>
-          )}
-
-          <TouchableOpacity
-            onPress={saveSurvey}
-            style={SIPCStyles.healthImageView}>
-            <Image
-              source={require('../assets/save.png')}
-              style={SIPCStyles.MainBuilding}
-            />
-            <Text style={[SIPCStyles.NormalFont, { paddingLeft: 10 }]}>
-              Save
-            </Text>
-          </TouchableOpacity>
-          <Divider bold={true} style={{ marginLeft: 30, marginTop: 10 }} />
-
-       
-          <TouchableOpacity
-            onPress={showModal1}
-            style={[SIPCStyles.healthImageView, { marginTop: 25 }]}>
-            <Image
-              source={require('../assets/submit.png')}
-              style={SIPCStyles.MainBuilding}
-            />
-            <Text style={[SIPCStyles.NormalFont, { paddingLeft: 10 }]}>
-              Submit Survey
-            </Text>
-          </TouchableOpacity>
-         
-          <Divider bold={true} style={{ marginLeft: 30, marginTop: 10 }} />
-        </Surface>
-      </View>
-    </Modal> */}
 
       <RBSheet
         ref={refRBSheet}

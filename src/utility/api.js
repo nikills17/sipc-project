@@ -43,6 +43,7 @@ export default class API {
 
   // data should always come with JSON.Stringify() for upload
   upload = async (url, data) => {
+    console.log("Data---------------------------"+JSON.stringify(data));
     try {
       let config = {
         method: 'POST',

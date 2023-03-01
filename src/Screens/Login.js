@@ -12,7 +12,7 @@ export const storage = new MMKV();
 const Login = ({ navigation }) => {
 
     const jsonUser = storage.getString('user');
-    if(jsonUser!=null && jsonUser!=''){
+    if(jsonUser!=null && jsonUser!=''){ 
         navigation.navigate("Dashboard");
     }
 
