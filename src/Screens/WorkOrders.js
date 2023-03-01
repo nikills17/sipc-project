@@ -1,4 +1,4 @@
-import { View, Alert, Image, ScrollView, TouchableWithoutFeedback, StatusBar,Dimensions,TouchableOpacity,FlatList } from 'react-native';
+import { View, Alert, Image, ScrollView, TouchableWithoutFeedback, StatusBar, Dimensions, TouchableOpacity, FlatList } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Button, Card, Searchbar, TextInput, Surface, Divider, Text, } from 'react-native-paper';
 import Icon2 from 'react-native-vector-icons/Entypo';
@@ -19,7 +19,7 @@ export const storage = new MMKV();
 
 const WorkOrders = ({ navigation }) => {
   const jsonUser = storage.getString('user')
-  if(jsonUser == null || jsonUser == ''){
+  if (jsonUser == null || jsonUser == '') {
     navigation.navigate("Login");
   }
   const user = JSON.parse(jsonUser);
@@ -56,8 +56,8 @@ const WorkOrders = ({ navigation }) => {
         .then(
           response => {
             setIsLoading(false);
-              setData(response.data);
-              setTotalCount(response.totalCount);
+            setData(response.data);
+            setTotalCount(response.totalCount);
           },
           error => {
             console.error(error);
@@ -67,8 +67,8 @@ const WorkOrders = ({ navigation }) => {
     }, [Active]),
   );
 
-  const renderItem = ({ item,index }) => (
-    <WorkOrderBox data={item} key={index} Active={Active} navigation={navigation}  />
+  const renderItem = ({ item, index }) => (
+    <WorkOrderBox data={item} key={index} Active={Active} navigation={navigation} />
   );
 
   return (
@@ -77,14 +77,14 @@ const WorkOrders = ({ navigation }) => {
 
       {/* ====================================== */}
       <Surface style={SIPCStyles.headerSurface}>
-      {
-        user.profile_picture!=''?
-          <TouchableOpacity>
-            <Image source={{uri: user.profile_picture}} style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}/>
-        </TouchableOpacity>
-        :
-          <Image source={require('../assets/man.png')} style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}/>
-      }
+        {
+          user.profile_picture != '' ?
+            <TouchableOpacity>
+              <Image source={{ uri: user.profile_picture }} style={[SIPCStyles.headerManImage, { borderRadius: 100, width: Width / 10, height: Height / 20 }]} />
+            </TouchableOpacity>
+            :
+            <Image source={require('../assets/man.png')} style={[SIPCStyles.headerManImage, { borderRadius: 100, width: Width / 10, height: Height / 20 }]} />
+        }
         <Searchbar
           placeholder="Search Work Orders"
           placeholderTextColor="grey"
@@ -100,7 +100,7 @@ const WorkOrders = ({ navigation }) => {
           )}
         />
         <TouchableWithoutFeedback
-          onPress={() => navigation.navigate('AddWorkOrders',{
+          onPress={() => navigation.navigate('AddWorkOrders', {
             selectedId: 0,
           })}>
           <Image
@@ -191,9 +191,31 @@ const WorkOrders = ({ navigation }) => {
             </>
           )
         } */}
+        {/* =============================================== */}
 
+        <ScrollView>
+          {isLoading ? (
+            <Loader />
+          ) : totalCount > 0 ? (
+            <>
+              {data.map((item, index) => (
+                <WorkOrderBox data={item} key={index} Active={Active} navigation={navigation} />
+              ))}
+            </>
+          ) : (
+            <>
+              <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
+                <Image source={require('../assets/no-work-order-found.png')} style={{ height: Height / 3.5, width: Width / 2, resizeMode: 'contain' }} />
+                <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>{Active == 1 ? "No Work Order" : Active == 2 ? "No InProgress Work Order" : "No Completed Work Order"}</Text>
+                <Text style={{ textAlign: 'center', fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular' }}>{Active == 1 ? "No Work Order were found yet." : Active == 2 ? "No In Progress Work Order were found yet." : "No Completed Work Order were found yet."}</Text>
+              </View>
+            </>
+          )}
 
-        <View>
+        </ScrollView>
+        {/* =============================================== */}
+
+        {/* <View>
           {isLoading ? (
             <Loader />
           ) : (
@@ -218,7 +240,7 @@ const WorkOrders = ({ navigation }) => {
               }
             </>
           )}
-        </View>
+        </View> */}
 
 
 

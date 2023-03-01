@@ -6,9 +6,9 @@ import {
   Dimensions,
   TouchableOpacity,
   StatusBar,
-  TouchableWithoutFeedback,FlatList
+  TouchableWithoutFeedback, FlatList
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button,
   Card,
@@ -21,7 +21,7 @@ import {
 import SIPCStyles from './styles';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import API from '../utility/api';
-import {useFocusEffect} from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import Loader from '../component/activityindicator';
 import { responsiveScreenHeight, responsiveScreenWidth, responsiveScreenFontSize } from 'react-native-responsive-dimensions';
 import SurveyBox from '../component/surveybox';
@@ -30,10 +30,10 @@ import SurveyBox from '../component/surveybox';
 import { MMKV } from 'react-native-mmkv'
 export const storage = new MMKV();
 
-const Surveys = ({navigation}) => {
+const Surveys = ({ navigation }) => {
 
   const jsonUser = storage.getString('user')
-  if(jsonUser == null || jsonUser == ''){
+  if (jsonUser == null || jsonUser == '') {
     navigation.navigate("Login");
   }
   const user = JSON.parse(jsonUser);
@@ -53,8 +53,8 @@ const Surveys = ({navigation}) => {
     pageNumber: '1',
     appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
     device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-    userId:user.id,
-    orgId:user.orgId,
+    userId: user.id,
+    orgId: user.orgId,
   });
 
   // useEffect(() => {
@@ -94,7 +94,7 @@ const Surveys = ({navigation}) => {
     }, []),
   );
 
-  const renderItem = ({ item,index, }) => (
+  const renderItem = ({ item, index, }) => (
     <SurveyBox data={item} key={index} navigation={navigation} />
 
   );
@@ -105,14 +105,14 @@ const Surveys = ({navigation}) => {
       {/* ====================================== */}
       <Surface style={SIPCStyles.headerSurface}>
 
-      {
-        user.profile_picture!=''?
-          <TouchableOpacity>
-            <Image source={{uri: user.profile_picture}} style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}/>
-        </TouchableOpacity>
-        :
-          <Image source={require('../assets/man.png')} style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}/>
-      }
+        {
+          user.profile_picture != '' ?
+            <TouchableOpacity>
+              <Image source={{ uri: user.profile_picture }} style={[SIPCStyles.headerManImage, { borderRadius: 100, width: Width / 10, height: Height / 20 }]} />
+            </TouchableOpacity>
+            :
+            <Image source={require('../assets/man.png')} style={[SIPCStyles.headerManImage, { borderRadius: 100, width: Width / 10, height: Height / 20 }]} />
+        }
 
 
         <Searchbar
@@ -125,7 +125,7 @@ const Surveys = ({navigation}) => {
             <SimpleLineIcons
               name="magnifier"
               size={20}
-              style={{color: 'grey'}}
+              style={{ color: 'grey' }}
             />
           )}
         />
@@ -146,8 +146,36 @@ const Surveys = ({navigation}) => {
         )}
 
       </ScrollView> */}
-    
-      <View>
+
+
+      {/* =========================== */}
+
+      <ScrollView>
+        {isLoading ? (
+          <Loader />
+        ) :
+          totalCount > 0 ? (
+            <>
+              {data.map((item, index) => (
+                <SurveyBox data={item} key={index} navigation={navigation} />
+              ))}
+            </>
+          ) : (
+            <>
+              <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
+                <Image source={require('../assets/no-survey-found.png')} style={{ height: Height / 3.5, width: Width / 2, resizeMode: 'contain' }} />
+                <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>No Survey</Text>
+                <Text style={{ textAlign: 'center', fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular' }}>No survey available</Text>
+              </View>
+            </>
+          )}
+
+      </ScrollView>
+
+
+      {/* =========================== */}
+
+      {/* <View>
           {isLoading ? (
             <Loader />
           ) : (
@@ -172,10 +200,10 @@ const Surveys = ({navigation}) => {
               }
             </>
           )}
-        </View>
-    
-    
-    
+        </View> */}
+
+
+
     </View>
   );
 };

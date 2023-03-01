@@ -5,6 +5,7 @@ import {Col, Grid} from 'react-native-easy-grid';
 import SIPCStyles from '../screens/styles';
 
 const SurveyViewAllBox = ({data, navigation, Active}) => {
+  console.log(navigation)
   const [Show, setShow] = useState(false);
   const [PendingShow, setPendingShow] = useState(false);
 
@@ -216,7 +217,7 @@ const SurveyViewAllBox = ({data, navigation, Active}) => {
                         surveyId: data.survey_id,
                         surveySessionId: data.survey_session_id,
                         userSurveyResultId: data.id,
-                          userId: data.user_id,
+                        userId: data.user_id,
                       });
                     }}>
                       <Image

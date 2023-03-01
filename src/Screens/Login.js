@@ -13,7 +13,7 @@ const Login = ({ navigation }) => {
 
     const jsonUser = storage.getString('user');
     if(jsonUser!=null && jsonUser!=''){
-        // navigation.navigate("Dashboard");
+        navigation.navigate("Dashboard");
     }
 
     const Width = Dimensions.get('window').width;

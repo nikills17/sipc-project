@@ -1,4 +1,4 @@
-import { View, Alert, Image, ScrollView, Dimensions, TouchableWithoutFeedback, StatusBar, ActivityIndicator, TouchableOpacity, } from 'react-native';
+import { View, Alert, Image, ScrollView, Dimensions, TouchableWithoutFeedback, StatusBar, FlatList, TouchableOpacity, } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { Button, Card, Searchbar, TextInput, Surface, Divider, Text, } from 'react-native-paper';
@@ -18,11 +18,11 @@ export const storage = new MMKV();
 const Inspections = ({ navigation }) => {
 
   const jsonUser = storage.getString('user')
-  if(jsonUser == null || jsonUser == ''){
+  if (jsonUser == null || jsonUser == '') {
     navigation.navigate("Login");
   }
   const user = JSON.parse(jsonUser);
-  
+
 
   const Width = Dimensions.get('window').width;
   const Height = Dimensions.get('window').height;
@@ -60,7 +60,7 @@ const Inspections = ({ navigation }) => {
         .then(
           response => {
             setIsLoading(false);
-            if(response.status == "success"){
+            if (response.status == "success") {
               setData(response.data);
               setTotalCount(response.totalCount);
             }
@@ -101,9 +101,9 @@ const Inspections = ({ navigation }) => {
       );
   }
 
-  const renderItem = ({ item,navigation,index }) => (
-    <InspectionBox data={item} navigation={navigation} key={index}  />
-  );
+  const renderItem = ({ item, navigation, index }) => {
+    <InspectionBox data={item} navigation={navigation} key={index} />
+  }
 
 
 
@@ -113,15 +113,15 @@ const Inspections = ({ navigation }) => {
 
       {/* ====================================== */}
       <Surface style={SIPCStyles.headerSurface}>
-      {
-        user.profile_picture!=''?
-          <TouchableOpacity>
-            <Image source={{uri: user.profile_picture}} style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}/>
-        </TouchableOpacity>
-        :
-          <Image source={require('../assets/man.png')} style={[SIPCStyles.headerManImage,{borderRadius:100,width:Width/10,height:Height/20}]}/>
-      }
-      
+        {
+          user.profile_picture != '' ?
+            <TouchableOpacity>
+              <Image source={{ uri: user.profile_picture }} style={[SIPCStyles.headerManImage, { borderRadius: 100, width: Width / 10, height: Height / 20 }]} />
+            </TouchableOpacity>
+            :
+            <Image source={require('../assets/man.png')} style={[SIPCStyles.headerManImage, { borderRadius: 100, width: Width / 10, height: Height / 20 }]} />
+        }
+
 
         <Searchbar
           placeholder="Search Inspection"
@@ -215,10 +215,33 @@ const Inspections = ({ navigation }) => {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* ==========INSPECTIONS ==================================== */}
-      
 
-        
-        <View>
+  
+
+   
+          {isLoading ? (
+            <Loader />
+          ) : totalCount > 0 ? (
+            <>
+              {data.map((item, index) => (
+                <InspectionBox data={item} navigation={navigation} key={index} Active={Active} />
+              ))}
+            </>
+          ) : (
+            <>
+              <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
+                <Image source={require('../assets/no-inspection-found.png')} style={{ height: Height / 3, width: Width / 2, resizeMode: 'contain' }} />
+                <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>{Active == null ? "No Inspections" : Active == 1 ? "No Completed Inspections" : "No Pending Inspections"}</Text>
+                <Text style={{ textAlign: 'center', fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular' }}>{Active == null ? "No inspection were found yet." : Active == 1 ? "No completed inspection were found yet." : "No pending inspection were found yet."}</Text>
+              </View>
+            </>
+          )}
+
+ 
+
+        {/* =========================================== */}
+
+        {/* <View>
           {isLoading ? (
             <Loader />
           ) : (
@@ -227,23 +250,23 @@ const Inspections = ({ navigation }) => {
                 <FlatList
                   data={data}
                   renderItem={renderItem}
-                  // keyExtractor={keyExtractor}
+                // keyExtractor={keyExtractor}
                 />
               ) :
-              (   
+                (
                   <>
                     <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
-                      <Image source={require('../assets/no-inspection-found.png')} style={{ height: Height / 3, width: Width / 2,resizeMode:'contain' }} />
-                      <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>{Active == null?"No Inspections":Active == 1?"No Completed Inspections":"No Pending Inspections"}</Text>
-                      <Text style={{ textAlign: 'center', fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular' }}>{Active == null?"No inspection were found yet.":Active == 1?"No completed inspection were found yet.":"No pending inspection were found yet."}</Text>
+                      <Image source={require('../assets/no-inspection-found.png')} style={{ height: Height / 3, width: Width / 2, resizeMode: 'contain' }} />
+                      <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>{Active == null ? "No Inspections" : Active == 1 ? "No Completed Inspections" : "No Pending Inspections"}</Text>
+                      <Text style={{ textAlign: 'center', fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular' }}>{Active == null ? "No inspection were found yet." : Active == 1 ? "No completed inspection were found yet." : "No pending inspection were found yet."}</Text>
                     </View>
                   </>
                 )
-              
+
               }
             </>
           )}
-        </View>
+        </View> */}
 
 
 
