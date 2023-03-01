@@ -340,20 +340,6 @@ const SavePendingSurvey = ({navigation, route}) => {
       answers.isSelected === '1' ? answers.images.split(',') : '',
     );
 
-    useEffect(() => {
-      if (answers.isSelected === '1') {
-        let answerObject = {
-          id: answers.answer_id.toString(),
-          score: answers.score.toString(),
-          is_comment_required: answers.is_comment_required.toString(),
-          answer_name: answers.answer.toString(),
-          comment: answers.comment,
-          images: answers.images,
-        };
-        setAnswer([...answer, answerObject]);
-      }
-    }, []);
-
     return (
       <View
         style={{
@@ -383,15 +369,13 @@ const SavePendingSurvey = ({navigation, route}) => {
                 borderBottomLeftRadius: checked == 1 ? 0 : 12,
               }}
               onPress={() => {
-                var elementPos = [...answer]
-                  .map(function (x) {
-                    return x.id;
-                  })
-                  .indexOf(answers.answer_id.toString());
-                if (elementPos != -1) {
-                  answer.splice(elementPos, 1);
-                  setAnswer([...answer]);
+                if (checked) {
+                  setImagePath('');
+                  setComment('');
+                  setChecked(false);
+                  setAnswer(answer.filter(el => el.id !== answers.answer_id.toString()));
                 } else {
+                  setChecked(true);
                   var answerObject = {
                     id: answers.answer_id.toString(),
                     score: answers.score.toString(),
@@ -402,12 +386,6 @@ const SavePendingSurvey = ({navigation, route}) => {
                   };
                   setAnswer([...answer, answerObject]);
                 }
-
-                if (checked) {
-                  setImagePath('');
-                  setComment('');
-                }
-                setChecked(!checked);
                 if (completed) {
                   setCompleted(false);
                 }
@@ -683,7 +661,30 @@ const SavePendingSurvey = ({navigation, route}) => {
   };
 
   const CheckBoxComponent = ({data}) => {
-    const [answer, setAnswer] = useState([]);
+    const [answer, setAnswer] = useState(
+      data.answers
+        .map(el => {
+          if (el.isSelected === '1') {
+            return el;
+          }
+        })
+        .filter(el => {
+          if (el !== undefined) {
+            return el;
+          }
+        })
+        .map(el => {
+          let answerObject = {
+            id: el.answer_id.toString(),
+            score: el.score.toString(),
+            is_comment_required: el.is_comment_required.toString(),
+            answer_name: el.answer.toString(),
+            comment: el.comment,
+            images: el.images,
+          };
+          return answerObject;
+        }),
+    );
     useEffect(() => {
       if (answer.length > 0) {
         let answerObject = {
@@ -701,17 +702,6 @@ const SavePendingSurvey = ({navigation, route}) => {
             el => el.question_id === data.id.toString(),
           );
           finalAnswer.current[answerIndex] = answerObject;
-        }
-      } else {
-        var elementPos = finalAnswer.current
-          .map(function (x) {
-            return x.question_id;
-          })
-          .indexOf(data.id.toString());
-        if (elementPos != -1) {
-          if (finalAnswer.current[elementPos].answer.length == 0) {
-            finalAnswer.current.splice(elementPos, 1);
-          }
         }
       }
     }, [answer]);
@@ -792,7 +782,16 @@ const SavePendingSurvey = ({navigation, route}) => {
           <View style={{paddingHorizontal: 10}}>
             <RadioButton
               status={answers === answer ? 'checked' : 'unchecked'}
-              onPress={() => setAnswer(answers)}
+              onPress={() => {
+                if (answer && answer.answer_id !== answers.answer_id) {
+                  setComment('');
+                  setImagePath('');
+                  var newAnswer = answers;
+                  newAnswer['comment'] = '';
+                  newAnswer['images'] = '';
+                  setAnswer(newAnswer);
+                }
+              }}
               value="first"
               color={'#3a7fc4'}
             />
@@ -1284,7 +1283,7 @@ const SavePendingSurvey = ({navigation, route}) => {
     //         setIsLoading(false);
     //         console.error(error);
     //       },
-    
+
     //     );
   };
 
