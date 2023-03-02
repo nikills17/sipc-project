@@ -19,9 +19,6 @@ export const storage = new MMKV();
 
 const WorkOrders = ({ navigation }) => {
   const jsonUser = storage.getString('user')
-  if (jsonUser == null || jsonUser == '') {
-    navigation.navigate("Login");
-  }
   const user = JSON.parse(jsonUser);
 
   const [searchQuery, setSearchQuery] = React.useState('');

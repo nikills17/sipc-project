@@ -44,9 +44,6 @@ export const storage = new MMKV();
 const AddWorkOrders = ({navigation, route}) => {
 
   const jsonUser = storage.getString('user')
-  if(jsonUser == null || jsonUser == ''){
-    navigation.navigate("Login");
-  }
   const user = JSON.parse(jsonUser);
   const deviceWidth = Dimensions.get('window').width;
 

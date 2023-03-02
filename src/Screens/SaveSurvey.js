@@ -1,4 +1,4 @@
-import { View, Image, TouchableOpacity, StatusBar, TouchableWithoutFeedback, ScrollView, Modal, Dimensions, FlatList } from 'react-native';
+import { View, Image, TouchableOpacity, StatusBar, TouchableWithoutFeedback, ScrollView, Modal, Dimensions, FlatList, Alert } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { Text, TextInput, Surface, Divider, Checkbox, RadioButton, Card, } from 'react-native-paper';
 import SIPCStyles from './styles';
@@ -15,9 +15,6 @@ export const storage = new MMKV();
 const SaveSurvey = ({ navigation, route }) => {
 
   const jsonUser = storage.getString('user')  // for user Object/Id 
-  if (jsonUser == null || jsonUser == '') {
-    navigation.navigate("Login");
-  }
   const user = JSON.parse(jsonUser);
 
 
@@ -141,17 +138,7 @@ const SaveSurvey = ({ navigation, route }) => {
             var imageName = response.image_name;
 
             imageNames.push({ "image": imageName });
-            setImageNames([...imageNames]);
-
-
-            // var answerObject = {
-            //   id: answers.answer_id.toString(),
-            //   score: answers.score.toString(),
-            //   is_comment_required: answers.is_comment_required.toString(),
-            //   answer_name: answers.answer.toString(),
-            //   comment: '',
-            //   images: imageNames,
-            // };
+            setImageNames(imageNames);
 
             if (questionTypeId == "2") { //checkbox
               var elementPos = [...answer].map(function (x) { return x.id; }).indexOf(answers.answer_id.toString());
@@ -210,6 +197,30 @@ const SaveSurvey = ({ navigation, route }) => {
     //setImages(images.filter((_, i) => i !== index));
   };
 
+  const updateFinalAnswer = (answer, setAnswer, answers, comment, images, questionTypeId) =>{
+    console.log("questionTypeId"+questionTypeId);
+    if(questionTypeId == 2){//checkbox
+      var elementPos = [...answer].map(function (x) { return x.id; }).indexOf(answers.answer_id.toString());
+      if (elementPos != -1) {
+        answer.splice(elementPos, 1);
+        setAnswer([...answer]);
+      } else {
+        var answerObject = {
+          id: answers.answer_id.toString(),
+          score: answers.score.toString(),
+          is_comment_required: answers.is_comment_required.toString(),
+          answer_name: answers.answer.toString(),
+          comment: comment,
+          images: images,
+        };
+        setAnswer([...answer, answerObject]);
+      }
+    }else{//radio
+
+    }
+    
+  }
+
 
   // TextInput For Comment----
   const TextBox = ({ data }) => {
@@ -253,11 +264,13 @@ const SaveSurvey = ({ navigation, route }) => {
   //CheckBox -> TypeId = 2
   //Here answers is the for the item being used in check box and answer is the state which contains all the answer for the particular question
 
-  const CheckBox = ({ answers, answer, setAnswer, imageNames, setImageNames, comment, setComment }) => {
+  const CheckBox = ({ answers, answer, setAnswer}) => {
     const [checked, setChecked] = useState(false);
-    const [completed, setCompleted] = useState(false);
+    const [completed, setCompleted] = useState(true);
     const [images, setImages] = useState([]);
-
+    const [comment, setComment] = useState('');
+    const [imageNames, setImageNames] = useState([]);
+    
     return (
       <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: deviceWidth > 500 ? 'wrap' : 'wrap', }}>
         <View style={{ flexDirection: 'column', width: deviceWidth > 500 ? '50%' : '100%', }}>
@@ -280,27 +293,13 @@ const SaveSurvey = ({ navigation, route }) => {
                 borderTopLeftRadius: 12
               }}
               onPress={() => {
-                var elementPos = [...answer].map(function (x) { return x.id; }).indexOf(answers.answer_id.toString());
-                if (elementPos != -1) {
-                  answer.splice(elementPos, 1);
-                  setAnswer([...answer]);
-                } else {
-                  var answerObject = {
-                    id: answers.answer_id.toString(),
-                    score: answers.score.toString(),
-                    is_comment_required: answers.is_comment_required.toString(),
-                    answer_name: answers.answer.toString(),
-                    comment: '',
-                    images: '',
-                  };
-                  setAnswer([...answer, answerObject]);
-                }
-
+                updateFinalAnswer(answer, setAnswer, answers, '', '', 2);
                 setChecked(!checked);
-                if (completed) {
+                if(checked === true){//means uncheck
+                  setCompleted(true);
+                }else if (completed) {
                   setCompleted(false);
                 }
-
               }}
               activeOpacity={0.85}>
               <View style={{ paddingHorizontal: 10 }}>
@@ -334,12 +333,16 @@ const SaveSurvey = ({ navigation, route }) => {
                 {answers.comment_type != "noTextImage" ?
                   (
                     <>
-                      {checked == 1 ? (
+                      {completed === false ? (
                         <>
 
                           <TouchableWithoutFeedback
                             onPress={() => {
-                              setChecked(!checked);
+                              if(answers.is_comment_required == "1" && completed === false){
+                                setComment('');
+                                setChecked(!checked);
+                              }
+                              setCompleted(true);
                             }}>
                             <Text
                               style={[
@@ -352,7 +355,25 @@ const SaveSurvey = ({ navigation, route }) => {
 
                           <TouchableWithoutFeedback
                             onPress={() => {
-                              setChecked(!checked);
+                              if(comment === ''){
+                                Alert.alert("Comment is required.");
+                              }else{
+                                setCompleted(true);
+                                console.log("answer"+JSON.stringify(answer));
+                                //lets update this comment in final answer array
+                                var elementPos = [...answer].map(function (x) { return x.id; }).indexOf(answers.answer_id.toString());
+                                var currentAnswerObj = [...answer][elementPos];
+                                const newObj = {
+                                  ...currentAnswerObj,
+                                  // replace the value of the key with a new value
+                                  comment: comment
+                                };
+                                console.log("elementPos"+elementPos+" newObj"+JSON.stringify(newObj));
+                                if (elementPos != -1) {
+                                  answer.splice(elementPos, 1);
+                                  setAnswer([...answer, newObj]);
+                                }
+                              }
                             }}>
                             <Text
                               style={[
@@ -371,7 +392,12 @@ const SaveSurvey = ({ navigation, route }) => {
                                 <>
                                   <TouchableWithoutFeedback
                                     onPress={() => {
-                                      setChecked(!checked);
+                                      if(checked === false){
+                                        setChecked(true);
+                                        //lets create json object here
+                                        updateFinalAnswer(answer, setAnswer, answers, '', '', 2);
+                                      }
+                                      setCompleted(false);
                                     }}>
                                     <Image
                                       source={require('../assets/msg.png')}
@@ -384,7 +410,12 @@ const SaveSurvey = ({ navigation, route }) => {
                                 <>
                                   <TouchableWithoutFeedback
                                     onPress={() => {
-                                      setChecked(!checked);
+                                      if(checked === false){
+                                        setChecked(true);
+                                        //lets create json object here
+                                        updateFinalAnswer(answer, setAnswer, answers, '', '');
+                                      }
+                                      setCompleted(false);
                                     }}>
                                     <Image
                                       source={require('../assets/msg.png')}
@@ -394,7 +425,12 @@ const SaveSurvey = ({ navigation, route }) => {
 
                                   <TouchableWithoutFeedback
                                     onPress={() => {
-                                      setChecked(!checked);
+                                      if(checked === false){
+                                        setChecked(true);
+                                        //lets create json object here
+                                        updateFinalAnswer(answer, setAnswer, answers, '', '', 2);
+                                      }
+                                      setCompleted(false);
                                     }}>
                                     <Image
                                       source={require('../assets/img.png')}
@@ -547,8 +583,6 @@ const SaveSurvey = ({ navigation, route }) => {
 
   const CheckBoxComponent = ({ data }) => {
     const [answer, setAnswer] = useState([]);
-    const [comment, setComment] = useState('');
-    const [imageNames, setImageNames] = useState([]);
     useEffect(() => {
 
       if (answer.length > 0) {
@@ -598,10 +632,6 @@ const SaveSurvey = ({ navigation, route }) => {
                 key={item.answer_id}
                 answer={answer}
                 setAnswer={setAnswer}
-                comment={comment}
-                setComment={setComment}
-                imageNames={imageNames}
-                setImageNames={setImageNames}
               />
             );
           })}
@@ -610,8 +640,21 @@ const SaveSurvey = ({ navigation, route }) => {
     );
   };
 
+  const saveAnswer = (answers, setAnswer, setCompleted) => {
+    setCompleted(false); 
+    setAnswer(answers);
+  }
+  const removeAnswer = (answers, setAnswer, setCompleted) => {
+    setCompleted(false); 
+    setAnswer(!answers);
+    var elementPos = finalAnswer.current.findIndex(el => el.question_id === answers.question_id.toString(),);
+    if(elementPos!=-1){
+      finalAnswer.current.splice(elementPos, 1);
+    }
+  }
+  
   const RadioBox = ({ answers, answer, setAnswer, imageNames, setImageNames, comment, setComment }) => {
-    const [completed, setCompleted] = useState(false);
+    const [completed, setCompleted] = useState(true);
     const [images, setImages] = useState([]);
 
     return (
@@ -634,7 +677,7 @@ const SaveSurvey = ({ navigation, route }) => {
           <View style={{ paddingHorizontal: 10 }}>
             <RadioButton
               status={answers === answer ? 'checked' : 'unchecked'}
-              onPress={() => setAnswer(answers)}
+              onPress={() => saveAnswer(answers, setAnswer, setCompleted)}
               value="first"
               color={'#3a7fc4'}
             />
@@ -648,7 +691,8 @@ const SaveSurvey = ({ navigation, route }) => {
               // marginRight: '18%',
               paddingVertical: 2,
               fontSize: responsiveScreenFontSize(1.8),
-              width: '35%',backgroundColor:'grey'
+              width: '35%',
+              // backgroundColor:'grey'
             }}>
             {answers.answer}
           </Text>
@@ -664,12 +708,16 @@ const SaveSurvey = ({ navigation, route }) => {
                 (
                   <>
                     {
-                      answer == 1 ? (
+                      completed === false ? (
                         <>
 
                           <TouchableWithoutFeedback
                             onPress={() => {
-                              setAnswer(!answers);
+                              if(answers.is_comment_required == "1" && completed === false){
+                                setComment('');
+                                removeAnswer(answers, setAnswer, setCompleted);
+                              }
+                              setCompleted(true);
                             }}>
                             <Text
                               style={[
@@ -682,7 +730,17 @@ const SaveSurvey = ({ navigation, route }) => {
 
                           <TouchableWithoutFeedback
                             onPress={() => {
-                              setAnswer(!answers);
+                              if(comment === ''){
+                                Alert.alert("Comment is required.");
+                              }else{
+                                setCompleted(true);
+                                var questionIndex = finalAnswer.current.findIndex(el => el.question_id === answers.question_id.toString(),);
+                                if(questionIndex!=1){
+                                  var currentAnswerObj = finalAnswer.current[questionIndex];
+                                  currentAnswerObj.answer[0].comment = comment;
+                                  finalAnswer.current[questionIndex] = currentAnswerObj;
+                                }
+                              }
                             }}>
                             <Text
                               style={[
@@ -700,7 +758,9 @@ const SaveSurvey = ({ navigation, route }) => {
                               (
                                 <>
                                   <TouchableWithoutFeedback
-                                    onPress={() => setAnswer(answers)}>
+                                    onPress={() => 
+                                      saveAnswer(answers, setAnswer, setCompleted)
+                                    }>
                                     <Image
                                       source={require('../assets/msg.png')}
                                       style={SIPCStyles.commentImage}
@@ -711,7 +771,9 @@ const SaveSurvey = ({ navigation, route }) => {
                               (
                                 <>
                                   <TouchableWithoutFeedback
-                                    onPress={() => setAnswer(answers)}>
+                                    onPress={() => 
+                                      saveAnswer(answers, setAnswer, setCompleted)
+                                    }>
                                     <Image
                                       source={require('../assets/msg.png')}
                                       style={SIPCStyles.commentImage}
@@ -719,7 +781,7 @@ const SaveSurvey = ({ navigation, route }) => {
                                   </TouchableWithoutFeedback>
 
                                   <TouchableWithoutFeedback
-                                    onPress={() => setAnswer(answers)}>
+                                    onPress={() => saveAnswer(answers, setAnswer, setCompleted)}>
                                     <Image
                                       source={require('../assets/img.png')}
                                       style={SIPCStyles.commentImage}
@@ -865,7 +927,7 @@ const SaveSurvey = ({ navigation, route }) => {
     const [imageNames, setImageNames] = useState([]);
 
     useEffect(() => {
-      if (answer) {
+      if (answer) {  
         let answerObject = {
           question_id: data.id.toString(),
           question_type_id: data.question_type_id.toString(),
@@ -932,6 +994,7 @@ const SaveSurvey = ({ navigation, route }) => {
     const switch_tab = x => {
       if (x === Active) {
         setActive(0);
+        setSubActive(false)
       } else {
         setActive(x);
       }
@@ -1019,7 +1082,7 @@ const SaveSurvey = ({ navigation, route }) => {
                 style={[
                   {
                     paddingHorizontal: '6%',
-                    backgroundColor: setSubActive === 1 ? '#fffcf8' : 'white',
+                    backgroundColor: SubActive === true ? '#fffcf8' : 'white',
                     padding: 15,
                     flexDirection: 'row',
                     alignItems: 'center',

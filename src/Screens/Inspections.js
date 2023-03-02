@@ -18,11 +18,7 @@ export const storage = new MMKV();
 const Inspections = ({ navigation }) => {
 
   const jsonUser = storage.getString('user')
-  if (jsonUser == null || jsonUser == '') {
-    navigation.navigate("Login");
-  }
   const user = JSON.parse(jsonUser);
-
 
   const Width = Dimensions.get('window').width;
   const Height = Dimensions.get('window').height;

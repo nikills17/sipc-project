@@ -39,9 +39,6 @@ export const storage = new MMKV();
 const StartSurveys = ({ navigation, route }) => {
 
   const jsonUser = storage.getString('user')
-  if(jsonUser == null || jsonUser == ''){
-    navigation.navigate("Login");
-  }
   const user = JSON.parse(jsonUser);
 
   const [showDropDown1, setShowDropDown1] = useState(false);

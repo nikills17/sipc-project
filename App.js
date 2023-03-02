@@ -23,7 +23,12 @@ import InspectionViewRoomScreen from './src/screens/InspectionViewRoom';
 import { responsiveScreenFontSize } from 'react-native-responsive-dimensions';
 import SIPCStyles from './src/screens/styles';
 
+import { MMKV } from 'react-native-mmkv'
+
+export const storage = new MMKV();
+
 const Height = Dimensions.get('window').height;
+const jsonUser = storage.getString('user');
 
 const Tab = createBottomTabNavigator();
 const MyTabScreen = () => {
@@ -142,16 +147,28 @@ const App = () => {
   return (
     <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Login" component={LoginScreen} />
+            {
+              jsonUser === undefined || jsonUser === null || jsonUser === ''?
+                <>
+                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Dashboard" component={MyTabScreen} />
+                </>
+              :
+              <>
+                <Stack.Screen name="Dashboard" component={MyTabScreen} />
+                <Stack.Screen name="Login" component={LoginScreen} />
+              </>
+            }
+            
             <Stack.Screen name="ForgetPassword" component={ForgetPasswordScreen} />
             <Stack.Screen name="ResetInstructions" component={ResetInstructionsScreen} />
-            <Stack.Screen name="Dashboard" component={MyTabScreen} />
             <Stack.Screen name="Surveys" component={SurveysScreen} />
+            <Stack.Screen name="StartSurveys" component={StartSurveysScreen} />
+            <Stack.Screen name="SaveSurvey" component={SaveSurveyScreen} />
             <Stack.Screen name="AddWorkOrders" component={AddWorkOrdersScreen} />
             <Stack.Screen name="StartInspections" component={StartInspectionsScreen}/>
             <Stack.Screen name="CleaningInspections" component={CleaningInspectionsScreen}/>
-            <Stack.Screen name="StartSurveys" component={StartSurveysScreen} />
-            <Stack.Screen name="SaveSurvey" component={SaveSurveyScreen} />
+            
             <Stack.Screen name="SavePendingSurvey" component={SavePendingSurveyScreen} />
             <Stack.Screen name="Assignment" component={AssignmentScreen} />
             <Stack.Screen name="InspectionViewRoom" component={InspectionViewRoomScreen} />

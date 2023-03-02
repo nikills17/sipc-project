@@ -11,11 +11,6 @@ export const storage = new MMKV();
 
 const Login = ({ navigation }) => {
 
-    const jsonUser = storage.getString('user');
-    if(jsonUser!=null && jsonUser!=''){ 
-        navigation.navigate("Dashboard");
-    }
-
     const Width = Dimensions.get('window').width;
     const Height = Dimensions.get('window').height;
 
@@ -41,7 +36,7 @@ const Login = ({ navigation }) => {
             .then(
                 response => {
                     if (response.status == "success") {
-                        storage.set('user', JSON.stringify(response.data))
+                        storage.set('user', JSON.stringify(response.data));
                         navigation.navigate("Dashboard");
                     } else {
                         setError(true);

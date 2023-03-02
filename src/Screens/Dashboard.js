@@ -8,9 +8,6 @@ export const storage = new MMKV();
 const Dashboard = ({ navigation }) => {
  
   const jsonUser = storage.getString('user');
-  if(jsonUser == null || jsonUser == ''){
-    navigation.navigate("Login");
-  }
   const user = JSON.parse(jsonUser);
 
   return (

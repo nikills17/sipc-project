@@ -32,9 +32,6 @@ export const storage = new MMKV();
 
 const SurveyViewAll = ({ navigation }) => {
   const jsonUser = storage.getString('user')
-  if (jsonUser == null || jsonUser == '') {
-    navigation.navigate("Login");
-  }
   const user = JSON.parse(jsonUser);
 
   const Width = Dimensions.get('window').width;

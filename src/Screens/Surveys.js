@@ -33,9 +33,6 @@ export const storage = new MMKV();
 const Surveys = ({ navigation }) => {
 
   const jsonUser = storage.getString('user')
-  if (jsonUser == null || jsonUser == '') {
-    navigation.navigate("Login");
-  }
   const user = JSON.parse(jsonUser);
 
   const [searchQuery, setSearchQuery] = React.useState('');
