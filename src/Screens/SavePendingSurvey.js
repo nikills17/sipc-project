@@ -27,6 +27,7 @@ import {MMKV} from 'react-native-mmkv';
 import API from '../utility/api';
 import SIPCStyles from './styles';
 import Loader from '../component/activityindicator';
+import {SurveyOptions} from '../utility/constants';
 
 const SavePendingSurvey = ({navigation, route}) => {
   const {surveyId, surveySessionId, userSurveyResultId, userId} = route?.params;
@@ -84,7 +85,6 @@ const SavePendingSurvey = ({navigation, route}) => {
     setImageNames,
     questionTypeId,
   ) => {
-    setIsLoading(true);
     // Check answer image is not null
     if (imagePath != null) {
       // Create FormData
@@ -634,21 +634,19 @@ const SavePendingSurvey = ({navigation, route}) => {
                     setChecked(false);
                   } else {
                     setChecked(true);
-                    if (answers.comment_type === 'noTextImage') {
+                    if (SurveyOptions[answers.comment_type].directAdd) {
                       var answerObject = {
                         id: answers.answer_id.toString(),
                         score: answers.score.toString(),
                         is_comment_required:
                           answers.is_comment_required.toString(),
                         answer_name: answers.answer.toString(),
-                        comment: '',
+                        comment: comment,
                         images: '',
                       };
                       setAnswer([...answer, answerObject]);
-                      setCompleted(true);
-                    } else {
-                      setCompleted(false);
                     }
+                    setCompleted(false);
                   }
                 }}
                 activeOpacity={0.85}>
@@ -682,7 +680,7 @@ const SavePendingSurvey = ({navigation, route}) => {
                   right: 0,
                   alignSelf: 'center',
                 }}>
-                {answers.comment_type !== 'noTextImage' && (
+                {SurveyOptions[answers.comment_type].completePopup && (
                   <>
                     {checked && !completed ? (
                       <>
@@ -715,7 +713,18 @@ const SavePendingSurvey = ({navigation, route}) => {
                                       return {image: el.split('/')[-1]};
                                     }),
                             };
-                            setAnswer([...answer, answerObject]);
+                            if (
+                              answer.find(
+                                el => el.id === answers.answer_id.toString(),
+                              )
+                            ) {
+                              let oldObject = answer.filter(
+                                el => el.id !== answers.answer_id.toString(),
+                              );
+                              setAnswer([...oldObject, answerObject]);
+                            } else {
+                              setAnswer([...answer, answerObject]);
+                            }
                             setCompleted(true);
                           }}>
                           <Text
@@ -729,41 +738,30 @@ const SavePendingSurvey = ({navigation, route}) => {
                       </>
                     ) : (
                       <>
-                        {answers.comment_type == 'textOptional' ||
-                        answers.comment_type == 'textRequired' ? (
-                          <>
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setCompleted(!completed);
-                              }}>
-                              <Image
-                                source={require('../assets/msg.png')}
-                                style={[SIPCStyles.commentImage]}
-                              />
-                            </TouchableWithoutFeedback>
-                          </>
-                        ) : (
-                          <>
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setCompleted(!completed);
-                              }}>
-                              <Image
-                                source={require('../assets/msg.png')}
-                                style={[SIPCStyles.commentImage]}
-                              />
-                            </TouchableWithoutFeedback>
+                        {SurveyOptions[answers.comment_type].commentShow && (
+                          <TouchableWithoutFeedback
+                            onPress={() => {
+                              setChecked(true);
+                              setCompleted(!completed);
+                            }}>
+                            <Image
+                              source={require('../assets/msg.png')}
+                              style={[SIPCStyles.commentImage]}
+                            />
+                          </TouchableWithoutFeedback>
+                        )}
 
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setCompleted(!completed);
-                              }}>
-                              <Image
-                                source={require('../assets/img.png')}
-                                style={[SIPCStyles.commentImage]}
-                              />
-                            </TouchableWithoutFeedback>
-                          </>
+                        {SurveyOptions[answers.comment_type].imageShow && (
+                          <TouchableWithoutFeedback
+                            onPress={() => {
+                              setChecked(true);
+                              setCompleted(!completed);
+                            }}>
+                            <Image
+                              source={require('../assets/img.png')}
+                              style={[SIPCStyles.commentImage]}
+                            />
+                          </TouchableWithoutFeedback>
                         )}
                       </>
                     )}
@@ -773,10 +771,10 @@ const SavePendingSurvey = ({navigation, route}) => {
             </View>
 
             {checked &&
-              answers.comment_type !== 'noTextImage' &&
-              !completed && (
+              !completed &&
+              SurveyOptions[answers.comment_type].completePopup && (
                 <View>
-                  {answers.comment_type === 'textWithImageRequired' && (
+                  {SurveyOptions[answers.comment_type].imageRequired && (
                     <Text
                       style={{
                         color: 'red',
@@ -793,9 +791,9 @@ const SavePendingSurvey = ({navigation, route}) => {
                         mode="text"
                         //  label="Outlined input"
                         placeholder={
-                          answers.comment_type === 'textOptional'
-                            ? 'Add Comment(Optional)'
-                            : 'Add Comment(Required)'
+                          SurveyOptions[answers.comment_type].commentRequired
+                            ? 'Add Comment(Required)'
+                            : 'Add Comment(Optional)'
                         }
                         value={comment}
                         onChangeText={setComment}
@@ -806,8 +804,7 @@ const SavePendingSurvey = ({navigation, route}) => {
                         style={SIPCStyles.TextInput1}
                       />
 
-                      {(answers.comment_type == 'textWithImageOptional' ||
-                        answers.comment_type == 'textWithImageRequired') && (
+                      {SurveyOptions[answers.comment_type].imageShow && (
                         <View
                           style={{
                             borderWidth: 1,
