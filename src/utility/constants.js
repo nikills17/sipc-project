@@ -1,3 +1,9 @@
+const SurveyQuestionType = {
+  '1': 'RadioBox',
+  '2': 'CheckBox',
+  '3': 'TextInput',
+}
+
 export const SurveyOptions = {
   noTextImage: {
     directAdd: true,
