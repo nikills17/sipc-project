@@ -37,7 +37,7 @@ const updateWorkOrderStatus = (workOrderId, status, navigation) => {
   
   API.instance
     .post(
-      `http://sipcsurvey.devuri.com/sipcsurvey/update-workorder-status-api?is_api=true`,
+      `/update-workorder-status-api?is_api=true`,
       payload,
     )
     .then(

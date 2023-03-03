@@ -62,22 +62,17 @@ const SavePendingSurvey = ({navigation, route}) => {
       user_survey_result_id: userSurveyResultId,
       user_id: userId,
     });
-    API.instance
-      .post(
-        `http://sipcsurvey.devuri.com/sipcsurvey/start-pending-survey-device?is_api=true`,
-        payload,
-      )
-      .then(
-        response => {
-          setSurveyData(response.surveyData[0]);
-          setData(response.data);
-          setIsLoading(false);
-        },
-        error => {
-          console.error(error);
-          setIsLoading(false);
-        },
-      );
+    API.instance.post(`/start-pending-survey-device?is_api=true`, payload).then(
+      response => {
+        setSurveyData(response.surveyData[0]);
+        setData(response.data);
+        setIsLoading(false);
+      },
+      error => {
+        console.error(error);
+        setIsLoading(false);
+      },
+    );
   }, []);
 
   const uploadImage = async (
@@ -120,47 +115,42 @@ const SavePendingSurvey = ({navigation, route}) => {
             : imagePath.replace('file://', ''),
       });
       console.log('-----------------------------' + JSON.stringify(data));
-      API.instance
-        .upload(
-          `http://sipcsurvey.devuri.com/sipcsurvey/upload-survey-image-api?is_api=true`,
-          data,
-        )
-        .then(
-          response => {
-            setIsLoading(false);
-            if (response.status === 'success') {
-              var imageName = response.uploaded_url;
-              setImageNames([...imageNames, imageName]);
-              if (questionTypeId == '2') {
-                //checkbox
-                var elementPos = [...answer]
-                  .map(function (x) {
-                    return x.id;
-                  })
-                  .indexOf(answers.answer_id.toString());
-                var currentAnswerObj = [...answer][elementPos];
-                const newObj = {
-                  ...currentAnswerObj,
-                  // replace the value of the key with a new value
-                  images: imageNames,
-                };
-                if (elementPos != -1) {
-                  answer.splice(elementPos, 1);
-                  setAnswer([...answer, newObj]);
-                }
-              } else {
-                // Radio
-                setAnswer(answers);
+      API.instance.upload(`/upload-survey-image-api?is_api=true`, data).then(
+        response => {
+          setIsLoading(false);
+          if (response.status === 'success') {
+            var imageName = response.uploaded_url;
+            setImageNames([...imageNames, imageName]);
+            if (questionTypeId == '2') {
+              //checkbox
+              var elementPos = [...answer]
+                .map(function (x) {
+                  return x.id;
+                })
+                .indexOf(answers.answer_id.toString());
+              var currentAnswerObj = [...answer][elementPos];
+              const newObj = {
+                ...currentAnswerObj,
+                // replace the value of the key with a new value
+                images: imageNames,
+              };
+              if (elementPos != -1) {
+                answer.splice(elementPos, 1);
+                setAnswer([...answer, newObj]);
               }
-              setError(false);
-              setErrorMessage('');
             } else {
-              setError(true);
-              setErrorMessage(response.error);
+              // Radio
+              setAnswer(answers);
             }
-          },
-          error => console.error(error),
-        );
+            setError(false);
+            setErrorMessage('');
+          } else {
+            setError(true);
+            setErrorMessage(response.error);
+          }
+        },
+        error => console.error(error),
+      );
     }
   };
 
@@ -1240,7 +1230,7 @@ const SavePendingSurvey = ({navigation, route}) => {
     //   setIsLoading(true);
     //   API.instance
     //     .post(
-    //       `http://sipcsurvey.devuri.com/sipcsurvey/save-user-pending-survey-device?is_api=true`,
+    //       `/save-user-pending-survey-device?is_api=true`,
     //       payload,
     //     )
     //     .then(
@@ -1276,26 +1266,21 @@ const SavePendingSurvey = ({navigation, route}) => {
     });
 
     setIsLoading(true);
-    API.instance
-      .post(
-        `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
-        payload,
-      )
-      .then(
-        response => {
-          setIsLoading(false);
-          if (response.status == 'success') {
-            navigation.navigate('SurveyViewAll');
-          } else {
-            setError(true);
-            setErrorMessage(response.error);
-          }
-        },
-        error => {
-          setIsLoading(false);
-          console.error(error);
-        },
-      );
+    API.instance.post(`/save-user-survey-device?is_api=true`, payload).then(
+      response => {
+        setIsLoading(false);
+        if (response.status == 'success') {
+          navigation.navigate('SurveyViewAll');
+        } else {
+          setError(true);
+          setErrorMessage(response.error);
+        }
+      },
+      error => {
+        setIsLoading(false);
+        console.error(error);
+      },
+    );
   };
 
   return (

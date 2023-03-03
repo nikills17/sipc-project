@@ -57,7 +57,7 @@ const Surveys = ({ navigation }) => {
   // useEffect(() => {
   //   API.instance
   //     .post(
-  //       'http://sipcsurvey.devuri.com/sipcsurvey/survey-list-device?is_api=true',
+  //       '/survey-list-device?is_api=true',
   //       params,
   //     )
   //     .then(
@@ -74,7 +74,7 @@ const Surveys = ({ navigation }) => {
       setIsLoading(true);
       API.instance
         .post(
-          'http://sipcsurvey.devuri.com/sipcsurvey/survey-list-device?is_api=true',
+          '/survey-list-device?is_api=true',
           params,
         )
         .then(

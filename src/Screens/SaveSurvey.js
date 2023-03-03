@@ -81,7 +81,7 @@ const SaveSurvey = ({ navigation, route }) => {
   useEffect(() => {
     API.instance
       .post(
-        `http://sipcsurvey.devuri.com/sipcsurvey/start-survey-device?is_api=true`,
+        `/start-survey-device?is_api=true`,
         JSON.stringify({
           appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
           device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
@@ -127,7 +127,7 @@ const SaveSurvey = ({ navigation, route }) => {
 
       API.instance
         .upload(
-          `http://sipcsurvey.devuri.com/sipcsurvey/upload-survey-image-api?is_api=true`,
+          `/upload-survey-image-api?is_api=true`,
           data,
         )
         .then(
@@ -1187,7 +1187,7 @@ const SaveSurvey = ({ navigation, route }) => {
     setIsLoading(true);
     // API.instance
     //   .post(
-    //     `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
+    //     `/save-user-survey-device?is_api=true`,
     //     payload,
     //   )
     //   .then(
@@ -1228,7 +1228,7 @@ const SaveSurvey = ({ navigation, route }) => {
     setIsLoading(true);
     API.instance
       .post(
-        `http://sipcsurvey.devuri.com/sipcsurvey/save-user-survey-device?is_api=true`,
+        `/save-user-survey-device?is_api=true`,
         payload,
       )
       .then(

@@ -35,7 +35,7 @@ const InspectionViewRoom = ({ navigation, route }) => {
       setIsLoading(true)
       API.instance
         .post(
-          'http://sipcsurvey.devuri.com/sipcsurvey/room-list-device?is_api=true',
+          '/room-list-device?is_api=true',
           params,
         )
         .then(

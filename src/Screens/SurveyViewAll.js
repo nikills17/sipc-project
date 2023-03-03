@@ -61,7 +61,7 @@ const SurveyViewAll = ({ navigation }) => {
       setIsLoading(true);
       API.instance
         .post(
-          'http://sipcsurvey.devuri.com/sipcsurvey/user-surveys-device?is_api=true',
+          '/user-surveys-device?is_api=true',
           params,
         )
         .then(

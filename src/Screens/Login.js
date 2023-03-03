@@ -30,7 +30,7 @@ const Login = ({ navigation }) => {
         });
         API.instance
             .post(
-                'http://sipcsurvey.devuri.com/sipcsurvey/login-service?is_api=true',
+                '/login-service?is_api=true',
                 payload,
             )
             .then(

@@ -30,7 +30,7 @@ const ForgetPassword = ({navigation}) => {
         });
         API.instance
             .post(
-                'http://sipcsurvey.devuri.com/sipcsurvey/forgot-password-api?is_api=true',
+                '/forgot-password-api?is_api=true',
                 payload,
             )
             .then(

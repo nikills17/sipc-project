@@ -70,7 +70,7 @@ const StartSurveys = ({ navigation, route }) => {
   useEffect(() => {
     API.instance
       .post(
-        `http://sipcsurvey.devuri.com/sipcsurvey/organization-list-device?is_api=true`,
+        `/organization-list-device?is_api=true`,
         JSON.stringify({
           appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
           device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
@@ -91,7 +91,7 @@ const StartSurveys = ({ navigation, route }) => {
     if (Group) {
       API.instance
         .post(
-          `http://sipcsurvey.devuri.com/sipcsurvey/get-buildings-by-org?is_api=true`,
+          `/get-buildings-by-org?is_api=true`,
           JSON.stringify({
             appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
             device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',

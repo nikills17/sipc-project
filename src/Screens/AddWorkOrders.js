@@ -132,7 +132,7 @@ const uploadImage = async (imagePath) => {
     
     API.instance
         .upload(
-          `http://sipcsurvey.devuri.com/sipcsurvey/upload-workorder-image-api?is_api=true`,
+          `/upload-workorder-image-api?is_api=true`,
           data,
         )
         .then(
@@ -169,7 +169,7 @@ const saveWorkOrder = () => {
   console.log(payload);
   API.instance
     .post(
-      `http://sipcsurvey.devuri.com/sipcsurvey/save-workorder-api?is_api=true`,
+      `/save-workorder-api?is_api=true`,
       payload,
     )
     .then(
@@ -201,7 +201,7 @@ useEffect(() => {
     });
     API.instance
       .post(
-        `http://sipcsurvey.devuri.com/sipcsurvey/floor-by-building-device?is_api=true`,
+        `/floor-by-building-device?is_api=true`,
         payload,
       )
       .then(
@@ -231,7 +231,7 @@ useEffect(() => {
     });
     API.instance
       .post(
-        `http://sipcsurvey.devuri.com/sipcsurvey/room-by-floor-device?is_api=true`,
+        `/room-by-floor-device?is_api=true`,
         payload,
       )
       .then(
@@ -254,7 +254,7 @@ useEffect(() => {
 useEffect(() => {
   API.instance
     .post(
-      `http://sipcsurvey.devuri.com/sipcsurvey/buildings-device?is_api=true`,
+      `/buildings-device?is_api=true`,
       JSON.stringify({
         appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
         device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
@@ -279,7 +279,7 @@ useEffect(() => {
  useEffect(() => {
   API.instance
     .post(
-      `http://sipcsurvey.devuri.com/sipcsurvey/workorder-condition-item-list-api?is_api=true`,
+      `/workorder-condition-item-list-api?is_api=true`,
       JSON.stringify({
         appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
         device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
@@ -438,7 +438,7 @@ useEffect(() => {
     
     API.instance
       .post(
-        `http://sipcsurvey.devuri.com/sipcsurvey/remove-workorder-image-api?is_api=true`,
+        `/remove-workorder-image-api?is_api=true`,
         payload,
       )
       .then(

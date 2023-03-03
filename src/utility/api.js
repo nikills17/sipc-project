@@ -1,3 +1,5 @@
+import {CONFIG} from './config';
+
 export default class API {
   static instance = API.instance || new API();
 
@@ -11,7 +13,7 @@ export default class API {
           'Content-Type': 'application/json',
         },
       };
-      let response = await fetch(url, config);
+      let response = await fetch(CONFIG.baseUrl + url, config);
       // give 401 Object only. So we need to call the method again, to get the right res
       let jsonData = await response.json();
       return jsonData;
@@ -32,7 +34,7 @@ export default class API {
         },
         body: data,
       };
-      let response = await fetch(url, config);
+      let response = await fetch(CONFIG.baseUrl + url, config);
       // give 401 Object only. So we need to call the method again, to get the right res
       let jsonData = await response.json();
       return jsonData;
@@ -43,17 +45,17 @@ export default class API {
 
   // data should always come with JSON.Stringify() for upload
   upload = async (url, data) => {
-    console.log("Data---------------------------"+JSON.stringify(data));
+    console.log('Data---------------------------' + JSON.stringify(data));
     try {
       let config = {
         method: 'POST',
         headers: {
-          "Content-Type": "multipart/form-data",
-          Accept: "application/json",
+          'Content-Type': 'multipart/form-data',
+          Accept: 'application/json',
         },
         body: data,
       };
-      let response = await fetch(url, config);
+      let response = await fetch(CONFIG.baseUrl + url, config);
       // give 401 Object only. So we need to call the method again, to get the right res
       let jsonData = await response.json();
       return jsonData;
@@ -74,7 +76,7 @@ export default class API {
         },
         body: data,
       };
-      let response = await fetch(url, config);
+      let response = await fetch(CONFIG.baseUrl + url, config);
       // give 401 Object only. So we need to call the method again, to get the right res
       let jsonData = await response.json();
       return jsonData;

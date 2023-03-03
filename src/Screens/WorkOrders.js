@@ -47,7 +47,7 @@ const WorkOrders = ({ navigation }) => {
       setIsLoading(true);
       API.instance
         .post(
-          'http://sipcsurvey.devuri.com/sipcsurvey/workorder-list-device?is_api=true',
+          '/workorder-list-device?is_api=true',
           params,
         )
         .then(

@@ -50,7 +50,7 @@ const Inspections = ({ navigation }) => {
       setIsLoading(true);
       API.instance
         .post(
-          'http://sipcsurvey.devuri.com/sipcsurvey/inspection-list-device?is_api=true',
+          '/inspection-list-device?is_api=true',
           params,
         )
         .then(
@@ -82,7 +82,7 @@ const Inspections = ({ navigation }) => {
 
     API.instance
       .post(
-        'http://sipcsurvey.devuri.com/sipcsurvey/inspection-list-device?is_api=true',
+        '/inspection-list-device?is_api=true',
         newParams,
       )
       .then(
