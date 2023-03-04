@@ -1,8 +1,11 @@
-import { Alert, Image, Dimensions } from 'react-native';
+import {Image, Dimensions} from 'react-native';
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {responsiveScreenFontSize} from 'react-native-responsive-dimensions';
+import {MMKV} from 'react-native-mmkv';
+
 import LoginScreen from './src/screens/Login';
 import ForgetPasswordScreen from './src/screens/ForgetPassword';
 import ResetInstructionsScreen from './src/screens/ResetInstructions';
@@ -20,10 +23,8 @@ import SaveSurveyScreen from './src/screens/SaveSurvey';
 import SavePendingSurveyScreen from './src/screens/SavePendingSurvey';
 import AssignmentScreen from './src/screens/Assignment';
 import InspectionViewRoomScreen from './src/screens/InspectionViewRoom';
-import { responsiveScreenFontSize } from 'react-native-responsive-dimensions';
 import SIPCStyles from './src/screens/styles';
-
-import { MMKV } from 'react-native-mmkv'
+import NetworkDebugger from './src/utility/networkdebugger';
 
 export const storage = new MMKV();
 
@@ -42,7 +43,7 @@ const MyTabScreen = () => {
         tabBarLabelPosition: 'below-icon',
         tabBarActiveTintColor: '#3a7fc4',
         tabBarInactiveTintColor: '#78a1aa',
-        tabBarLabelStyle: [{ fontSize: responsiveScreenFontSize(1.2) }],
+        tabBarLabelStyle: [{fontSize: responsiveScreenFontSize(1.2)}],
         tabBarPosition: 'bottom',
         tabBarStyle: [
           {
@@ -59,12 +60,12 @@ const MyTabScreen = () => {
         component={DashboardScreen}
         options={{
           tabBarLabel: 'Dashboard',
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({color, focused}) => (
             <Image
               source={require('./src/assets/dashboard.png')}
               style={[
                 SIPCStyles.BottomImage,
-                { tintColor: focused ? '#3a7fc4' : '#acbcc6' },
+                {tintColor: focused ? '#3a7fc4' : '#acbcc6'},
               ]}
             />
           ),
@@ -76,12 +77,12 @@ const MyTabScreen = () => {
         component={InspectionsScreen}
         options={{
           tabBarLabel: 'Inspections',
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({color, focused}) => (
             <Image
               source={require('./src/assets/inspection.png')}
               style={[
                 SIPCStyles.BottomImage,
-                { tintColor: focused ? '#3a7fc4' : '#acbcc6' },
+                {tintColor: focused ? '#3a7fc4' : '#acbcc6'},
               ]}
             />
           ),
@@ -93,12 +94,12 @@ const MyTabScreen = () => {
         component={WorkOrdersScreen}
         options={{
           tabBarLabel: 'Work Orders',
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({color, focused}) => (
             <Image
               source={require('./src/assets/orders.png')}
               style={[
                 SIPCStyles.BottomImage,
-                { tintColor: focused ? '#3a7fc4' : '#acbcc6' },
+                {tintColor: focused ? '#3a7fc4' : '#acbcc6'},
               ]}
             />
           ),
@@ -110,12 +111,12 @@ const MyTabScreen = () => {
         component={SurveyViewAllScreen}
         options={{
           tabBarLabel: 'Surveys',
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({color, focused}) => (
             <Image
               source={require('./src/assets/survey.png')}
               style={[
                 SIPCStyles.BottomImage,
-                { tintColor: focused ? '#3a7fc4' : '#acbcc6' },
+                {tintColor: focused ? '#3a7fc4' : '#acbcc6'},
               ]}
             />
           ),
@@ -127,12 +128,12 @@ const MyTabScreen = () => {
         component={ReportsScreen}
         options={{
           tabBarLabel: 'Reports',
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({color, focused}) => (
             <Image
               source={require('./src/assets/reports.png')}
               style={[
                 SIPCStyles.BottomImage,
-                { tintColor: focused ? '#3a7fc4' : '#acbcc6' },
+                {tintColor: focused ? '#3a7fc4' : '#acbcc6'},
               ]}
             />
           ),
@@ -146,35 +147,49 @@ const Stack = createNativeStackNavigator();
 const App = () => {
   return (
     <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            {
-              jsonUser === undefined || jsonUser === null || jsonUser === ''?
-                <>
-                <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen name="Dashboard" component={MyTabScreen} />
-                </>
-              :
-              <>
-                <Stack.Screen name="Dashboard" component={MyTabScreen} />
-                <Stack.Screen name="Login" component={LoginScreen} />
-              </>
-            }
-            
-            <Stack.Screen name="ForgetPassword" component={ForgetPasswordScreen} />
-            <Stack.Screen name="ResetInstructions" component={ResetInstructionsScreen} />
-            <Stack.Screen name="Surveys" component={SurveysScreen} />
-            <Stack.Screen name="StartSurveys" component={StartSurveysScreen} />
-            <Stack.Screen name="SaveSurvey" component={SaveSurveyScreen} />
-            <Stack.Screen name="AddWorkOrders" component={AddWorkOrdersScreen} />
-            <Stack.Screen name="StartInspections" component={StartInspectionsScreen}/>
-            <Stack.Screen name="CleaningInspections" component={CleaningInspectionsScreen}/>
-            
-            <Stack.Screen name="SavePendingSurvey" component={SavePendingSurveyScreen} />
-            <Stack.Screen name="Assignment" component={AssignmentScreen} />
-            <Stack.Screen name="InspectionViewRoom" component={InspectionViewRoomScreen} />
-          </Stack.Navigator>
-      </NavigationContainer>
-    
+      <Stack.Navigator screenOptions={{headerShown: false}}>
+        {jsonUser === undefined || jsonUser === null || jsonUser === '' ? (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Dashboard" component={MyTabScreen} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Dashboard" component={MyTabScreen} />
+            <Stack.Screen name="Login" component={LoginScreen} />
+          </>
+        )}
+
+        <Stack.Screen name="ForgetPassword" component={ForgetPasswordScreen} />
+        <Stack.Screen
+          name="ResetInstructions"
+          component={ResetInstructionsScreen}
+        />
+        <Stack.Screen name="Surveys" component={SurveysScreen} />
+        <Stack.Screen name="StartSurveys" component={StartSurveysScreen} />
+        <Stack.Screen name="SaveSurvey" component={SaveSurveyScreen} />
+        <Stack.Screen name="AddWorkOrders" component={AddWorkOrdersScreen} />
+        <Stack.Screen
+          name="StartInspections"
+          component={StartInspectionsScreen}
+        />
+        <Stack.Screen
+          name="CleaningInspections"
+          component={CleaningInspectionsScreen}
+        />
+
+        <Stack.Screen
+          name="SavePendingSurvey"
+          component={SavePendingSurveyScreen}
+        />
+        <Stack.Screen name="Assignment" component={AssignmentScreen} />
+        <Stack.Screen
+          name="InspectionViewRoom"
+          component={InspectionViewRoomScreen}
+        />
+        <Stack.Screen name="NetworkDebugger" component={NetworkDebugger} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 

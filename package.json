@@ -31,6 +31,7 @@
     "react-native-image-picker": "^5.0.1",
     "react-native-mmkv": "2.5.1",
     "react-native-modal-datetime-picker": "^14.0.1",
+    "react-native-network-logger": "^1.14.0",
     "react-native-paper": "^5.1.2",
     "react-native-permissions": "^3.6.1",
     "react-native-raw-bottom-sheet": "^2.2.0",
