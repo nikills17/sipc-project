@@ -89,7 +89,7 @@ const Reports = ({ navigation }) => {
 
 
         <TouchableWithoutFeedback
-          onPress={() => navigation.navigate('Surveys')}>
+          onPress={() => navigation.navigate('Reports')}>
           <Image
             source={require('../assets/start-inspection.png')}
             style={SIPCStyles.headerManImage}
@@ -99,108 +99,107 @@ const Reports = ({ navigation }) => {
       <Divider bold={true} />
 
       {/* ===================TABS==================== */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-      <View
-        style={{
-          backgroundColor: 'white',
-          flexDirection: 'row',
-          justifyContent: 'space-around',height:'9%'
-        }}>
-        <View
-          style={{
-            paddingVertical: 15,
-            paddingHorizontal: 20,
-            backgroundColor: 'white',
-            borderBottomWidth: Active === 1 ? 1 : 0,
-            borderColor: Active === 1 ? '#1485cc' : 'transparent',
-            borderRadius:0
-          }}
-          >
-          <Text onPress={() => setActive(1)}
-            style={[
-              SIPCStyles.NormalFont,
-              { color: Active === 1 ? '#1485cc' : '#525252' },
-            ]}>
-            Building
-          </Text>
-        </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ backgroundColor: 'red', }}>
 
         <View
           style={{
-            paddingVertical: 15,
-            paddingHorizontal: 20,
             backgroundColor: 'white',
-            borderBottomWidth: Active === 2 ? 1 : 0,
-            borderColor: Active === 2 ? '#1485cc' : 'transparent', 
-            
-            borderRadius:0
-          }}
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            height: 50
+          }}>
+          <TouchableOpacity onPress={() => setActive(1)}
+            style={{
+              paddingVertical: 15,
+              paddingHorizontal: 20,
+              backgroundColor: 'white',
+              borderBottomWidth: Active === 1 ? 1 : 0,
+              borderColor: Active === 1 ? '#1485cc' : 'transparent',
+              borderRadius: 0,
+            }}
           >
-          <Text onPress={() => setActive(2)}
-            style={[
-              SIPCStyles.NormalFont,
-              { color: Active === 2 ? '#1485cc' : '#525252' },
-            ]}>
-            Building Category
-          </Text>
-        </View>
+            <Text
+              style={[
+                SIPCStyles.NormalFont,
+                { color: Active === 1 ? '#1485cc' : '#525252' },
+              ]}>
+              Building
+            </Text>
+          </TouchableOpacity>
 
-        <View
-          style={{
-            paddingHorizontal: 20, paddingVertical: 15,
-            backgroundColor: 'white',
-            borderBottomWidth: Active === 3 ? 1 : 0,
-            borderColor: Active === 3 ? '#1485cc' : 'transparent', 
-            
-            borderRadius:0
-          }}
-          >
-          <Text onPress={() => setActive(3)} style={[SIPCStyles.NormalFont, { color: Active === 3 ? '#1485cc' : '#525252' },]}>
-            Inspection
-          </Text>
-        </View>
+          <TouchableOpacity onPress={() => setActive(2)}
+            style={{
+              paddingVertical: 15,
+              paddingHorizontal: 20,
+              backgroundColor: 'white',
+              borderBottomWidth: Active === 2 ? 1 : 0,
+              borderColor: Active === 2 ? '#1485cc' : 'transparent',
 
-        <View
-          style={{
-            paddingHorizontal: 20, paddingVertical: 15,
-            backgroundColor: 'white',
-            borderBottomWidth: Active === 4 ? 1 : 0,
-            borderColor: Active === 4 ? '#1485cc' : 'transparent', 
-            
-            borderRadius:0
-          }}
+              borderRadius: 0
+            }}
           >
-          <Text onPress={() => setActive(4)} style={[SIPCStyles.NormalFont, { color: Active === 4 ? '#1485cc' : '#525252' },]}>
-            WorkOrder
-          </Text>
-        </View>
+            <Text
+              style={[
+                SIPCStyles.NormalFont,
+                { color: Active === 2 ? '#1485cc' : '#525252' },
+              ]}>
+              Building Category
+            </Text>
+          </TouchableOpacity>
 
-        <View
-          style={{
-            paddingHorizontal: 20, 
-            paddingVertical: 15,
-            backgroundColor: 'white',
-            borderBottomWidth: Active === 5 ? 1 : 0,
-            borderColor: Active === 5 ? '#1485cc' : 'transparent', 
-            
-            borderRadius:0
-          }}
+          <TouchableOpacity onPress={() => setActive(3)}
+            style={{
+              paddingHorizontal: 20, paddingVertical: 15,
+              backgroundColor: 'white',
+              borderBottomWidth: Active === 3 ? 1 : 0,
+              borderColor: Active === 3 ? '#1485cc' : 'transparent',
+              borderRadius: 0,
+            }}
           >
-          <Text onPress={() => setActive(5)} style={[SIPCStyles.NormalFont, { color: Active === 5 ? '#1485cc' : '#525252' },]}>
-            KPI
-          </Text>
+            <Text style={[SIPCStyles.NormalFont, { color: Active === 3 ? '#1485cc' : '#525252' },]}>
+              Inspection
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setActive(4)}
+            style={{
+              paddingHorizontal: 20, paddingVertical: 15,
+              backgroundColor: 'white',
+              borderBottomWidth: Active === 4 ? 1 : 0,
+              borderColor: Active === 4 ? '#1485cc' : 'transparent',
+
+              borderRadius: 0
+            }}
+          >
+            <Text style={[SIPCStyles.NormalFont, { color: Active === 4 ? '#1485cc' : '#525252' },]}>
+              WorkOrder
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setActive(5)}
+            style={{
+              paddingHorizontal: 20,
+              paddingVertical: 15,
+              backgroundColor: 'white',
+              borderBottomWidth: Active === 5 ? 1 : 0,
+              borderColor: Active === 5 ? '#1485cc' : 'transparent',
+              borderRadius: 0
+            }}
+          >
+            <Text style={[SIPCStyles.NormalFont, { color: Active === 5 ? '#1485cc' : '#525252' },]}>
+              KPI
+            </Text>
+          </TouchableOpacity>
+
+
         </View>
-      </View>
       </ScrollView>
 
-<ScrollView>
-
-      {/* ====================================================================== */}
-
-      <ReportBox />
-
-      {/* ====================================================================== */}
-</ScrollView>
+      <ScrollView>
+        <View style={{ }}>
+          <ReportBox />
+        </View>
+      </ScrollView>
     </View>
   )
 }
