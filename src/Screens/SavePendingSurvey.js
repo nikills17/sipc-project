@@ -231,13 +231,13 @@ const SavePendingSurvey = ({navigation, route}) => {
             borderBottomRightRadius:
               SurveyOptions[answers.comment_type].completePopup &&
               answer &&
-              answer[0].id === answers.answer_id
+              answer[0] === answers.answer_id
                 ? 0
                 : 12,
             borderBottomLeftRadius:
               SurveyOptions[answers.comment_type].completePopup &&
               answer &&
-              answer[0].id === answers.answer_id
+              answer[0] === answers.answer_id
                 ? 0
                 : 12,
           }}>

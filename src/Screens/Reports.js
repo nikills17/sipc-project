@@ -113,7 +113,7 @@ const Reports = ({ navigation }) => {
             backgroundColor: 'white',
             borderBottomWidth: Active === 1 ? 1 : 0,
             borderColor: Active === 1 ? '#1485cc' : 'transparent',
-            flex: 1,borderRadius:0
+            borderRadius:0
           }}
           >
           <Text onPress={() => setActive(1)}
@@ -132,7 +132,7 @@ const Reports = ({ navigation }) => {
             backgroundColor: 'white',
             borderBottomWidth: Active === 2 ? 1 : 0,
             borderColor: Active === 2 ? '#1485cc' : 'transparent', 
-            flex: 1,
+            
             borderRadius:0
           }}
           >
@@ -151,7 +151,7 @@ const Reports = ({ navigation }) => {
             backgroundColor: 'white',
             borderBottomWidth: Active === 3 ? 1 : 0,
             borderColor: Active === 3 ? '#1485cc' : 'transparent', 
-            flex: 1,
+            
             borderRadius:0
           }}
           >
@@ -166,7 +166,7 @@ const Reports = ({ navigation }) => {
             backgroundColor: 'white',
             borderBottomWidth: Active === 4 ? 1 : 0,
             borderColor: Active === 4 ? '#1485cc' : 'transparent', 
-            flex: 1,
+            
             borderRadius:0
           }}
           >
@@ -182,7 +182,7 @@ const Reports = ({ navigation }) => {
             backgroundColor: 'white',
             borderBottomWidth: Active === 5 ? 1 : 0,
             borderColor: Active === 5 ? '#1485cc' : 'transparent', 
-            flex: 1,
+            
             borderRadius:0
           }}
           >
@@ -193,12 +193,14 @@ const Reports = ({ navigation }) => {
       </View>
       </ScrollView>
 
+<ScrollView>
 
       {/* ====================================================================== */}
 
       <ReportBox />
 
       {/* ====================================================================== */}
+</ScrollView>
     </View>
   )
 }
