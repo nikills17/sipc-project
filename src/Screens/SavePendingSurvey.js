@@ -77,15 +77,7 @@ const SavePendingSurvey = ({navigation, route}) => {
     );
   }, []);
 
-  const uploadImage = (
-    imagePath,
-    answer,
-    setAnswer,
-    answers,
-    imageNames,
-    setImageNames,
-    questionTypeId,
-  ) => {
+  const uploadImage = (imagePath, answers, imageNames, setImageNames) => {
     if (!imagePath) return;
 
     const data = new FormData();
@@ -111,29 +103,9 @@ const SavePendingSurvey = ({navigation, route}) => {
     API.instance
       .upload('/upload-survey-image-api?is_api=true', data)
       .then(response => {
-        setIsLoading(false);
-
         if (response.status === 'success') {
           const imageName = response.uploaded_url;
           setImageNames([...imageNames, imageName]);
-
-          if (questionTypeId === '2') {
-            const elementPos = answer.findIndex(
-              x => x.id === answers.answer_id.toString(),
-            );
-
-            if (elementPos !== -1) {
-              const currentAnswerObj = answer[elementPos];
-              const newObj = {
-                ...currentAnswerObj,
-                images: imageNames,
-              };
-              answer.splice(elementPos, 1);
-              setAnswer([...answer, newObj]);
-            }
-          } else {
-            setAnswer(answers);
-          }
 
           setError(false);
           setErrorMessage('');
@@ -147,14 +119,7 @@ const SavePendingSurvey = ({navigation, route}) => {
       });
   };
 
-  const openCamera = (
-    answer,
-    setAnswer,
-    answers,
-    imageNames,
-    setImageNames,
-    questionTypeId,
-  ) => {
+  const openCamera = (answers, imageNames, setImageNames) => {
     ImagePicker.openCamera({
       width: 300,
       height: 400,
@@ -164,15 +129,7 @@ const SavePendingSurvey = ({navigation, route}) => {
           alert(`Max limit reached: ${maxImages}`);
           return;
         }
-        uploadImage(
-          image.path,
-          answer,
-          setAnswer,
-          answers,
-          imageNames,
-          setImageNames,
-          questionTypeId,
-        );
+        uploadImage(image.path, answers, imageNames, setImageNames);
       },
       error => {
         console.error(error);
@@ -180,29 +137,14 @@ const SavePendingSurvey = ({navigation, route}) => {
     );
   };
 
-  const pickImage = (
-    answer,
-    setAnswer,
-    answers,
-    imageNames,
-    setImageNames,
-    questionTypeId,
-  ) => {
+  const pickImage = (answers, imageNames, setImageNames) => {
     ImagePicker.openPicker({})
       .then(image => {
         if (imageNames.length + 1 > maxImages) {
           alert(`Max limit reached: ${maxImages}`);
           return;
         }
-        uploadImage(
-          image.path,
-          answer,
-          setAnswer,
-          answers,
-          imageNames,
-          setImageNames,
-          questionTypeId,
-        );
+        uploadImage(image.path, answers, imageNames, setImageNames);
       })
       .catch(error => console.error(error));
   };
@@ -215,35 +157,34 @@ const SavePendingSurvey = ({navigation, route}) => {
     const [comment, setComment] = useState(
       answers.isSelected === '1' ? answers.comment : '',
     );
-    const [completed, setCompleted] = useState(true);
+    const [completed, setCompleted] = useState(answers.isSelected === '1');
     const [imagePath, setImagePath] = useState(
       answers.isSelected === '1' ? answers.images.split(',') : '',
     );
     const commentType = SurveyOptions[answers.comment_type];
 
-    useEffect(() => {
-      let obj = answer;
-      obj['comment'] = comment;
-      setAnswer(obj);
-    }, [comment]);
-
     const onPress = () => {
       if (!selected) {
+        const answerObject = [
+          {
+            id: answers.answer_id.toString(),
+            score: answers.score.toString(),
+            is_comment_required: answers.is_comment_required.toString(),
+            answer_name: answers.answer,
+            comment: '',
+            images: '',
+          },
+        ];
         setComment('');
         setImagePath('');
-        setAnswer({
-          ...answers,
-          comment: '',
-          images: '',
-          image_names: '',
-        });
+        setAnswer(answerObject);
         setCompleted(false);
       }
     };
 
     const onCancel = () => {
       if (commentType.commentRequired || commentType.imageRequired) {
-        setAnswer();
+        setAnswer([]);
       } else {
         setCompleted(true);
       }
@@ -255,17 +196,17 @@ const SavePendingSurvey = ({navigation, route}) => {
             .map(el => ({image: el.split('/').pop()}))
             .filter(el => el.image)
         : [];
-      const answerObject = {
-        answer_id: answers.answer_id,
-        score: answers.score,
-        is_comment_required: answers.is_comment_required,
-        answer: answers.answer,
-        comment,
-        images: filteredArray.length ? filteredArray : '',
-        image_names: answers.image_names,
-      };
+      const answerObject = [
+        {
+          id: answers.answer_id.toString(),
+          score: answers.score.toString(),
+          is_comment_required: answers.is_comment_required.toString(),
+          answer_name: answers.answer,
+          comment,
+          images: filteredArray.length ? filteredArray : '',
+        },
+      ];
       setAnswer(answerObject);
-      console.log(answers);
       setCompleted(true);
     };
 
@@ -290,13 +231,13 @@ const SavePendingSurvey = ({navigation, route}) => {
             borderBottomRightRadius:
               SurveyOptions[answers.comment_type].completePopup &&
               answer &&
-              answer.answer_id == answers.answer_id
+              answer[0].id === answers.answer_id
                 ? 0
                 : 12,
             borderBottomLeftRadius:
               SurveyOptions[answers.comment_type].completePopup &&
               answer &&
-              answer.answer_id == answers.answer_id
+              answer[0].id === answers.answer_id
                 ? 0
                 : 12,
           }}>
@@ -414,14 +355,7 @@ const SavePendingSurvey = ({navigation, route}) => {
                     }}>
                     <TouchableWithoutFeedback
                       onPress={() =>
-                        openCamera(
-                          answer,
-                          setAnswer,
-                          answers,
-                          imagePath,
-                          setImagePath,
-                          1,
-                        )
+                        openCamera(answers, imagePath, setImagePath)
                       }>
                       <Image
                         source={require('../assets/camera.png')}
@@ -438,14 +372,7 @@ const SavePendingSurvey = ({navigation, route}) => {
 
                     <TouchableWithoutFeedback
                       onPress={() =>
-                        pickImage(
-                          answer,
-                          setAnswer,
-                          answers,
-                          imagePath,
-                          setImagePath,
-                          1,
-                        )
+                        pickImage(answers, imagePath, setImagePath)
                       }>
                       <Image
                         source={require('../assets/gallery.png')}
@@ -498,26 +425,27 @@ const SavePendingSurvey = ({navigation, route}) => {
   };
 
   const RadioBoxComponent = ({data}) => {
-    const {id, question, question_type_id, answers} = data;
-    const [answer, setAnswer] = useState(() =>
-      answers.find(el => el.isSelected === '1'),
+    const [answer, setAnswer] = useState(
+      data.answers
+        .filter(el => el.isSelected === '1')
+        .map(el => ({
+          id: el.answer_id.toString(),
+          score: el.score.toString(),
+          is_comment_required: el.is_comment_required.toString(),
+          answer_name: el.answer.toString(),
+          comment: el.comment,
+          images:
+            el.image_names === ''
+              ? ''
+              : el.image_names.split(',').map(image => ({image})),
+        })),
     );
-    const [imageNames, setImageNames] = useState(answer.images);
 
     useEffect(() => {
       const answerObject = {
-        question_id: id.toString(),
-        question_type_id: question_type_id.toString(),
-        answer: [
-          {
-            id: answer?.answer_id.toString(),
-            score: answer?.score.toString(),
-            is_comment_required: answer?.is_comment_required.toString(),
-            answer_name: answer?.answer.toString(),
-            comment: answer?.comment,
-            images: answer.image_names,
-          },
-        ],
+        question_id: data.id.toString(),
+        question_type_id: data.question_type_id.toString(),
+        answer,
       };
 
       const answerIndex = finalAnswer.current.findIndex(
@@ -540,18 +468,16 @@ const SavePendingSurvey = ({navigation, route}) => {
             style={SIPCStyles.headerManImage}
           />
           <Text style={[SIPCStyles.SemiBold, {flex: 1, marginLeft: 15}]}>
-            {question}
+            {data.question}
           </Text>
         </View>
-        {answers.map((item, index) => (
+        {data.answers.map((item, index) => (
           <RadioBox
             answers={item}
             key={index}
             answer={answer}
             setAnswer={setAnswer}
-            imageNames={imageNames}
-            setImageNames={setImageNames}
-            selected={item?.answer_id === answer?.answer_id}
+            selected={item?.answer_id.toString() === answer[0]?.id}
           />
         ))}
       </View>
@@ -662,7 +588,7 @@ const SavePendingSurvey = ({navigation, route}) => {
                 overflow: 'hidden',
                 height: height / 12,
                 marginHorizontal: 20,
-                borderBottomRightRadius: checked && completed  === 1 ? 0 : 12,
+                borderBottomRightRadius: checked && completed === 1 ? 0 : 12,
                 borderBottomLeftRadius: checked && completed === 1 ? 0 : 12,
               }}>
               <TouchableOpacity
@@ -802,14 +728,7 @@ const SavePendingSurvey = ({navigation, route}) => {
                             }}>
                             <TouchableWithoutFeedback
                               onPress={() =>
-                                openCamera(
-                                  answer,
-                                  setAnswer,
-                                  answers,
-                                  imagePath,
-                                  setImagePath,
-                                  2,
-                                )
+                                openCamera(answers, imagePath, setImagePath)
                               }>
                               <Image
                                 source={require('../assets/camera.png')}
@@ -826,14 +745,7 @@ const SavePendingSurvey = ({navigation, route}) => {
 
                             <TouchableWithoutFeedback
                               onPress={() =>
-                                pickImage(
-                                  answer,
-                                  setAnswer,
-                                  answers,
-                                  imagePath,
-                                  setImagePath,
-                                  2,
-                                )
+                                pickImage(answers, imagePath, setImagePath)
                               }>
                               <Image
                                 source={require('../assets/gallery.png')}
