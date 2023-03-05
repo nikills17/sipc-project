@@ -30,7 +30,8 @@ import { responsiveScreenHeight, responsiveScreenWidth, responsiveScreenFontSize
 import { MMKV } from 'react-native-mmkv'
 export const storage = new MMKV();
 
-const SurveyViewAll = ({ navigation }) => {
+const SurveyViewAll = ({ navigation, route }) => {
+  const pending = route?.params?.pending ?? 1;
   const jsonUser = storage.getString('user')
   const user = JSON.parse(jsonUser);
 
@@ -42,7 +43,7 @@ const SurveyViewAll = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const onChangeSearch = query => setSearchQuery(query);
 
-  const [Active, setActive] = useState(1);
+  const [Active, setActive] = useState(pending);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
