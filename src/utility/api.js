@@ -1,4 +1,5 @@
 import {CONFIG} from './config';
+import axios from 'axios';
 
 export default class API {
   static instance = API.instance || new API();
@@ -43,22 +44,17 @@ export default class API {
     }
   };
 
-  // data should always come with JSON.Stringify() for upload
   upload = async (url, data) => {
-    console.log('Data---------------------------' + JSON.stringify(data));
     try {
-      let config = {
-        method: 'POST',
+      const response = await axios({
+        method: 'post',
+        url: CONFIG.baseUrl + url,
+        data: data,
         headers: {
           'Content-Type': 'multipart/form-data',
-          Accept: 'application/json',
         },
-        body: data,
-      };
-      let response = await fetch(CONFIG.baseUrl + url, config);
-      // give 401 Object only. So we need to call the method again, to get the right res
-      let jsonData = await response.json();
-      return jsonData;
+      });
+      return response.data;
     } catch (error) {
       console.log(`${error} while fetching data from ${url}`);
     }
