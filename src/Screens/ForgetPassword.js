@@ -59,11 +59,11 @@ const ForgetPassword = ({navigation}) => {
                     </View>
                 </View>
 
-                <View style={{ backgroundColor: 'white', height: Height / 4, width: Width / 2.3, justifyContent: 'center', alignItems: 'center', alignSelf: 'center', borderRadius: 100, bottom: 80 }}>
-                    <Image source={require('../assets/SipcLogo.png')} style={{ height: Height / 5.3, width: Width / 3.3, }} />
+                <View style={{ backgroundColor: 'white', height: Height / 4, width: Width / 2.3, justifyContent: 'center', alignItems: 'center', alignSelf: 'center', borderRadius: 100,  bottom: '10%' }}>
+                    <Image source={require('../assets/SipcLogo.png')} style={{ height: Height / 5.3, width: Width / 3.3,resizeMode:'contain' }} />
 
                 </View>
-                <View style={{ bottom: 80 }}>
+                <View style={{  bottom: '10%' }}>
                     <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>Forgot Password</Text>
 
                     {error && (

@@ -662,8 +662,8 @@ const SavePendingSurvey = ({navigation, route}) => {
                 overflow: 'hidden',
                 height: height / 12,
                 marginHorizontal: 20,
-                borderBottomRightRadius: checked == 1 ? 0 : 12,
-                borderBottomLeftRadius: checked == 1 ? 0 : 12,
+                borderBottomRightRadius: checked && completed  === 1 ? 0 : 12,
+                borderBottomLeftRadius: checked && completed === 1 ? 0 : 12,
               }}>
               <TouchableOpacity
                 style={{paddingHorizontal: 10}}
