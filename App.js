@@ -4,7 +4,6 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {responsiveScreenFontSize} from 'react-native-responsive-dimensions';
-import {MMKV} from 'react-native-mmkv';
 
 import LoginScreen from './src/screens/Login';
 import ForgetPasswordScreen from './src/screens/ForgetPassword';
@@ -25,11 +24,9 @@ import AssignmentScreen from './src/screens/Assignment';
 import InspectionViewRoomScreen from './src/screens/InspectionViewRoom';
 import SIPCStyles from './src/screens/styles';
 import NetworkDebugger from './src/utility/networkdebugger';
-
-export const storage = new MMKV();
+import SplashScreen from './src/screens/splash';
 
 const Height = Dimensions.get('window').height;
-const jsonUser = storage.getString('user');
 
 const Tab = createBottomTabNavigator();
 const MyTabScreen = () => {
@@ -147,19 +144,12 @@ const Stack = createNativeStackNavigator();
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{headerShown: false}}>
-        {jsonUser === undefined || jsonUser === null || jsonUser === '' ? (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Dashboard" component={MyTabScreen} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Dashboard" component={MyTabScreen} />
-            <Stack.Screen name="Login" component={LoginScreen} />
-          </>
-        )}
-
+      <Stack.Navigator
+        initialRouteName="SplashScreen"
+        screenOptions={{headerShown: false}}>
+        <Stack.Screen name="SplashScreen" component={SplashScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Dashboard" component={MyTabScreen} />
         <Stack.Screen name="ForgetPassword" component={ForgetPasswordScreen} />
         <Stack.Screen
           name="ResetInstructions"
