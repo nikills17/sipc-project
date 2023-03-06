@@ -52,6 +52,12 @@ const SavePendingSurvey = ({navigation, route}) => {
   const refRBSheet = useRef();
   const refRBSheet1 = useRef();
 
+  const close = (sheetObj) => {
+    setError(false);
+    setErrorMessage('');
+    sheetObj.current.close();
+  }
+
   const maxImages = 10;
 
   useEffect(() => {
@@ -163,6 +169,7 @@ const SavePendingSurvey = ({navigation, route}) => {
     );
     const commentType = SurveyOptions[answers.comment_type];
 
+    // onPRESS
     const onPress = () => {
       if (!selected) {
         const answerObject = [
@@ -182,6 +189,7 @@ const SavePendingSurvey = ({navigation, route}) => {
       }
     };
 
+    //onCANCEL
     const onCancel = () => {
       if (commentType.commentRequired || commentType.imageRequired) {
         setAnswer([]);
@@ -190,6 +198,7 @@ const SavePendingSurvey = ({navigation, route}) => {
       }
     };
 
+    //onSubmit
     const onSubmit = () => {
       const filteredArray = Array.isArray(imagePath)
         ? imagePath
@@ -210,10 +219,11 @@ const SavePendingSurvey = ({navigation, route}) => {
       setCompleted(true);
     };
 
+    //onCommentImagePress
     const onCommentImagePress = () => {
       setCompleted(!completed);
     };
-console.log(answer[0].id);
+
     return (
       <>
         <View
@@ -229,15 +239,12 @@ console.log(answer[0].id);
             alignItems: 'center',
             height: height / 12,
             borderBottomRightRadius:
-              SurveyOptions[answers.comment_type].completePopup &&
-              answer &&
-              answer[0].id === answers.answer_id
+              commentType.completePopup && answer && answer[0] === answers.answer_id
                 ? 0
                 : 12,
             borderBottomLeftRadius:
-              SurveyOptions[answers.comment_type].completePopup &&
-              answer &&
-              answer[0].id === answers.answer_id
+              commentType.completePopup && answer &&
+              answer[0] === answers.answer_id
                 ? 0
                 : 12,
           }}>
@@ -1094,28 +1101,28 @@ console.log(answer[0].id);
       questions: finalAnswer.current,
     });
     console.log('Save Pending Payload: ' + payload);
-    //   setIsLoading(true);
-    //   API.instance
-    //     .post(
-    //       `/save-user-pending-survey-device?is_api=true`,
-    //       payload,
-    //     )
-    //     .then(
-    //       response => {
-    //         setIsLoading(false);
-    //         if (response.status == "success") {
-    //           navigation.navigate('SurveyViewAll');
-    //         } else {
-    //           setError(true);
-    //           setErrorMessage(response.error);
-    //         }
-    //       },
-    //       error => {
-    //         setIsLoading(false);
-    //         console.error(error);
-    //       },
+      setIsLoading(true);
+      API.instance
+        .post(
+          `/save-user-pending-survey-device?is_api=true`,
+          payload,
+        )
+        .then(
+          response => {
+            setIsLoading(false);
+            if (response.status == "success") {
+              navigation.navigate('SurveyViewAll');
+            } else {
+              setError(true);
+              setErrorMessage(response.error);
+            }
+          },
+          error => {
+            setIsLoading(false);
+            console.error(error);
+          },
 
-    //     );
+        );
   };
 
   const submitSurvey = () => {
@@ -1381,14 +1388,14 @@ console.log(answer[0].id);
                 marginVertical: 15,
               }}>
               <TouchableWithoutFeedback
-                onPress={() => refRBSheet1.current.close()}
+                onPress={() => close(refRBSheet1)}
                 style={{borderWidth: 1}}>
                 <Text style={[SIPCStyles.NormalFont, {marginRight: 15}]}>
                   Cancel
                 </Text>
               </TouchableWithoutFeedback>
               <TouchableWithoutFeedback
-                onPress={() => refRBSheet1.current.close()}>
+                onPress={() => submitSurvey()}>
                 <Text style={[SIPCStyles.NormalFont, {color: '#199be2'}]}>
                   Continue
                 </Text>
