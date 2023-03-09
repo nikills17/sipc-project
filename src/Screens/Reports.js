@@ -7,7 +7,7 @@ import {
   TouchableWithoutFeedback,
   StatusBar, TouchableOpacity
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Button,
   Card,
@@ -27,12 +27,14 @@ import { useFocusEffect } from '@react-navigation/native';
 import Loader from '../component/activityindicator';
 import ReportBox from '../component/reportsbox';
 import { CONFIG } from '../utility/config';
-
+import RBSheet from "react-native-raw-bottom-sheet";
+import DropDownPicker from 'react-native-dropdown-picker';
+import Entypo from 'react-native-vector-icons/Entypo';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 
 import { MMKV } from 'react-native-mmkv'
 export const storage = new MMKV();
-
 
 const Reports = ({ navigation }) => {
 
@@ -43,38 +45,166 @@ const Reports = ({ navigation }) => {
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
 
-
-
-
+  const refRBSheet = useRef();
 
   const Width = Dimensions.get('window').width;
   const Height = Dimensions.get('window').height;
 
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  const currentDate = new Date().toLocaleDateString('en-US', options);
-
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [dateType, setDateType] = React.useState('survey_submitted');
-  const [startDate, setStartDate] = React.useState('');
-  const [endDate, setEndDate] = React.useState(currentDate);
+
   const onChangeSearch = query => setSearchQuery(query);
+
+
+  //DataType
+  const [dataTypeDropDown, setDataTypeDropDown] = useState(false);
+  const [dataType, setDataType] = useState(0);
+  const [dataTypeList, setDataTypeList] = useState([
+    {
+      label: 'Survey Created',
+      value: '1',
+    },
+    {
+      label: 'Survey Submitted',
+      value: '2',
+    },
+  ]);
+
+
+  //Period
+  const [periodDropDown, setPeriodDropDown] = useState(false);
+  const [period, setPeriod] = useState(0);
+  const [periodList, setPeriodList] = useState([
+    {
+      label: 'Last 30 days',
+      value: '1',
+    },
+    {
+      label: 'Last 90 days',
+      value: '2',
+    },
+    {
+      label: 'Last 180 days',
+      value: '3',
+    },
+    {
+      label: 'Last 365 days',
+      value: '4',
+    },
+  ]);
+
+
+  //Organization
+  const [organizationDropDown, setOrganizationDropDown] = useState(false);
+  const [organization, setOrganization] = useState(0);
+  const [organizationList, setOrganizationList] = useState([
+  ]);
+
+  //Building
+  const [buildingDropDown, setBuildingDropDown] = useState(false);
+  const [building, setBuilding] = useState(0);
+  const [buildingList, setBuildingList] = useState([
+  ]);
+
+  //Building Category
+  const [buildingCategoryDropDown, setBuildingCategoryDropDown] = useState(false);
+  const [buildingCategory, setBuildingCategory] = useState(0);
+  const [buildingCategoryList, setBuildingCategoryList] = useState([
+  ]);
+
+
+  //Date-Picker (START DATE)
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = date => {
+    setSelectedDate(date);
+    hideDatePicker();
+  };
+
+  //Date-Picker (End DATE)
+  const [isEndDatePickerVisible, setEndDatePickerVisibility] = useState(false);
+  const [selectedEndDate, setSelectedEndDate] = useState(null);
+
+  const showEndDatePicker = () => {
+    setEndDatePickerVisibility(true);
+  };
+
+  const hideEndDatePicker = () => {
+    setEndDatePickerVisibility(false);
+  };
+
+  const handleEndDateConfirm = date => {
+    setSelectedEndDate(date);
+    hideEndDatePicker();
+  };
+
+  const currentDate = new Date().toISOString().slice(0, 10);
+  const [dateType, setDateType] = useState('survey_submitted');
+
+  var previousDate = new Date(currentDate);
+  previousDate = new Date(previousDate.setMonth(previousDate.getMonth() - 1)).toISOString().slice(0, 10);
+
+  const [startDate, setStartDate] = useState(previousDate);
+  const [endDate, setEndDate] = useState(currentDate);
+  const [organizationId, setOrganizationId] = useState(0);
+  const [buildingId, setBuildingId] = useState(0);
+  const [buildingCategoryId, setBuildingCategoryId] = useState(0);
+  const [floorId, setFloorId] = useState(0);
+  const [roomId, setRoomId] = useState(0);
+
 
   const [Active, setActive] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiAction, setAPIAction] = useState('/building-report-api');
 
   const [data, setData] = useState([]);
   // console.log(endDate);
 
-  const params = JSON.stringify({
+  const showReport = (tabId) => {
+    setStartDate(previousDate);
+    setEndDate(currentDate);
+    setOrganizationId(0);
+    setBuildingId(0);
+
+    if (tabId === 1) {
+      setAPIAction('/building-report-api');
+    } else if (tabId === 2) {
+      setBuildingCategoryId(0);
+      setAPIAction('/building-category-report-api');
+    } else if (tabId === 3) {
+      setAPIAction('/inspection-report-api');
+    } else if (tabId === 4) {
+      setAPIAction('/workorder-report-api');
+    } else if (tabId === 5) {
+      setFloorId(0);
+      setRoomId(0);
+      //setAPIAction('/building-report-api');
+    }
+
+    setActive(tabId);
+  }
+
+  const payload = JSON.stringify({
     appKey: CONFIG.appKey,
     device_id: "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
     user_id: user.id,
     date_type: dateType,
     period: "30",
-    start_date: "2023-01-28",
-    end_date: "2023-02-28",
-    organization_id: "0",
-    building_id: "0",
+    start_date: startDate,
+    end_date: endDate,
+    organization_id: organizationId,
+    building_id: buildingId,
+    building_category_id: buildingCategoryId,
+    floor_id: floorId,
+    room_id: roomId
   });
 
   useFocusEffect(
@@ -82,8 +212,8 @@ const Reports = ({ navigation }) => {
       setIsLoading(true);
       API.instance
         .post(
-          '/building-report-api?is_api=true',
-          params,
+          apiAction + '?is_api=true',
+          payload,
         )
         .then(
           response => {
@@ -98,7 +228,7 @@ const Reports = ({ navigation }) => {
             setIsLoading(false);
           },
         );
-    }, []),
+    }, [Active]),
   );
 
   return (
@@ -147,7 +277,7 @@ const Reports = ({ navigation }) => {
 
 
           <TouchableWithoutFeedback
-            onPress={() => navigation.navigate('Reports')}>
+            onPress={() => refRBSheet.current.open()}>
             <Image
               source={require('../assets/filter.png')}
               style={SIPCStyles.headerManImage}
@@ -195,7 +325,7 @@ const Reports = ({ navigation }) => {
               justifyContent: 'space-around',
               height: Height / 15
             }}>
-            <TouchableOpacity onPress={() => setActive(1)}
+            <TouchableOpacity onPress={() => showReport(1)}
               style={{
                 paddingVertical: 15,
                 paddingHorizontal: 20,
@@ -213,7 +343,7 @@ const Reports = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setActive(2)}
+            <TouchableOpacity onPress={() => showReport(2)}
               style={{
                 paddingVertical: 15,
                 paddingHorizontal: 20,
@@ -231,7 +361,7 @@ const Reports = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setActive(3)}
+            <TouchableOpacity onPress={() => showReport(3)}
               style={{
                 paddingHorizontal: 20, paddingVertical: 15,
                 backgroundColor: 'white',
@@ -244,7 +374,7 @@ const Reports = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setActive(4)}
+            <TouchableOpacity onPress={() => showReport(4)}
               style={{
                 paddingHorizontal: 20, paddingVertical: 15,
                 backgroundColor: 'white',
@@ -257,7 +387,7 @@ const Reports = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setActive(5)}
+            <TouchableOpacity onPress={() => showReport(5)}
               style={{
                 paddingHorizontal: 20,
                 paddingVertical: 15,
@@ -275,6 +405,399 @@ const Reports = ({ navigation }) => {
           </View>
         </ScrollView>
       </View>
+
+
+      {/* ====================================== */}
+      <RBSheet
+        ref={refRBSheet}
+        closeOnDragDown={false}
+        closeOnPressMask={false}
+        dragFromTopOnly={true}
+        height={Height}
+        customStyles={{
+          wrapper: {
+            backgroundColor: "transparent"
+          },
+          draggableIcon: {
+            backgroundColor: "#000"
+          },
+          container: {
+            backgroundColor: 'red',
+          }
+
+        }}>
+
+        <View style={{
+          flexDirection: 'row', justifyContent: 'center', backgroundColor: '#e2e0eb',
+          padding: 25, backgroundColor: '#1281ca'
+        }}>
+
+          <Text style={[SIPCStyles.NormalFont, { textAlign: 'center', color: 'white' }]}>{Active === 1 ? 'Building Report' : Active === 2 ? 'Building Category' : Active === 3 ? 'Inspection' : Active === 4 ? 'WorkOrder' : 'KPI'}
+          </Text>
+        </View>
+
+
+        {Active === 1 || Active === 2 ?
+          <>
+            {/* ===============DataType DropDown========================= */}
+            <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
+              <DropDownPicker
+                searchable={true}
+                searchPlaceholder=""
+                searchContainerStyle={{
+                  backgroundColor: '#fffff6',
+                  borderColor: '#D2D2D2',
+                }}
+                searchTextInputStyle={{ borderColor: '#D2D2D2' }}
+                itemSeparator={true}
+                itemSeparatorStyle={{ backgroundColor: '#D2D2D2', marginVertical: 3 }}
+                showArrowIcon={true}
+                // showTickIcon={true}
+                ArrowDownIconComponent={() => {
+                  return (
+                    <Entypo
+                      size={16}
+                      color={'#808080'}
+                      style={{ paddingHorizontal: 5 }}
+                      name="chevron-thin-down"
+                    />
+                  );
+                }}
+                ArrowUpIconComponent={() => {
+                  return (
+                    <Entypo
+                      size={16}
+                      color={'#808080'}
+                      style={{ paddingHorizontal: 5 }}
+                      name="chevron-thin-up"
+                    />
+                  );
+                }}
+                placeholder="Date Type"
+                placeholderStyle={SIPCStyles.placeholderStyle}
+                style={SIPCStyles.DropDownPicker1}
+                textStyle={SIPCStyles.textSize}
+                dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
+                labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
+                open={dataTypeDropDown}
+                value={dataType}
+                items={dataTypeList}
+                setOpen={setDataTypeDropDown}
+                setValue={setDataType}
+                setItems={setDataTypeList}
+              />
+            </View>
+          </>
+          : (<></>)}
+
+        {/* ===============Period DropDown========================= */}
+        <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
+          <DropDownPicker
+            searchable={true}
+            searchPlaceholder=""
+            searchContainerStyle={{
+              backgroundColor: '#fffff6',
+              borderColor: '#D2D2D2',
+            }}
+            searchTextInputStyle={{ borderColor: '#D2D2D2' }}
+            itemSeparator={true}
+            itemSeparatorStyle={{ backgroundColor: '#D2D2D2', marginVertical: 3 }}
+            showArrowIcon={true}
+            // showTickIcon={true}
+            ArrowDownIconComponent={() => {
+              return (
+                <Entypo
+                  size={16}
+                  color={'#808080'}
+                  style={{ paddingHorizontal: 5 }}
+                  name="chevron-thin-down"
+                />
+              );
+            }}
+            ArrowUpIconComponent={() => {
+              return (
+                <Entypo
+                  size={16}
+                  color={'#808080'}
+                  style={{ paddingHorizontal: 5 }}
+                  name="chevron-thin-up"
+                />
+              );
+            }}
+            placeholder="Period"
+            placeholderStyle={SIPCStyles.placeholderStyle}
+            style={SIPCStyles.DropDownPicker1}
+            textStyle={SIPCStyles.textSize}
+            dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
+            labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
+            open={periodDropDown}
+            value={period}
+            items={periodList}
+            setOpen={setPeriodDropDown}
+            setValue={setPeriod}
+            setItems={setPeriodList}
+          />
+        </View>
+
+        {/* ========================================Start Date======== */}
+
+        <View style={[SIPCStyles.container, { marginHorizontal: 20, marginVertical: 15, borderWidth: 1 }]}>
+          <TouchableOpacity onPress={showDatePicker}>
+            <Image
+              source={require('../assets/cal.png')}
+              style={SIPCStyles.MainBuilding}
+            />
+          </TouchableOpacity>
+
+          <TextInput
+            style={SIPCStyles.textInputs}
+            placeholder='Start Date'
+            value={selectedDate ? selectedDate.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            }) : ''}
+            editable={false}
+            underlineColor="transparent"
+            theme={{ colors: { primary: '#cccccc' } }}
+          />
+        </View>
+
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="date"
+          onConfirm={handleConfirm}
+          onCancel={hideDatePicker}
+        />
+        {/* ========================================End Date======== */}
+
+        <View style={[SIPCStyles.container, { marginHorizontal: 20, marginVertical: 15, borderWidth: 1 }]}>
+          <TouchableOpacity onPress={showEndDatePicker}>
+            <Image
+              source={require('../assets/cal.png')}
+              style={SIPCStyles.MainBuilding}
+            />
+          </TouchableOpacity>
+
+          <TextInput
+            style={SIPCStyles.textInputs}
+            placeholder='End Date'
+            value={selectedEndDate ? selectedEndDate.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            }) : ''}
+            editable={false}
+            underlineColor="transparent"
+            theme={{ colors: { primary: '#cccccc' } }}
+          />
+        </View>
+
+        <DateTimePickerModal
+          isVisible={isEndDatePickerVisible}
+          mode="date"
+          onConfirm={handleEndDateConfirm}
+          onCancel={hideEndDatePicker}
+        />
+        {/* ===============Organization DropDown========================= */}
+        <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
+          <DropDownPicker
+            searchable={true}
+            searchPlaceholder=""
+            searchContainerStyle={{
+              backgroundColor: '#fffff6',
+              borderColor: '#D2D2D2',
+            }}
+            searchTextInputStyle={{ borderColor: '#D2D2D2' }}
+            itemSeparator={true}
+            itemSeparatorStyle={{ backgroundColor: '#D2D2D2', marginVertical: 3 }}
+            showArrowIcon={true}
+            // showTickIcon={true}
+            ArrowDownIconComponent={() => {
+              return (
+                <Entypo
+                  size={16}
+                  color={'#808080'}
+                  style={{ paddingHorizontal: 5 }}
+                  name="chevron-thin-down"
+                />
+              );
+            }}
+            ArrowUpIconComponent={() => {
+              return (
+                <Entypo
+                  size={16}
+                  color={'#808080'}
+                  style={{ paddingHorizontal: 5 }}
+                  name="chevron-thin-up"
+                />
+              );
+            }}
+            placeholder="Organization"
+            placeholderStyle={SIPCStyles.placeholderStyle}
+            style={SIPCStyles.DropDownPicker1}
+            textStyle={SIPCStyles.textSize}
+            dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
+            labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
+            open={organizationDropDown}
+            value={organization}
+            items={organizationList}
+            setOpen={setOrganizationDropDown}
+            setValue={setOrganization}
+            setItems={setOrganizationList}
+          />
+        </View>
+
+
+        {Active === 2 ?
+          <>
+            {/* ===============Building Category DropDown========================= */}
+            <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
+              <DropDownPicker
+                searchable={true}
+                searchPlaceholder=""
+                searchContainerStyle={{
+                  backgroundColor: '#fffff6',
+                  borderColor: '#D2D2D2',
+                }}
+                searchTextInputStyle={{ borderColor: '#D2D2D2' }}
+                itemSeparator={true}
+                itemSeparatorStyle={{ backgroundColor: '#D2D2D2', marginVertical: 3 }}
+                showArrowIcon={true}
+                // showTickIcon={true}
+                ArrowDownIconComponent={() => {
+                  return (
+                    <Entypo
+                      size={16}
+                      color={'#808080'}
+                      style={{ paddingHorizontal: 5 }}
+                      name="chevron-thin-down"
+                    />
+                  );
+                }}
+                ArrowUpIconComponent={() => {
+                  return (
+                    <Entypo
+                      size={16}
+                      color={'#808080'}
+                      style={{ paddingHorizontal: 5 }}
+                      name="chevron-thin-up"
+                    />
+                  );
+                }}
+                placeholder="Building Category"
+                placeholderStyle={SIPCStyles.placeholderStyle}
+                style={SIPCStyles.DropDownPicker1}
+                textStyle={SIPCStyles.textSize}
+                dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
+                labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
+                open={buildingCategoryDropDown}
+                value={buildingCategory}
+                items={buildingCategoryList}
+                setOpen={setBuildingCategoryDropDown}
+                setValue={setBuildingCategory}
+                setItems={setBuildingCategoryList}
+              />
+            </View>
+
+            <View style={{ margin: 20, }}>
+              <Button style={{ backgroundColor: '#3a7fc4', borderRadius: 10, paddingVertical: 5 }} labelStyle={{ color: 'white' }}>
+                <Text style={[SIPCStyles.NormalFont, { color: 'white' }]}> Get Reports</Text> </Button>
+            </View>
+
+
+          </>
+          :
+          <>
+            {/* ===============Building DropDown========================= */}
+            <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
+              <DropDownPicker
+                searchable={true}
+                searchPlaceholder=""
+                searchContainerStyle={{
+                  backgroundColor: '#fffff6',
+                  borderColor: '#D2D2D2',
+                }}
+                searchTextInputStyle={{ borderColor: '#D2D2D2' }}
+                itemSeparator={true}
+                itemSeparatorStyle={{ backgroundColor: '#D2D2D2', marginVertical: 3 }}
+                showArrowIcon={true}
+                // showTickIcon={true}
+                ArrowDownIconComponent={() => {
+                  return (
+                    <Entypo
+                      size={16}
+                      color={'#808080'}
+                      style={{ paddingHorizontal: 5 }}
+                      name="chevron-thin-down"
+                    />
+                  );
+                }}
+                ArrowUpIconComponent={() => {
+                  return (
+                    <Entypo
+                      size={16}
+                      color={'#808080'}
+                      style={{ paddingHorizontal: 5 }}
+                      name="chevron-thin-up"
+                    />
+                  );
+                }}
+                placeholder="Building"
+                placeholderStyle={SIPCStyles.placeholderStyle}
+                style={SIPCStyles.DropDownPicker1}
+                textStyle={SIPCStyles.textSize}
+                dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
+                labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
+                open={buildingDropDown}
+                value={building}
+                items={buildingList}
+                setOpen={setBuildingDropDown}
+                setValue={setBuilding}
+                setItems={setBuildingList}
+              />
+            </View>
+
+            {/* <View style={{ margin: 20, }}>
+              <Button style={{ backgroundColor: '#3a7fc4', borderRadius: 10, paddingVertical: 5 }} labelStyle={{ color: 'white' }}>
+                <Text style={[SIPCStyles.NormalFont, { color: 'white' }]}> Get Reports</Text> </Button>
+            </View> */}
+
+
+
+          </>
+        }
+
+        <View
+          style={{ backgroundColor: 'white', borderRadius: 0, bottom: 0, position: 'absolute', width: Width, height: Height / 13 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+            <TouchableWithoutFeedback
+               onPress={() => refRBSheet.current.close()}
+              style={{}}>
+              <Text style={[SIPCStyles.NormalFont, { padding: 15 }]}>Close</Text>
+            </TouchableWithoutFeedback>
+
+            <View style={{ borderWidth: 1, borderColor: '#e6e6e6' }} />
+
+            <TouchableWithoutFeedback
+            // onPress={saveWorkOrder}
+            >
+              <Text
+                style={[
+                  SIPCStyles.NormalFont,
+                  { color: '#199be2', padding: 15 },
+                ]}>
+                Get Reports
+              </Text>
+            </TouchableWithoutFeedback>
+          </View>
+        </View>
+
+      </RBSheet>
+
+
+
+
 
 
       {/* ================================ */}

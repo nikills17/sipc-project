@@ -80,7 +80,6 @@ const AddWorkOrders = ({navigation, route}) => {
       label: 'Maintenance',
       value: '2',
     },
-
   ]);
   
   //Location Type

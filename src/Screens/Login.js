@@ -1,7 +1,7 @@
-import { View, Text, Image, Dimensions, StatusBar, TextInput, } from 'react-native'
+import { View, Image, Dimensions,StatusBar,} from 'react-native'
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import SIPCStyles from './styles'
-import { Button } from 'react-native-paper';
+import { Button,Text,TextInput,} from 'react-native-paper';
 import API from '../utility/api';
 import { responsiveScreenHeight, responsiveScreenWidth, responsiveScreenFontSize } from 'react-native-responsive-dimensions';
 import { ScrollView } from 'react-native';
