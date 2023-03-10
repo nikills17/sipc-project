@@ -170,6 +170,7 @@ const SavePendingSurvey = ({ navigation, route }) => {
     );
     const commentType = SurveyOptions[answers.comment_type];
 
+    
     // onPRESS
     const onPress = () => {
       if (!selected) {

@@ -52,12 +52,13 @@ const SurveyViewAll = ({navigation, route}) => {
   const [Active, setActive] = useState(pending);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  
   const [dataLoading, setDataLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+
 
   const params = JSON.stringify({
-    pageSize: pageSize.toString(),
+    pageSize: CONFIG.pageSize,
     pageNumber: '1',
     appKey: CONFIG.appKey,
     device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
@@ -85,10 +86,10 @@ const SurveyViewAll = ({navigation, route}) => {
   );
 
   const getMoreData = () => {
-    if (currentPage * pageSize < totalCount) {
+    if (currentPage * CONFIG.pageSize < totalCount) {
       setDataLoading(true);
       const newParams = JSON.stringify({
-        pageSize: pageSize.toString(),
+        pageSize: CONFIG.pageSize,
         pageNumber: (currentPage + 1).toString(),
         appKey: CONFIG.appKey,
         device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
@@ -111,14 +112,7 @@ const SurveyViewAll = ({navigation, route}) => {
     }
   };
 
-  const renderItem = ({item, index}) => (
-    <SurveyViewAllBox
-      data={item}
-      key={index}
-      navigation={navigation}
-      Active={Active}
-    />
-  );
+
 
   return (
     <View style={SIPCStyles.flex}>
