@@ -204,7 +204,7 @@ const Reports = ({ navigation }) => {
     building_id: buildingId,
     building_category_id: buildingCategoryId,
     floor_id: floorId,
-    room_id: roomId
+    room_id: roomId,
   });
 
   useFocusEffect(
@@ -422,7 +422,7 @@ const Reports = ({ navigation }) => {
             backgroundColor: "#000"
           },
           container: {
-            backgroundColor: 'red',
+            // backgroundColor: 'red',
           }
 
         }}>
@@ -769,10 +769,10 @@ const Reports = ({ navigation }) => {
         }
 
         <View
-          style={{ backgroundColor: 'white', borderRadius: 0, bottom: 0, position: 'absolute', width: Width, height: Height / 13 }}>
+          style={{ backgroundColor: 'white', borderRadius: 0, bottom: 0, position: 'absolute', width: Width, height: Height / 13, borderColor: '#ccc', borderWidth: 1, }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
             <TouchableWithoutFeedback
-               onPress={() => refRBSheet.current.close()}
+              onPress={() => refRBSheet.current.close()}
               style={{}}>
               <Text style={[SIPCStyles.NormalFont, { padding: 15 }]}>Close</Text>
             </TouchableWithoutFeedback>
@@ -807,9 +807,9 @@ const Reports = ({ navigation }) => {
         ))}
       </ScrollView> */}
 
+      <ScrollView>
+        <View style={{ zIndex: -1 }}>
 
-      <View style={{ zIndex: -1 }}>
-        <ScrollView>
           {isLoading ? (
             <Loader />
           ) : (
@@ -819,9 +819,9 @@ const Reports = ({ navigation }) => {
               ))}
             </>
           )}
-        </ScrollView>
-      </View>
 
+        </View>
+      </ScrollView>
 
 
       {/* ================================ */}

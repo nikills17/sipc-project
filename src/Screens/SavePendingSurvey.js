@@ -7,7 +7,8 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
   Dimensions,
-  FlatList, Alert
+  FlatList,
+  Alert,
 } from 'react-native';
 import {
   Text,
@@ -52,11 +53,11 @@ const SavePendingSurvey = ({ navigation, route }) => {
   const refRBSheet = useRef();
   const refRBSheet1 = useRef();
 
-  const close = (sheetObj) => {
+  const close = sheetObj => {
     setError(false);
     setErrorMessage('');
     sheetObj.current.close();
-  }
+  };
 
   const maxImages = 10;
 
@@ -160,14 +161,16 @@ const SavePendingSurvey = ({ navigation, route }) => {
   };
 
   const RadioBox = ({ answers, answer, setAnswer, selected }) => {
-    console.log("RADIO BOX FINAL ===>" + JSON.stringify(finalAnswer.current));
-    const [comment, setComment] = useState(answers.isSelected === '1' ? answers.comment : '',);
+    const [comment, setComment] = useState(
+      answers.isSelected === '1' ? answers.comment : '',
+    );
     const [completed, setCompleted] = useState(answers.isSelected === '1');
-    const [imagePath, setImagePath] = useState(answers.isSelected === '1' ?
-      answers.images.split(',') : '',);
+    const [imagePath, setImagePath] = useState(
+      answers.isSelected === '1' ? answers.images.split(',') : '',
+    );
     const commentType = SurveyOptions[answers.comment_type];
-    console.log(imagePath);
 
+    
     // onPRESS
     const onPress = () => {
       if (!selected) {
@@ -199,24 +202,35 @@ const SavePendingSurvey = ({ navigation, route }) => {
 
     //onSubmit
     const onSubmit = () => {
-      const filteredArray = Array.isArray(imagePath)
-        ? imagePath
-          .map(el => ({ image: el.split('/').pop() }))
-          .filter(el => el.image)
-        : [];
-      const answerObject = [
-        {
-          id: answers.answer_id.toString(),
-          score: answers.score.toString(),
-          is_comment_required: answers.is_comment_required.toString(),
-          answer_name: answers.answer,
-          comment,
-          images: filteredArray.length ? filteredArray : '',
-        },
-      ];
-      setAnswer(answerObject);
-      setCompleted(true);
-    };
+      if (commentType.commentRequired && comment === '') {
+        Alert.alert('Comment is required.');
+      } else if (
+        commentType.imageRequired &&
+        imagePath === ''
+      ) {
+        Alert.alert('Image is required.');
+      } else {
+        const filteredArray = Array.isArray(imagePath)
+          ? imagePath
+            .map(el => ({ image: el.split('/').pop() }))
+            .filter(el => el.image)
+          : [];
+        const answerObject = [
+          {
+            id: answers.answer_id.toString(),
+            score: answers.score.toString(),
+            is_comment_required: answers.is_comment_required.toString(),
+            answer_name: answers.answer,
+            comment,
+            images: filteredArray.length ? filteredArray : '',
+          },
+        ];
+        setAnswer(answerObject);
+        setCompleted(true);
+      };
+    }
+
+
 
     //onCommentImagePress
     const onCommentImagePress = () => {
@@ -238,11 +252,14 @@ const SavePendingSurvey = ({ navigation, route }) => {
             alignItems: 'center',
             height: height / 12,
             borderBottomRightRadius:
-              commentType.completePopup && answer && answer[0] === answers.answer_id
+              commentType.completePopup &&
+                answer &&
+                answer[0] === answers.answer_id
                 ? 0
                 : 12,
             borderBottomLeftRadius:
-              commentType.completePopup && answer &&
+              commentType.completePopup &&
+                answer &&
                 answer[0] === answers.answer_id
                 ? 0
                 : 12,
@@ -289,15 +306,10 @@ const SavePendingSurvey = ({ navigation, route }) => {
                       </Text>
                     </TouchableWithoutFeedback>
 
-                    <TouchableWithoutFeedback onPress={() => {
-                      if (comment === '') {
-                        Alert.alert("Comment is required.");
-                      } else if (commentType.imageRequired && imagePath === '') {
-                        Alert.alert("Image is required.");
-                      } else {
-                        onSubmit();
-                      }
-                    }}>
+                    <TouchableWithoutFeedback
+                      onPress={() => {
+                        onSubmit()
+                      }}>
                       <Text
                         style={[
                           SIPCStyles.checkboxFont,
@@ -439,7 +451,6 @@ const SavePendingSurvey = ({ navigation, route }) => {
     );
   };
   const RadioBoxComponent = ({ data }) => {
-
     const [answer, setAnswer] = useState(
       data.answers
         .filter(el => el.isSelected === '1')
@@ -466,7 +477,7 @@ const SavePendingSurvey = ({ navigation, route }) => {
       const answerIndex = finalAnswer.current.findIndex(
         el => el.question_id === data.id.toString(),
       );
-      answer
+      answer.length > 0
         ? answerIndex === -1
           ? finalAnswer.current.push(answerObject)
           : (finalAnswer.current[answerIndex] = answerObject)
@@ -501,8 +512,6 @@ const SavePendingSurvey = ({ navigation, route }) => {
 
   //Here answers is the for the item being used in check box and answer is the state which contains all the answer for the particular question
   const CheckBox = ({ answers, answer, setAnswer }) => {
-    console.log("CHECK BOX FINAL ===>" + JSON.stringify(finalAnswer.current));
-
     const [checked, setChecked] = useState(answers.isSelected === '1');
     const [comment, setComment] = useState(answers.comment);
     const [completed, setCompleted] = useState(answers.isSelected === '1');
@@ -510,7 +519,6 @@ const SavePendingSurvey = ({ navigation, route }) => {
       answers.isSelected === '1' ? answers.images.split(',') : '',
     );
     const commentType = SurveyOptions[answers.comment_type];
-
 
     const onPress = () => {
       if (checked) {
@@ -552,29 +560,39 @@ const SavePendingSurvey = ({ navigation, route }) => {
     };
 
     const onSubmit = () => {
-      const filteredArray = Array.isArray(imagePath)
-        ? imagePath
-          .map(el => ({ image: el.split('/').pop() }))
-          .filter(el => el.image)
-        : [];
-      const answerObject = {
-        id: answers.answer_id.toString(),
-        score: answers.score.toString(),
-        is_comment_required: answers.is_comment_required.toString(),
-        answer_name: answers.answer.toString(),
-        comment,
-        images: filteredArray.length ? filteredArray : '',
-      };
-      if (answer.some(el => el.id === answers.answer_id.toString())) {
-        const oldObject = answer.filter(
-          el => el.id !== answers.answer_id.toString(),
-        );
-        setAnswer([...oldObject, answerObject]);
+      if (comment === '') {
+        Alert.alert('Comment is required.');
+      } else if (
+        commentType.imageRequired &&
+        imagePath === ''
+      ) {
+        Alert.alert('Image is required.');
       } else {
-        setAnswer([...answer, answerObject]);
-      }
-      setCompleted(true);
-    };
+        const filteredArray = Array.isArray(imagePath)
+          ? imagePath
+            .map(el => ({ image: el.split('/').pop() }))
+            .filter(el => el.image)
+          : [];
+        const answerObject = {
+          id: answers.answer_id.toString(),
+          score: answers.score.toString(),
+          is_comment_required: answers.is_comment_required.toString(),
+          answer_name: answers.answer.toString(),
+          comment,
+          images: filteredArray.length ? filteredArray : '',
+        };
+        if (answer.some(el => el.id === answers.answer_id.toString())) {
+          const oldObject = answer.filter(
+            el => el.id !== answers.answer_id.toString(),
+          );
+          setAnswer([...oldObject, answerObject]);
+        } else {
+          setAnswer([...answer, answerObject]);
+        }
+        setCompleted(true);
+      };
+    }
+
 
     const onCommentImagePress = () => {
       setChecked(true);
@@ -657,15 +675,11 @@ const SavePendingSurvey = ({ navigation, route }) => {
                           </Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={() => {
-                          if (comment === '') {
-                            Alert.alert("Comment is required.");
-                          } else if (commentType.imageRequired && imagePath === '') {
-                            Alert.alert("Image is required.");
-                          } else {
-                            onSubmit();
-                          }
-                        }}>
+                        <TouchableOpacity
+                          onPress={() => {
+                            onSubmit()
+
+                          }}>
                           <Text
                             style={[
                               SIPCStyles.checkboxFont,
@@ -1413,8 +1427,7 @@ const SavePendingSurvey = ({ navigation, route }) => {
                   Cancel
                 </Text>
               </TouchableWithoutFeedback>
-              <TouchableWithoutFeedback
-                onPress={() => submitSurvey()}>
+              <TouchableWithoutFeedback onPress={() => submitSurvey()}>
                 <Text style={[SIPCStyles.NormalFont, { color: '#199be2' }]}>
                   Continue
                 </Text>

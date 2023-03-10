@@ -14,6 +14,7 @@ import Loader from '../component/activityindicator';
 import { responsiveScreenHeight, responsiveScreenWidth, responsiveScreenFontSize } from 'react-native-responsive-dimensions';
 
 import { MMKV } from 'react-native-mmkv'
+import { CONFIG } from '../utility/config';
 export const storage = new MMKV();
 
 
@@ -24,23 +25,29 @@ const WorkOrders = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const onChangeSearch = query => setSearchQuery(query);
 
-  const [totalCount, setTotalCount] = useState();
 
   const Width = Dimensions.get('window').width;
   const Height = Dimensions.get('window').height;
 
   const [Active, setActive] = useState(1);
+  const [totalCount, setTotalCount] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
 
+  const [dataLoading, setDataLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  
+
+
   const params = JSON.stringify({
-    "pageSize": "10",
-    "pageNumber": "1",
-    "appKey": "f9285c6c2d6a6b531ae1f70d2853f612",
-    "device_id": "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
-    "userId": user.id,
-    "workorderStatus": Active,
+    pageSize: CONFIG.pageSize,
+    pageNumber: "1",
+    appKey: CONFIG.appKey,
+    device_id: "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
+    userId: user.id,
+    workorderStatus: Active,
   });
+
 
   useFocusEffect(
     React.useCallback(() => {
@@ -48,25 +55,49 @@ const WorkOrders = ({ navigation }) => {
       API.instance
         .post(
           '/workorder-list-device?is_api=true',
-          params,
-        )
-        .then(
-          response => {
-            setIsLoading(false);
-            setData(response.data);
-            setTotalCount(response.totalCount);
-          },
-          error => {
-            console.error(error);
-            setIsLoading(false);
-          },
-        );
+          params,).then(
+            response => {
+              setIsLoading(false);
+              setData(response.data);
+              setTotalCount(response.totalCount);
+              setCurrentPage(1);
+            },
+            error => {
+              console.error(error);
+              setIsLoading(false);
+            },
+          );
     }, [Active]),
   );
 
-  const renderItem = ({ item, index }) => (
-    <WorkOrderBox data={item} key={index} Active={Active} navigation={navigation} />
-  );
+  const getMoreData = () => {
+    if (currentPage * CONFIG.pageSize < totalCount) {
+      setDataLoading(true);
+      const newParams = JSON.stringify({
+        pageSize: CONFIG.pageSize,
+        pageNumber: (currentPage + 1).toString(),
+        appKey: CONFIG.appKey,
+        device_id: "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
+        userId: user.id,
+        workorderStatus: Active,
+      });
+      API.instance.post('/workorder-list-device?is_api=true', newParams).then(
+        response => {
+          let newData = response.data;
+          setDataLoading(false);
+          setData([...data, ...newData]);
+          setCurrentPage(currentPage + 1);
+        },
+        error => {
+          console.error(error);
+          setDataLoading(false);
+        },
+      );
+    }
+  };
+
+
+
 
   return (
     <View style={SIPCStyles.flex}>
@@ -172,7 +203,7 @@ const WorkOrders = ({ navigation }) => {
           </Text>
         </Card>
       </View>
-      <ScrollView>
+      
         {/* ====================================== */}
         {/* {isLoading ? (
           <Loader />
@@ -190,14 +221,29 @@ const WorkOrders = ({ navigation }) => {
         } */}
         {/* =============================================== */}
 
-        <ScrollView>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 35 }}
+          onScroll={({ nativeEvent }) => {
+            const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+            if (
+              layoutMeasurement.height + contentOffset.y >=
+              contentSize.height - 35
+            ) {
+              getMoreData();
+            }
+          }}>
           {isLoading ? (
             <Loader />
           ) : totalCount > 0 ? (
             <>
               {data.map((item, index) => (
-                <WorkOrderBox data={item} key={index} Active={Active} navigation={navigation} />
+                <WorkOrderBox
+                  data={item}
+                  key={index}
+                  Active={Active}
+                  navigation={navigation} />
               ))}
+              {dataLoading && <Loader marginTop={10} />}
             </>
           ) : (
             <>
@@ -242,7 +288,7 @@ const WorkOrders = ({ navigation }) => {
 
 
         {/* ====================================== */}
-      </ScrollView>
+     
     </View>
   );
 };

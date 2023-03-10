@@ -8,6 +8,7 @@ import API from '../utility/api';
 import { responsiveScreenFontSize, } from 'react-native-responsive-dimensions';
 import RBSheet from "react-native-raw-bottom-sheet";
 import Loader from '../component/activityindicator';
+import { SurveyOptions } from '../utility/constants';
 
 import { MMKV } from 'react-native-mmkv'
 import { CONFIG } from '../utility/config';
@@ -241,6 +242,8 @@ const SaveSurvey = ({ navigation, route }) => {
     const [comment, setComment] = useState('');
     const [imageNames, setImageNames] = useState([]);
 
+    const commentType = SurveyOptions[answers.comment_type];
+
     return (
       <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: deviceWidth > 500 ? 'wrap' : 'wrap', }}>
         <View style={{ flexDirection: 'column', width: deviceWidth > 500 ? '50%' : '100%', }}>
@@ -257,8 +260,8 @@ const SaveSurvey = ({ navigation, route }) => {
                 overflow: 'hidden',
                 height: Height / 12,
                 marginHorizontal: 20,
-                borderBottomRightRadius: checked == 1 && answers.comment_type != "noTextImage" ? 0 : 12,
-                borderBottomLeftRadius: checked == 1 && answers.comment_type != "noTextImage" ? 0 : 12,
+                borderBottomRightRadius: checked == 1 && commentType.completePopup ? 0 : 12,
+                borderBottomLeftRadius: checked == 1 && commentType.completePopup ? 0 : 12,
                 borderTopRightRadius: 12,
                 borderTopLeftRadius: 12
               }}
@@ -300,7 +303,7 @@ const SaveSurvey = ({ navigation, route }) => {
                   right: 0,
                   alignSelf: 'center',
                 }}>
-                {answers.comment_type != "noTextImage" ?
+                {commentType.completePopup ?
                   (
                     <>
                       {completed === false ? (
@@ -627,6 +630,13 @@ const SaveSurvey = ({ navigation, route }) => {
     const [completed, setCompleted] = useState(true);
     const [images, setImages] = useState([]);
 
+    const commentType = SurveyOptions[answers.comment_type];
+
+
+    //-------------------------//
+    
+    //-------------------------//
+
     return (
       <>
         <View style={{
@@ -637,9 +647,8 @@ const SaveSurvey = ({ navigation, route }) => {
           // paddingRight: 12,
           // overflow: 'hidden',
           height: Height / 12,
-
-          borderBottomRightRadius: answers.comment_type != "noTextImage" && answer && answer.answer_id == answers.answer_id ? 0 : 12,
-          borderBottomLeftRadius: answers.comment_type != "noTextImage" && answer && answer.answer_id == answers.answer_id ? 0 : 12,
+          borderBottomRightRadius: commentType.completePopup && answer && answer[0] === answers.answer_id ? 0 : 12,
+          borderBottomLeftRadius: commentType.completePopup && answer && answer[0] === answers.answer_id ? 0 : 12,
           borderTopRightRadius: 12,
           borderTopLeftRadius: 12
 
@@ -674,7 +683,7 @@ const SaveSurvey = ({ navigation, route }) => {
               alignSelf: 'center',
             }}>
             {
-              answers.comment_type != "noTextImage" ?
+              commentType.completePopup ?
                 (
                   <>
                     {
@@ -724,43 +733,28 @@ const SaveSurvey = ({ navigation, route }) => {
                       ) : (
                         <>
                           {
-                            answers.comment_type == "textOptional" || answers.comment_type == "textRequired" ?
-                              (
-                                <>
-                                  <TouchableWithoutFeedback
-                                    onPress={() =>
-                                      saveAnswer(answers, setAnswer, setCompleted)
-                                    }>
-                                    <Image
-                                      source={require('../assets/msg.png')}
-                                      style={SIPCStyles.commentImage}
-                                    />
-                                  </TouchableWithoutFeedback>
-                                </>
-                              ) :
-                              (
-                                <>
-                                  <TouchableWithoutFeedback
-                                    onPress={() =>
-                                      saveAnswer(answers, setAnswer, setCompleted)
-                                    }>
-                                    <Image
-                                      source={require('../assets/msg.png')}
-                                      style={SIPCStyles.commentImage}
-                                    />
-                                  </TouchableWithoutFeedback>
-
-                                  <TouchableWithoutFeedback
-                                    onPress={() => saveAnswer(answers, setAnswer, setCompleted)}>
-                                    <Image
-                                      source={require('../assets/img.png')}
-                                      style={SIPCStyles.commentImage}
-                                    />
-                                  </TouchableWithoutFeedback>
-                                </>
-                              )
+                            commentType.commentShow && (
+                              <TouchableWithoutFeedback
+                                onPress={() =>
+                                  saveAnswer(answers, setAnswer, setCompleted)
+                                }>
+                                <Image
+                                  source={require('../assets/msg.png')}
+                                  style={[SIPCStyles.commentImage]}
+                                />
+                              </TouchableWithoutFeedback>
+                            )
                           }
 
+                          {commentType.imageShow && (
+                            <TouchableWithoutFeedback
+                              onPress={() => saveAnswer(answers, setAnswer, setCompleted)}>
+                              <Image
+                                source={require('../assets/img.png')}
+                                style={[SIPCStyles.commentImage]}
+                              />
+                            </TouchableWithoutFeedback>
+                          )}
                         </>
                       )}
                   </>
@@ -778,7 +772,7 @@ const SaveSurvey = ({ navigation, route }) => {
         {answer && answer.answer_id === answers.answer_id && !completed && (
           <View>
             {
-              answers.comment_type != "noTextImage" ?
+              commentType.commentShow  &&
                 (
                   <>
                     <TextInput
@@ -793,8 +787,6 @@ const SaveSurvey = ({ navigation, route }) => {
 
                     />
                   </>
-                ) : (
-                  <></>
                 )
             }
 
