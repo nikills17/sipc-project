@@ -104,7 +104,7 @@ const MyTabScreen = () => {
       />
 
       <Tab.Screen
-        name="Survey"
+        name="SurveyViewAll"
         component={SurveyViewAllScreen}
         options={{
           tabBarLabel: 'Surveys',

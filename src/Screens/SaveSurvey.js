@@ -8,13 +8,15 @@ import API from '../utility/api';
 import { responsiveScreenFontSize, } from 'react-native-responsive-dimensions';
 import RBSheet from "react-native-raw-bottom-sheet";
 import Loader from '../component/activityindicator';
+import { SurveyOptions } from '../utility/constants';
 
 import { MMKV } from 'react-native-mmkv'
+import { CONFIG } from '../utility/config';
 export const storage = new MMKV();
 
 const SaveSurvey = ({ navigation, route }) => {
 
-  const jsonUser = storage.getString('user')  // for user Object/Id 
+  const jsonUser = storage.getString('user')
   const user = JSON.parse(jsonUser);
 
 
@@ -30,52 +32,20 @@ const SaveSurvey = ({ navigation, route }) => {
   const { orgId, orgName, buildingId, buildingName, surveyId } = route?.params;
 
   const finalAnswer = useRef([]);
+  const [visible, setVisible] = useState(false);
   const refRBSheet = useRef();
   const refRBSheet1 = useRef();
   const screenHeight = Dimensions.get("window").height;
 
-  const Width = Dimensions.get('window').width;
+
+  const width = Dimensions.get('window').width;
   const Height = Dimensions.get('window').height;
   const deviceWidth = Dimensions.get('window').width;
-
-
-  /* ===================== MODAL================ */
-
-  const [visible, setVisible] = useState(false);
-  const showModal = () => {
-    setError(false);
-    setErrorMessage("");
-    setVisible(true);
-  }
-  const hideModal = () => {
-    setError(false);
-    setErrorMessage("");
-    setVisible(false)
-  };
-
-  /* ===================Submit MODAL================ */
-
-  const [visible1, setVisible1] = useState(false);
-
-  const showModal1 = () => {
-    setError(false);
-    setErrorMessage("");
-    setFirstName('');
-    setLastName('');
-    setVisible1(true);
-  }
-  const hideModal1 = () => {
-    setError(false);
-    setErrorMessage("");
-    setFirstName('');
-    setLastName('');
-    setVisible1(false);
-  }
 
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
 
-  const width = Dimensions.get('window').width;
+
 
   //Start-survey-device Api 
   useEffect(() => {
@@ -83,14 +53,13 @@ const SaveSurvey = ({ navigation, route }) => {
       .post(
         `/start-survey-device?is_api=true`,
         JSON.stringify({
-          appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+          appKey: CONFIG.appKey,
           device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
           surveyId: route?.params?.surveyId,
         }),
       )
       .then(response => {
         setSurveyData(response.surveyData[0]);
-        // console.log("response.surveyData[0]"+ JSON.stringify(response.surveyData[0]));
         setData(response.data);
         setError(false);
         setErrorMessage("")
@@ -107,7 +76,7 @@ const SaveSurvey = ({ navigation, route }) => {
     if (imagePath != null) {
       // Create FormData
       const data = new FormData();
-      data.append("appKey", "f9285c6c2d6a6b531ae1f70d2853f612");
+      data.append("appKey", CONFIG.appKey);
       data.append("device_id", "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1");
       data.append("survey_id", surveyId);
       data.append("user_id", user.id);
@@ -197,9 +166,10 @@ const SaveSurvey = ({ navigation, route }) => {
     //setImages(images.filter((_, i) => i !== index));
   };
 
-  const updateFinalAnswer = (answer, setAnswer, answers, comment, images, questionTypeId) =>{
-    console.log("questionTypeId"+questionTypeId);
-    if(questionTypeId == 2){//checkbox
+  const updateFinalAnswer = (answer, setAnswer, answers, comment, images, questionTypeId) => {
+
+    // console.log("questionTypeId"+questionTypeId);
+    if (questionTypeId == 2) {//checkbox
       var elementPos = [...answer].map(function (x) { return x.id; }).indexOf(answers.answer_id.toString());
       if (elementPos != -1) {
         answer.splice(elementPos, 1);
@@ -215,11 +185,12 @@ const SaveSurvey = ({ navigation, route }) => {
         };
         setAnswer([...answer, answerObject]);
       }
-    }else{//radio
+    } else {//radio
 
     }
-    
+
   }
+  // console.log('updateFinalAnswer' + updateFinalAnswer);
 
 
   // TextInput For Comment----
@@ -264,13 +235,15 @@ const SaveSurvey = ({ navigation, route }) => {
   //CheckBox -> TypeId = 2
   //Here answers is the for the item being used in check box and answer is the state which contains all the answer for the particular question
 
-  const CheckBox = ({ answers, answer, setAnswer}) => {
+  const CheckBox = ({ answers, answer, setAnswer }) => {
     const [checked, setChecked] = useState(false);
     const [completed, setCompleted] = useState(true);
     const [images, setImages] = useState([]);
     const [comment, setComment] = useState('');
     const [imageNames, setImageNames] = useState([]);
-    
+
+    const commentType = SurveyOptions[answers.comment_type];
+
     return (
       <View style={{ flexDirection: 'row', justifyContent: 'flex-start', flexWrap: deviceWidth > 500 ? 'wrap' : 'wrap', }}>
         <View style={{ flexDirection: 'column', width: deviceWidth > 500 ? '50%' : '100%', }}>
@@ -287,17 +260,17 @@ const SaveSurvey = ({ navigation, route }) => {
                 overflow: 'hidden',
                 height: Height / 12,
                 marginHorizontal: 20,
-                borderBottomRightRadius: checked == 1 && answers.comment_type != "noTextImage" ? 0 : 12,
-                borderBottomLeftRadius: checked == 1 && answers.comment_type != "noTextImage" ? 0 : 12,
+                borderBottomRightRadius: checked == 1 && commentType.completePopup ? 0 : 12,
+                borderBottomLeftRadius: checked == 1 && commentType.completePopup ? 0 : 12,
                 borderTopRightRadius: 12,
                 borderTopLeftRadius: 12
               }}
               onPress={() => {
                 updateFinalAnswer(answer, setAnswer, answers, '', '', 2);
                 setChecked(!checked);
-                if(checked === true){//means uncheck
+                if (checked === true) {//means uncheck
                   setCompleted(true);
-                }else if (completed) {
+                } else if (completed) {
                   setCompleted(false);
                 }
               }}
@@ -319,7 +292,7 @@ const SaveSurvey = ({ navigation, route }) => {
                   // marginRight: '18%',
                   paddingVertical: 2,
                   fontSize: responsiveScreenFontSize(1.8),
-                  width: '35%',
+                  width: '30%',
                 }}>
                 {answers.answer}
               </Text>
@@ -338,7 +311,7 @@ const SaveSurvey = ({ navigation, route }) => {
 
                           <TouchableWithoutFeedback
                             onPress={() => {
-                              if(answers.is_comment_required == "1" && completed === false){
+                              if (answers.is_comment_required == "1" && completed === false) {
                                 setComment('');
                                 setChecked(!checked);
                               }
@@ -355,11 +328,11 @@ const SaveSurvey = ({ navigation, route }) => {
 
                           <TouchableWithoutFeedback
                             onPress={() => {
-                              if(comment === ''){
+                              if (comment === '') {
                                 Alert.alert("Comment is required.");
-                              }else{
+                              } else {
                                 setCompleted(true);
-                                console.log("answer"+JSON.stringify(answer));
+
                                 //lets update this comment in final answer array
                                 var elementPos = [...answer].map(function (x) { return x.id; }).indexOf(answers.answer_id.toString());
                                 var currentAnswerObj = [...answer][elementPos];
@@ -368,7 +341,7 @@ const SaveSurvey = ({ navigation, route }) => {
                                   // replace the value of the key with a new value
                                   comment: comment
                                 };
-                                console.log("elementPos"+elementPos+" newObj"+JSON.stringify(newObj));
+                                // console.log("elementPos"+elementPos+" newObj"+JSON.stringify(newObj));
                                 if (elementPos != -1) {
                                   answer.splice(elementPos, 1);
                                   setAnswer([...answer, newObj]);
@@ -392,7 +365,7 @@ const SaveSurvey = ({ navigation, route }) => {
                                 <>
                                   <TouchableWithoutFeedback
                                     onPress={() => {
-                                      if(checked === false){
+                                      if (checked === false) {
                                         setChecked(true);
                                         //lets create json object here
                                         updateFinalAnswer(answer, setAnswer, answers, '', '', 2);
@@ -410,7 +383,7 @@ const SaveSurvey = ({ navigation, route }) => {
                                 <>
                                   <TouchableWithoutFeedback
                                     onPress={() => {
-                                      if(checked === false){
+                                      if (checked === false) {
                                         setChecked(true);
                                         //lets create json object here
                                         updateFinalAnswer(answer, setAnswer, answers, '', '');
@@ -425,7 +398,7 @@ const SaveSurvey = ({ navigation, route }) => {
 
                                   <TouchableWithoutFeedback
                                     onPress={() => {
-                                      if(checked === false){
+                                      if (checked === false) {
                                         setChecked(true);
                                         //lets create json object here
                                         updateFinalAnswer(answer, setAnswer, answers, '', '', 2);
@@ -460,11 +433,11 @@ const SaveSurvey = ({ navigation, route }) => {
               !completed && ( //TODO: Need to add this same conditions for radio box
                 <View>
 
-                  {answers.comment_type === 'textWithImageRequired' && (
+                  {/* {answers.comment_type === 'textWithImageRequired' && (
                     <Text style={{ color: 'red', alignSelf: 'center', fontSize: responsiveScreenFontSize(1.8), }}>
                       Image is Required!
                     </Text>
-                  )}
+                  )} */}
 
                   {checked == 1 ? (
                     <View style={{ marginHorizontal: 20 }}>
@@ -641,21 +614,23 @@ const SaveSurvey = ({ navigation, route }) => {
   };
 
   const saveAnswer = (answers, setAnswer, setCompleted) => {
-    setCompleted(false); 
+    setCompleted(false);
     setAnswer(answers);
   }
   const removeAnswer = (answers, setAnswer, setCompleted) => {
-    setCompleted(false); 
+    setCompleted(false);
     setAnswer(!answers);
     var elementPos = finalAnswer.current.findIndex(el => el.question_id === answers.question_id.toString(),);
-    if(elementPos!=-1){
+    if (elementPos != -1) {
       finalAnswer.current.splice(elementPos, 1);
     }
   }
-  
+
   const RadioBox = ({ answers, answer, setAnswer, imageNames, setImageNames, comment, setComment }) => {
     const [completed, setCompleted] = useState(true);
     const [images, setImages] = useState([]);
+
+    const commentType = SurveyOptions[answers.comment_type];
 
     return (
       <>
@@ -667,9 +642,8 @@ const SaveSurvey = ({ navigation, route }) => {
           // paddingRight: 12,
           // overflow: 'hidden',
           height: Height / 12,
-
-          borderBottomRightRadius: answers.comment_type != "noTextImage" && answer && answer.answer_id == answers.answer_id ? 0 : 12,
-          borderBottomLeftRadius: answers.comment_type != "noTextImage" && answer && answer.answer_id == answers.answer_id ? 0 : 12,
+          borderBottomRightRadius: commentType.completePopup && answer && answer[0] === answers.answer_id? 0: 12,
+          borderBottomLeftRadius: commentType.completePopup && answer && answer[0] === answers.answer_id? 0: 12,
           borderTopRightRadius: 12,
           borderTopLeftRadius: 12
 
@@ -691,7 +665,7 @@ const SaveSurvey = ({ navigation, route }) => {
               // marginRight: '18%',
               paddingVertical: 2,
               fontSize: responsiveScreenFontSize(1.8),
-              width: '35%',
+              width: '30%',
               // backgroundColor:'grey'
             }}>
             {answers.answer}
@@ -704,7 +678,7 @@ const SaveSurvey = ({ navigation, route }) => {
               alignSelf: 'center',
             }}>
             {
-              answers.comment_type != "noTextImage" ?
+             commentType.completePopup ?
                 (
                   <>
                     {
@@ -713,7 +687,7 @@ const SaveSurvey = ({ navigation, route }) => {
 
                           <TouchableWithoutFeedback
                             onPress={() => {
-                              if(answers.is_comment_required == "1" && completed === false){
+                              if (answers.is_comment_required == "1" && completed === false) {
                                 setComment('');
                                 removeAnswer(answers, setAnswer, setCompleted);
                               }
@@ -730,12 +704,12 @@ const SaveSurvey = ({ navigation, route }) => {
 
                           <TouchableWithoutFeedback
                             onPress={() => {
-                              if(comment === ''){
+                              if (comment === '') {
                                 Alert.alert("Comment is required.");
-                              }else{
+                              } else {
                                 setCompleted(true);
                                 var questionIndex = finalAnswer.current.findIndex(el => el.question_id === answers.question_id.toString(),);
-                                if(questionIndex!=1){
+                                if (questionIndex != 1) {
                                   var currentAnswerObj = finalAnswer.current[questionIndex];
                                   currentAnswerObj.answer[0].comment = comment;
                                   finalAnswer.current[questionIndex] = currentAnswerObj;
@@ -758,7 +732,7 @@ const SaveSurvey = ({ navigation, route }) => {
                               (
                                 <>
                                   <TouchableWithoutFeedback
-                                    onPress={() => 
+                                    onPress={() =>
                                       saveAnswer(answers, setAnswer, setCompleted)
                                     }>
                                     <Image
@@ -771,7 +745,7 @@ const SaveSurvey = ({ navigation, route }) => {
                               (
                                 <>
                                   <TouchableWithoutFeedback
-                                    onPress={() => 
+                                    onPress={() =>
                                       saveAnswer(answers, setAnswer, setCompleted)
                                     }>
                                     <Image
@@ -927,7 +901,7 @@ const SaveSurvey = ({ navigation, route }) => {
     const [imageNames, setImageNames] = useState([]);
 
     useEffect(() => {
-      if (answer) {  
+      if (answer) {
         let answerObject = {
           question_id: data.id.toString(),
           question_type_id: data.question_type_id.toString(),
@@ -1168,7 +1142,7 @@ const SaveSurvey = ({ navigation, route }) => {
 
   const saveSurvey = () => {
     var payload = JSON.stringify({
-      appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+      appKey: CONFIG.appKey,
       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
       surveyId: surveyId,
       user_id: user.id,
@@ -1209,7 +1183,7 @@ const SaveSurvey = ({ navigation, route }) => {
 
   const submitSurvey = () => {
     var payload = JSON.stringify({
-      appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+      appKey: CONFIG.appKey,
       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
       surveyId: surveyId,
       user_id: user.id,
