@@ -5,9 +5,11 @@ import {
   ScrollView,
   Dimensions,
   TouchableWithoutFeedback,
-  StatusBar, TouchableOpacity, FlatList
+  StatusBar,
+  TouchableOpacity,
+  FlatList,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Button,
   Card,
@@ -20,25 +22,29 @@ import {
 import SIPCStyles from './styles';
 import Icon2 from 'react-native-vector-icons/Entypo';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
-import { Col, Grid } from 'react-native-easy-grid';
+import {Col, Grid} from 'react-native-easy-grid';
 import SurveyViewAllBox from '../component/surveyviewallbox';
 import API from '../utility/api';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 import Loader from '../component/activityindicator';
-import { responsiveScreenHeight, responsiveScreenWidth, responsiveScreenFontSize } from 'react-native-responsive-dimensions';
+import {
+  responsiveScreenHeight,
+  responsiveScreenWidth,
+  responsiveScreenFontSize,
+} from 'react-native-responsive-dimensions';
 
-import { MMKV } from 'react-native-mmkv'
+import {MMKV} from 'react-native-mmkv';
+import {CONFIG} from '../utility/config';
 export const storage = new MMKV();
 
-const SurveyViewAll = ({ navigation, route }) => {
+const SurveyViewAll = ({navigation, route}) => {
   const pending = route?.params?.pending ?? 1;
-  const jsonUser = storage.getString('user')
+  const jsonUser = storage.getString('user');
   const user = JSON.parse(jsonUser);
 
   const Width = Dimensions.get('window').width;
   const Height = Dimensions.get('window').height;
   const [totalCount, setTotalCount] = useState();
-
 
   const [searchQuery, setSearchQuery] = React.useState('');
   const onChangeSearch = query => setSearchQuery(query);
@@ -46,11 +52,14 @@ const SurveyViewAll = ({ navigation, route }) => {
   const [Active, setActive] = useState(pending);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const params = JSON.stringify({
-    pageSize: '10',
+    pageSize: pageSize.toString(),
     pageNumber: '1',
-    appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+    appKey: CONFIG.appKey,
     device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
     userId: user.id,
     userSurveyStatus: Active,
@@ -60,30 +69,56 @@ const SurveyViewAll = ({ navigation, route }) => {
   useFocusEffect(
     React.useCallback(() => {
       setIsLoading(true);
-      API.instance
-        .post(
-          '/user-surveys-device?is_api=true',
-          params,
-        )
-        .then(
-          response => {
-            setIsLoading(false);
-            setData(response.data);
-            setTotalCount(response.totalCount);
-          },
-          error => {
-            console.error(error);
-            setIsLoading(false);
-          },
-        );
+      API.instance.post('/user-surveys-device?is_api=true', params).then(
+        response => {
+          setIsLoading(false);
+          setData(response.data);
+          setTotalCount(response.totalCount);
+          setCurrentPage(1);
+        },
+        error => {
+          console.error(error);
+          setIsLoading(false);
+        },
+      );
     }, [Active]),
   );
 
-  const renderItem = ({ item,index }) => (
-    <SurveyViewAllBox data={item} key={index} navigation={navigation} Active={Active}/>
+  const getMoreData = () => {
+    if (currentPage * pageSize < totalCount) {
+      setDataLoading(true);
+      const newParams = JSON.stringify({
+        pageSize: pageSize.toString(),
+        pageNumber: (currentPage + 1).toString(),
+        appKey: CONFIG.appKey,
+        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+        userId: user.id,
+        userSurveyStatus: Active,
+        searchKeyword: '',
+      });
+      API.instance.post('/user-surveys-device?is_api=true', newParams).then(
+        response => {
+          let newData = response.data;
+          setDataLoading(false);
+          setData([...data, ...newData]);
+          setCurrentPage(currentPage + 1);
+        },
+        error => {
+          console.error(error);
+          setDataLoading(false);
+        },
+      );
+    }
+  };
 
+  const renderItem = ({item, index}) => (
+    <SurveyViewAllBox
+      data={item}
+      key={index}
+      navigation={navigation}
+      Active={Active}
+    />
   );
-
 
   return (
     <View style={SIPCStyles.flex}>
@@ -91,14 +126,25 @@ const SurveyViewAll = ({ navigation, route }) => {
 
       {/* ====================================== */}
       <Surface style={SIPCStyles.headerSurface}>
-        {
-          user.profile_picture != '' ?
-            <TouchableOpacity>
-              <Image source={{ uri: user.profile_picture }} style={[SIPCStyles.headerManImage, { borderRadius: 100, width: Width / 10, height: Height / 20 }]} />
-            </TouchableOpacity>
-            :
-            <Image source={require('../assets/man.png')} style={[SIPCStyles.headerManImage, { borderRadius: 100, width: Width / 10, height: Height / 20 }]} />
-        }
+        {user.profile_picture != '' ? (
+          <TouchableOpacity>
+            <Image
+              source={{uri: user.profile_picture}}
+              style={[
+                SIPCStyles.headerManImage,
+                {borderRadius: 100, width: Width / 10, height: Height / 20},
+              ]}
+            />
+          </TouchableOpacity>
+        ) : (
+          <Image
+            source={require('../assets/man.png')}
+            style={[
+              SIPCStyles.headerManImage,
+              {borderRadius: 100, width: Width / 10, height: Height / 20},
+            ]}
+          />
+        )}
 
         <Searchbar
           placeholder="Search Survey"
@@ -110,7 +156,7 @@ const SurveyViewAll = ({ navigation, route }) => {
             <SimpleLineIcons
               name="magnifier"
               size={20}
-              style={{ color: 'grey' }}
+              style={{color: 'grey'}}
             />
           )}
         />
@@ -146,7 +192,7 @@ const SurveyViewAll = ({ navigation, route }) => {
           <Text
             style={[
               SIPCStyles.NormalFont,
-              { textAlign: 'center', color: Active == 1 ? '#1485cc' : '#525252' },
+              {textAlign: 'center', color: Active == 1 ? '#1485cc' : '#525252'},
             ]}>
             Completed
           </Text>
@@ -166,7 +212,7 @@ const SurveyViewAll = ({ navigation, route }) => {
           <Text
             style={[
               SIPCStyles.NormalFont,
-              { color: Active == 0 ? '#1485cc' : '#525252', textAlign: 'center' },
+              {color: Active == 0 ? '#1485cc' : '#525252', textAlign: 'center'},
             ]}>
             Pending
           </Text>
@@ -174,32 +220,71 @@ const SurveyViewAll = ({ navigation, route }) => {
       </View>
       <Divider bold={true} />
 
-
-
-{/* ===================================================================================== */}
-      <ScrollView>
+      {/* ===================================================================================== */}
+      <ScrollView
+        contentContainerStyle={{paddingBottom: 35}}
+        onScroll={({nativeEvent}) => {
+          const {layoutMeasurement, contentOffset, contentSize} = nativeEvent;
+          if (
+            layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - 35
+          ) {
+            getMoreData();
+          }
+        }}>
         {isLoading ? (
           <Loader />
         ) : totalCount > 0 ? (
           <>
             {data.map((item, index) => (
-              <SurveyViewAllBox data={item} key={index} navigation={navigation} Active={Active} />
+              <SurveyViewAllBox
+                data={item}
+                key={index}
+                navigation={navigation}
+                Active={Active}
+              />
             ))}
+            {dataLoading && <Loader marginTop={10} />}
           </>
         ) : (
           <>
-            <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
-              <Image source={require('../assets/no-survey-found.png')} style={{ height: Height / 3.5, width: Width / 2, resizeMode: 'contain' }} />
-              <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>{Active == 1 ? "No Completed Survey" : "No Pending Survey"}</Text>
-              <Text style={{ textAlign: 'center', fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular' }}>{Active == 1 ? "No Completed Survey were found yet." : "No Pending Survey were found yet."}</Text>
+            <View
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginTop: 100,
+              }}>
+              <Image
+                source={require('../assets/no-survey-found.png')}
+                style={{
+                  height: Height / 3.5,
+                  width: Width / 2,
+                  resizeMode: 'contain',
+                }}
+              />
+              <Text
+                style={{
+                  textAlign: 'center',
+                  color: '#4284c6',
+                  fontSize: responsiveScreenFontSize(2.5),
+                  fontFamily: 'Poppins-Regular',
+                }}>
+                {Active == 1 ? 'No Completed Survey' : 'No Pending Survey'}
+              </Text>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontSize: responsiveScreenFontSize(1.8),
+                  fontFamily: 'Poppins-Regular',
+                }}>
+                {Active == 1
+                  ? 'No Completed Survey were found yet.'
+                  : 'No Pending Survey were found yet.'}
+              </Text>
             </View>
           </>
         )}
-
       </ScrollView>
-
-
-
 
       {/* <View>
         {isLoading ? (
@@ -233,10 +318,6 @@ const SurveyViewAll = ({ navigation, route }) => {
           </>
         )}
       </View> */}
-
-
-
-
     </View>
   );
 };
