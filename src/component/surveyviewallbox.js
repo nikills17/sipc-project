@@ -4,9 +4,15 @@ import {Surface, Divider, Text} from 'react-native-paper';
 import {Col, Grid} from 'react-native-easy-grid';
 import SIPCStyles from '../screens/styles';
 
+import { MMKV } from 'react-native-mmkv'
+export const storage = new MMKV();
+
 const SurveyViewAllBox = ({data, navigation, Active}) => {
   const [Show, setShow] = useState(false);
   const [PendingShow, setPendingShow] = useState(false);
+  const jsonUser = storage.getString('user')
+  const user = JSON.parse(jsonUser);
+
 
   return (
     <>
@@ -210,36 +216,53 @@ const SurveyViewAllBox = ({data, navigation, Active}) => {
                     flexDirection: 'row',
                     justifyContent: 'space-around',
                   }}>
-                  <View style={{flexDirection: 'column'}}>
-                    <TouchableOpacity onPress={()=>{
-                      navigation.navigate('SavePendingSurvey', {
-                        surveyId: data.survey_id,
-                        surveySessionId: data.survey_session_id,
-                        userSurveyResultId: data.id,
-                        userId: data.user_id,
-                      });
-                    }}>
-                      <Image
-                        source={require('../assets/continue.png')}
-                        style={SIPCStyles.playImage}
-                      />
-                      <Text style={SIPCStyles.SurfacePlayImageText}>
-                      Continue
-                    </Text>
-                    </TouchableOpacity>
-                    
-                  </View>
+                  {
+                    data.user_id == user.id?
+                    <>
+                    <View style={{flexDirection: 'column'}}>
+                      <TouchableOpacity onPress={()=>{
+                        navigation.navigate('SavePendingSurvey', {
+                          surveyId: data.survey_id,
+                          surveySessionId: data.survey_session_id,
+                          userSurveyResultId: data.id,
+                          userId: data.user_id,
+                        });
+                      }}>
+                        <Image
+                          source={require('../assets/continue.png')}
+                          style={SIPCStyles.playImage}
+                        />
+                        <Text style={SIPCStyles.SurfacePlayImageText}>
+                        Continue
+                      </Text>
+                      </TouchableOpacity>
+                    </View>
 
-                  <View style={{flexDirection: 'column'}}>
-                    <TouchableOpacity>
-                      <Image
-                        source={require('../assets/delete.png')}
-                        style={SIPCStyles.playImage}
-                      />
-                      <Text style={SIPCStyles.SurfacePlayImageText}> Delete</Text>
-                    </TouchableOpacity>
-                    
-                  </View>
+                    <View style={{flexDirection: 'column'}}>
+                      <TouchableOpacity 
+                        //onPress={()=>{deletePendingSurvey(data.id);}}
+                      >
+                        <Image
+                          source={require('../assets/delete.png')}
+                          style={SIPCStyles.playImage}
+                        />
+                        <Text style={SIPCStyles.SurfacePlayImageText}> Delete</Text>
+                      </TouchableOpacity>
+                    </View>
+                    </>
+                    :
+                    <>
+                    <View style={{flexDirection: 'column',opacity:.5}}>
+                        <Image source={require('../assets/continue.png')} style={SIPCStyles.playImage}/>
+                        <Text style={SIPCStyles.SurfacePlayImageText}> Continue</Text>
+                    </View>
+                    <View style={{flexDirection: 'column',opacity:.5}}>
+                        <Image source={require('../assets/delete.png')} style={SIPCStyles.playImage}/>
+                        <Text style={SIPCStyles.SurfacePlayImageText}> Delete</Text>
+                    </View>
+                    </>
+                  }
+                  
                 </View>
               </Col>
             </Grid>
