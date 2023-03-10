@@ -5,7 +5,7 @@ import {
   ScrollView,
   Dimensions,
   TouchableWithoutFeedback,
-  StatusBar, TouchableOpacity
+  StatusBar, TouchableOpacity, Modal
 } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import {
@@ -34,6 +34,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 
 import { MMKV } from 'react-native-mmkv'
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
 export const storage = new MMKV();
 
 const Reports = ({ navigation }) => {
@@ -41,8 +42,10 @@ const Reports = ({ navigation }) => {
   const jsonUser = storage.getString('user')
   const user = JSON.parse(jsonUser);
 
+  const [modalVisible, setModalVisible] = useState(false);
+
   const [visible, setVisible] = useState(false);
-  const openMenu = () => setVisible(true);
+  const openMenu = () => setVisible(!visible);
   const closeMenu = () => setVisible(false);
 
   const refRBSheet = useRef();
@@ -57,7 +60,7 @@ const Reports = ({ navigation }) => {
 
   //DataType
   const [dataTypeDropDown, setDataTypeDropDown] = useState(false);
-  const [dataType, setDataType] = useState(0);
+  const [dataType, setDataType] = useState();
   const [dataTypeList, setDataTypeList] = useState([
     {
       label: 'Survey Created',
@@ -191,7 +194,7 @@ const Reports = ({ navigation }) => {
 
     setActive(tabId);
   }
-
+//API--------------->
   const payload = JSON.stringify({
     appKey: CONFIG.appKey,
     device_id: "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
@@ -265,7 +268,7 @@ const Reports = ({ navigation }) => {
             )}
           />
 
-          <TouchableWithoutFeedback>
+          <TouchableWithoutFeedback >
             <Image
               source={require('../assets/print.png')}
               style={[SIPCStyles.playImage, {
@@ -286,37 +289,42 @@ const Reports = ({ navigation }) => {
         </Surface>
       </View>
       {/* =============================MENU================== */}
-      <View>
+      <View style={{bottom:8}}>
+        <Provider style={{ zIndex: 9999 }}>
+          <View style={{ zIndex: 9999 }}>
+            <Menu
+              visible={visible}
+              onDismiss={closeMenu}
+              style={{ backgroundColor: 'transparent' }}
+              contentStyle={{ backgroundColor: 'white', }}
+              anchor={{ x: 0, y: 0, }}>
 
-        <View>
-          <Provider style={{ zIndex: 9999 }}>
-            <View style={{ zIndex: 9999 }}>
-              <Menu
-                visible={visible}
-                onDismiss={closeMenu}
-                style={{ backgroundColor: 'transparent' }}
-                contentStyle={{ backgroundColor: 'white', }}
-                anchor={{ x: 0, y: 0, }}>
+              <Menu.Item onPress={() => { }} title={
+                <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                  <Image source={require('../assets/ii.png')} style={{ height:Height/35,width:Width/23,resizeMode:'contain' }} />
+                  <Text style={{ color: 'black',fontSize:responsiveFontSize(1.8),marginLeft:5 }}>Settings</Text>
+                </View>
+              }  />
 
-                <Menu.Item onPress={() => { }} title="Settings" titleStyle={{ color: 'black' }} />
-                <Menu.Item onPress={() => {
-                  storage.set('user', '');
-                  navigation.navigate('Login');
-                }} title="Log Out" titleStyle={{ color: 'black' }} />
-              </Menu>
-            </View>
-          </Provider>
-        </View>
 
+              <Menu.Item onPress={() => {storage.set('user', ''); navigation.navigate('Login');
+              }} title={
+                <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                  <Image source={require('../assets/ii.png')} style={{ height:Height/35,width:Width/23,resizeMode:'contain' }} />
+                  <Text style={{ color: 'black',fontSize:responsiveFontSize(1.8),marginLeft:5 }}>Log Out</Text>
+                </View>
+              } />
+            </Menu>
+          </View>
+        </Provider>
       </View>
-
       <Divider bold={true} />
 
 
 
       {/* ===================TABS==================== */}
-      <View style={{ zIndex: -1 }}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} >
+      <View >
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ zIndex: -1 }}>
 
           <View
             style={{
@@ -484,7 +492,7 @@ const Reports = ({ navigation }) => {
                 items={dataTypeList}
                 setOpen={setDataTypeDropDown}
                 setValue={setDataType}
-                setItems={setDataTypeList}
+                // setItems={setDataTypeList}
               />
             </View>
           </>
@@ -801,26 +809,20 @@ const Reports = ({ navigation }) => {
 
 
       {/* ================================ */}
-      {/* <ScrollView>
-        {data.map((item, index) => (
-          <ReportBox data={item} key={index} Active={Active} />
-        ))}
-      </ScrollView> */}
 
-      <ScrollView>
-        <View style={{ zIndex: -1 }}>
 
-          {isLoading ? (
-            <Loader />
-          ) : (
-            <>
-              {data.map((item, index) => (
-                <ReportBox data={item} key={index} Active={Active} />
-              ))}
-            </>
-          )}
+      <ScrollView style={{ zIndex: -1 }}>
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <>
+            {data.map((item, index) => (
+              <ReportBox data={item} key={index} Active={Active} />
+            ))}
+          </>
+        )}
 
-        </View>
+
       </ScrollView>
 
 
