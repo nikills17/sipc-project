@@ -56,7 +56,8 @@ export default class API {
       });
       return response.data;
     } catch (error) {
-      console.log(`${error} while fetching data from ${url}`);
+      // console.log(`${error} while fetching data from ${url}`);
+      return this.upload(url, data);
     }
   };
 
