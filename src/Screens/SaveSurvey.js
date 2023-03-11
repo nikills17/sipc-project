@@ -521,7 +521,7 @@ const SaveSurvey = ({navigation, route}) => {
     };
 
     const onCancel = () => {
-      if (commentType.commentRequired && comment == '') {
+      if (commentType.commentRequired && comment === '') {
         setChecked(!checked);
       } else {
         setCompleted(true);

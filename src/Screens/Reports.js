@@ -106,8 +106,7 @@ const Reports = ({ navigation }) => {
   //Organization
   const [organizationDropDown, setOrganizationDropDown] = useState(false);
   const [organization, setOrganization] = useState(0);
-  const [organizationList, setOrganizationList] = useState([
-  ]);
+  const [organizationList, setOrganizationList] = useState([]);
 
   //Building
   const [buildingDropDown, setBuildingDropDown] = useState(false);
@@ -216,6 +215,8 @@ const Reports = ({ navigation }) => {
     room_id: roomId,
   });
 
+  // console.log("data.organization_id" + organizationId);
+
   useFocusEffect(
     React.useCallback(() => {
       setIsLoading(true);
@@ -229,7 +230,8 @@ const Reports = ({ navigation }) => {
             setIsLoading(false);
             if (response.status == "success") {
               setData(response.data);
-              // console.log(response.data);
+              setOrganizationList(response.data.map(item => ({ label: item.organization_name, value: item.id })));
+              console.log(data);
             }
           },
           error => {
@@ -239,6 +241,8 @@ const Reports = ({ navigation }) => {
         );
     }, [Active]),
   );
+
+  // console.log("data=====>" +JSON.stringify(data));
 
   return (
 
@@ -709,7 +713,7 @@ const Reports = ({ navigation }) => {
             labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
             open={organizationDropDown}
             value={organization}
-            items={organizationList}
+            items={organizationList.map(item => ({ label: item.organization_name, value: item.id }))}
             setOpen={setOrganizationDropDown}
             setValue={setOrganization}
             setItems={setOrganizationList}
