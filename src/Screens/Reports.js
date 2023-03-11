@@ -49,19 +49,26 @@ const Reports = ({ navigation }) => {
   const closeMenu = () => setVisible(false);
 
   const refRBSheet = useRef();
+  const refRBSheet1 = useRef();
+
+  const close = sheetObj => {
+    setError(false);
+    setErrorMessage('');
+    sheetObj.current.close();
+  };
 
   const Width = Dimensions.get('window').width;
   const Height = Dimensions.get('window').height;
 
   const [searchQuery, setSearchQuery] = React.useState('');
-
   const onChangeSearch = query => setSearchQuery(query);
 
 
   //DataType
-  const [dataTypeDropDown, setDataTypeDropDown] = useState(false);
-  const [dataType, setDataType] = useState();
-  const [dataTypeList, setDataTypeList] = useState([
+  const [dateTypeDropDown, setDateTypeDropDown] = useState(false);
+  
+  const [dateType, setDateType] = useState('survey_submitted');
+  const [dateTypeList, setDateTypeList] = useState([
     {
       label: 'Survey Created',
       value: '1',
@@ -150,7 +157,6 @@ const Reports = ({ navigation }) => {
   };
 
   const currentDate = new Date().toISOString().slice(0, 10);
-  const [dateType, setDateType] = useState('survey_submitted');
 
   var previousDate = new Date(currentDate);
   previousDate = new Date(previousDate.setMonth(previousDate.getMonth() - 1)).toISOString().slice(0, 10);
@@ -194,7 +200,7 @@ const Reports = ({ navigation }) => {
 
     setActive(tabId);
   }
-//API--------------->
+  //API--------------->
   const payload = JSON.stringify({
     appKey: CONFIG.appKey,
     device_id: "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
@@ -244,11 +250,13 @@ const Reports = ({ navigation }) => {
         <Surface style={SIPCStyles.headerSurface}>
           {
             user.profile_picture != '' ?
-              <TouchableOpacity onPress={openMenu}>
+              <TouchableOpacity onPress={() => refRBSheet1.current.open()}>
+
                 <Image source={{ uri: user.profile_picture }} style={[SIPCStyles.headerManImage, { borderRadius: 100, width: Width / 10, height: Height / 20 }]} />
               </TouchableOpacity>
               :
-              <TouchableOpacity onPress={openMenu}>
+              <TouchableOpacity onPress={() => refRBSheet1.current.open()}>
+
                 <Image source={require('../assets/man.png')} style={[SIPCStyles.headerManImage, { borderRadius: 100, width: Width / 10, height: Height / 20 }]} />
               </TouchableOpacity>
           }
@@ -289,7 +297,7 @@ const Reports = ({ navigation }) => {
         </Surface>
       </View>
       {/* =============================MENU================== */}
-      <View style={{bottom:8}}>
+      {/* <View style={{ bottom: 8 }}>
         <Provider style={{ zIndex: 9999 }}>
           <View style={{ zIndex: 9999 }}>
             <Menu
@@ -301,25 +309,74 @@ const Reports = ({ navigation }) => {
 
               <Menu.Item onPress={() => { }} title={
                 <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                  <Image source={require('../assets/ii.png')} style={{ height:Height/35,width:Width/23,resizeMode:'contain' }} />
-                  <Text style={{ color: 'black',fontSize:responsiveFontSize(1.8),marginLeft:5 }}>Settings</Text>
+                  <Image source={require('../assets/ii.png')} style={{ height: Height / 35, width: Width / 23, resizeMode: 'contain' }} />
+                  <Text style={{ color: 'black', fontSize: responsiveFontSize(1.8), marginLeft: 5 }}>Settings</Text>
                 </View>
-              }  />
+              } />
 
 
-              <Menu.Item onPress={() => {storage.set('user', ''); navigation.navigate('Login');
+              <Menu.Item onPress={() => {
+                storage.set('user', ''); navigation.navigate('Login');
               }} title={
                 <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                  <Image source={require('../assets/ii.png')} style={{ height:Height/35,width:Width/23,resizeMode:'contain' }} />
-                  <Text style={{ color: 'black',fontSize:responsiveFontSize(1.8),marginLeft:5 }}>Log Out</Text>
+                  <Image source={require('../assets/ii.png')} style={{ height: Height / 35, width: Width / 23, resizeMode: 'contain' }} />
+                  <Text style={{ color: 'black', fontSize: responsiveFontSize(1.8), marginLeft: 5 }}>Log Out</Text>
                 </View>
               } />
             </Menu>
           </View>
         </Provider>
-      </View>
+      </View> */}
       <Divider bold={true} />
+      {/* ================================================ */}
+      <RBSheet
+        ref={refRBSheet1}
+        closeOnDragDown={false}
+        closeOnPressMask={true}
+        closeOnPressBack={true}
+        dragFromTopOnly={true}
+        fromTop={true}
+        height={Height}
+        animated={true}
+        animationType="fade"
+        // closeOnPressBack={true}
+        customStyles={{
+          wrapper: {
+            backgroundColor: "transparent"
+          },
+          draggableIcon: {
+            backgroundColor: "transparent"
+          },
+          container: {
+            backgroundColor: '#ccc',
+            height: Height/7,
+            width:Width/3,
+            borderWidth:1,
+            borderColor:'#ccc',
+            // marginHorizontal: 5,
+            position: 'absolute',
+            top: 80,
+            left: 0,
+            right: 0,
+          }
+        }}>
+        <View style={{ height: Height / 7, width: Width / 3, backgroundColor: 'white', marginHorizontal: 5,  padding: 10 }}>
+          <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', }}>
+            <Image source={require('../assets/ii.png')} style={{ height: Height / 35, width: Width / 23, resizeMode: 'contain' }} />
+            <Text style={{ color: 'black', fontSize: responsiveFontSize(1.8), marginLeft: 5 }}>Settings</Text>
+          </TouchableOpacity>
 
+          <TouchableOpacity onPress={() => {
+                storage.set('user', ''); navigation.navigate('Login');
+              }}
+           style={{ flexDirection: 'row', alignItems: 'center', marginTop: 20 }}>
+            <Image source={require('../assets/ii.png')} style={{ height: Height / 35, width: Width / 23, resizeMode: 'contain' }} />
+            <Text style={{ color: 'black', fontSize: responsiveFontSize(1.8), marginLeft: 5 }}>Log Out</Text>
+          </TouchableOpacity>
+
+        </View>
+
+      </RBSheet>
 
 
       {/* ===================TABS==================== */}
@@ -447,9 +504,10 @@ const Reports = ({ navigation }) => {
 
         {Active === 1 || Active === 2 ?
           <>
-            {/* ===============DataType DropDown========================= */}
+            {/* ===============DateType DropDown========================= */}
             <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
               <DropDownPicker
+                listMode='SCROLLVIEW'
                 searchable={true}
                 searchPlaceholder=""
                 searchContainerStyle={{
@@ -487,12 +545,12 @@ const Reports = ({ navigation }) => {
                 textStyle={SIPCStyles.textSize}
                 dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
                 labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
-                open={dataTypeDropDown}
-                value={dataType}
-                items={dataTypeList}
-                setOpen={setDataTypeDropDown}
-                setValue={setDataType}
-                // setItems={setDataTypeList}
+                open={dateTypeDropDown}
+                value={dateType}
+                items={dateTypeList}
+                setOpen={setDateTypeDropDown}
+                setValue={setDateType}
+              // setItems={setDataTypeList}
               />
             </View>
           </>
@@ -501,6 +559,7 @@ const Reports = ({ navigation }) => {
         {/* ===============Period DropDown========================= */}
         <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
           <DropDownPicker
+            listMode='SCROLLVIEW'
             searchable={true}
             searchPlaceholder=""
             searchContainerStyle={{
@@ -610,6 +669,7 @@ const Reports = ({ navigation }) => {
         {/* ===============Organization DropDown========================= */}
         <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
           <DropDownPicker
+            listMode='SCROLLVIEW'
             searchable={true}
             searchPlaceholder=""
             searchContainerStyle={{
@@ -662,6 +722,7 @@ const Reports = ({ navigation }) => {
             {/* ===============Building Category DropDown========================= */}
             <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
               <DropDownPicker
+                listMode='SCROLLVIEW'
                 searchable={true}
                 searchPlaceholder=""
                 searchContainerStyle={{
@@ -720,6 +781,7 @@ const Reports = ({ navigation }) => {
             {/* ===============Building DropDown========================= */}
             <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
               <DropDownPicker
+                listMode='SCROLLVIEW'
                 searchable={true}
                 searchPlaceholder=""
                 searchContainerStyle={{
@@ -802,10 +864,6 @@ const Reports = ({ navigation }) => {
         </View>
 
       </RBSheet>
-
-
-
-
 
 
       {/* ================================ */}

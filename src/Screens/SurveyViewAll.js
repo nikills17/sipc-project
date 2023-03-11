@@ -51,7 +51,7 @@ const SurveyViewAll = ({ navigation, route }) => {
   const Height = Dimensions.get('window').height;
   const [totalCount, setTotalCount] = useState();
 
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const onChangeSearch = query => setSearchQuery(query);
 
   const [Active, setActive] = useState(pending);
@@ -69,7 +69,7 @@ const SurveyViewAll = ({ navigation, route }) => {
     device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
     userId: user.id,
     userSurveyStatus: Active,
-    searchKeyword: '',
+    searchKeyword: searchQuery,
   });
 
   useFocusEffect(
@@ -81,6 +81,7 @@ const SurveyViewAll = ({ navigation, route }) => {
           setData(response.data);
           setTotalCount(response.totalCount);
           setCurrentPage(1);
+          // setSearchQuery(searchQuery)
         },
         error => {
           console.error(error);
@@ -89,6 +90,7 @@ const SurveyViewAll = ({ navigation, route }) => {
       );
     }, [Active]),
   );
+  // console.log(searchQuery);
 
   const getMoreData = () => {
     if (currentPage * CONFIG.pageSize < totalCount) {
@@ -100,7 +102,7 @@ const SurveyViewAll = ({ navigation, route }) => {
         device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
         userId: user.id,
         userSurveyStatus: Active,
-        searchKeyword: '',
+        searchKeyword: searchQuery,
       });
       API.instance.post('/user-surveys-device?is_api=true', newParams).then(
         response => {
@@ -173,9 +175,9 @@ const SurveyViewAll = ({ navigation, route }) => {
       <Divider bold={true} />
 
       {/* =============================MENU================== */}
-      <View style={{bottom:8}}>
-        <Provider style={{ zIndex: 9999 ,}}>
-          <View style={{ zIndex: 9999 ,}}>
+      <View style={{ bottom: 8 }}>
+        <Provider style={{ zIndex: 9999, }}>
+          <View style={{ zIndex: 9999, }}>
             <Menu
               visible={visible}
               onDismiss={closeMenu}
