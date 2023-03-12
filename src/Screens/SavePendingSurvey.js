@@ -195,7 +195,7 @@ const SavePendingSurvey = ({navigation, route}) => {
 
     //onSubmit
     const onSubmit = () => {
-      if (commentType.commentRequired && comment === '') {
+      if (comment === '' && (commentType.commentRequired || !commentType.commentRequired)) {
         Alert.alert('Comment is required.');
       } else if (commentType.imageRequired && imagePath === '') {
         Alert.alert('Image is required.');
@@ -541,15 +541,17 @@ const SavePendingSurvey = ({navigation, route}) => {
     };
 
     const onCancel = () => {
-      if (commentType.commentRequired && comment == '') {
+      if (commentType.commentRequired) {
         setChecked(!checked);
+        setComment('');
+        setImagePath('');
       } else {
         setCompleted(true);
       }
     };
 
     const onSubmit = () => {
-      if (commentType.commentRequired && comment === '') {
+      if (comment === '' && (commentType.commentRequired || !commentType.commentRequired)) {
         Alert.alert('Comment is required.');
       } else if (commentType.imageRequired && imagePath === '') {
         Alert.alert('Image is required.');
