@@ -186,13 +186,15 @@ const SaveSurvey = ({navigation, route}) => {
     const onCancel = () => {
       if (commentType.commentRequired || commentType.imageRequired) {
         setAnswer([]);
+        setComment('');
       } else {
         setCompleted(true);
       }
     };
 
+
     const onSubmit = () => {
-      if (commentType.commentRequired && comment === '') {
+      if (comment === '' && (commentType.commentRequired || !commentType.commentRequired)) {
         Alert.alert('Comment is required.');
       } else if (commentType.imageRequired && imagePath === '') {
         Alert.alert('Image is required.');
@@ -521,17 +523,19 @@ const SaveSurvey = ({navigation, route}) => {
     };
 
     const onCancel = () => {
-      if (commentType.commentRequired && comment == '') {
+      if (commentType.commentRequired) {
         setChecked(!checked);
+        setComment('');
+        setImagePath('');
       } else {
         setCompleted(true);
       }
     };
 
     const onSubmit = () => {
-      if (commentType.commentRequired && comment === '') {
+      if (comment === '' && (commentType.commentRequired || !commentType.commentRequired)) {
         Alert.alert('Comment is required.');
-      } else if (commentType.imageRequired && imagePath === '') {
+      }  else if (commentType.imageRequired && imagePath === '') {
         Alert.alert('Image is required.');
       } else {
         const filteredArray = Array.isArray(imagePath)
