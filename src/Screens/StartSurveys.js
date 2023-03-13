@@ -33,6 +33,7 @@ import {
   responsiveScreenFontSize,
 } from 'react-native-responsive-dimensions';
 import { MMKV } from 'react-native-mmkv'
+import { CONFIG } from '../utility/config';
 export const storage = new MMKV();
 
 
@@ -54,7 +55,6 @@ const StartSurveys = ({ navigation, route }) => {
   }
   const [showDropDown2, setShowDropDown2] = useState(false);
   const [Group2, setGroup2] = useState();
-
   const [GroupList2, setGroupList2] = useState([
     {
       name: 'Select an Organisation first!',
@@ -72,7 +72,7 @@ const StartSurveys = ({ navigation, route }) => {
       .post(
         `/organization-list-device?is_api=true`,
         JSON.stringify({
-          appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+          appKey: CONFIG.appKey,
           device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
           userId: user.id,
         }),
@@ -93,7 +93,7 @@ const StartSurveys = ({ navigation, route }) => {
         .post(
           `/get-buildings-by-org?is_api=true`,
           JSON.stringify({
-            appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+            appKey:CONFIG.appKey,
             device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
             orgId: Group,
           }),

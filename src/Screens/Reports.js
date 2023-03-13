@@ -171,6 +171,7 @@ const Reports = ({ navigation }) => {
 
   const [Active, setActive] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  
   const [apiAction, setAPIAction] = useState('/building-report-api');
 
   const [data, setData] = useState([]);
@@ -230,8 +231,7 @@ const Reports = ({ navigation }) => {
             setIsLoading(false);
             if (response.status == "success") {
               setData(response.data);
-              setOrganizationList(response.data.map(item => ({ label: item.organization_name, value: item.id })));
-              console.log(data);
+              setOrganizationList(response.data);
             }
           },
           error => {
@@ -242,7 +242,11 @@ const Reports = ({ navigation }) => {
     }, [Active]),
   );
 
-  // console.log("data=====>" +JSON.stringify(data));
+
+
+  
+
+
 
   return (
 
@@ -554,7 +558,7 @@ const Reports = ({ navigation }) => {
                 items={dateTypeList}
                 setOpen={setDateTypeDropDown}
                 setValue={setDateType}
-              // setItems={setDataTypeList}
+              // setItems={setDateTypeList}
               />
             </View>
           </>

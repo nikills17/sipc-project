@@ -22,6 +22,7 @@ import {
 import SIPCStyles from './styles';
 import Icon2 from 'react-native-vector-icons/Entypo';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Col, Grid } from 'react-native-easy-grid';
 import SurveyViewAllBox from '../component/surveyviewallbox';
 import API from '../utility/api';
@@ -52,7 +53,7 @@ const SurveyViewAll = ({ navigation, route }) => {
   const [totalCount, setTotalCount] = useState();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const onChangeSearch = query => setSearchQuery(query);
+  const onChangeSearch = (query) => setSearchQuery(query);
 
   const [Active, setActive] = useState(pending);
   const [data, setData] = useState([]);
@@ -61,35 +62,40 @@ const SurveyViewAll = ({ navigation, route }) => {
   const [dataLoading, setDataLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
+  getResult = (currentPage, searchQuery) =>{
+    const params = JSON.stringify({
+      pageSize: CONFIG.pageSize,
+      pageNumber: currentPage,
+      appKey: CONFIG.appKey,
+      device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+      userId: user.id,
+      userSurveyStatus: Active,
+      searchKeyword: searchQuery,
+    });
 
-  const params = JSON.stringify({
-    pageSize: CONFIG.pageSize,
-    pageNumber: '1',
-    appKey: CONFIG.appKey,
-    device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-    userId: user.id,
-    userSurveyStatus: Active,
-    searchKeyword: searchQuery,
-  });
-
-  useFocusEffect(
-    React.useCallback(() => {
-      setIsLoading(true);
+    setIsLoading(true);
       API.instance.post('/user-surveys-device?is_api=true', params).then(
         response => {
           setIsLoading(false);
           setData(response.data);
           setTotalCount(response.totalCount);
           setCurrentPage(1);
-          // setSearchQuery(searchQuery)
         },
         error => {
           console.error(error);
           setIsLoading(false);
         },
       );
-    }, [Active]),
+  }
+
+  
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getResult(currentPage, searchQuery);
+    }, [Active,]),
   );
+
   // console.log(searchQuery);
 
   const getMoreData = () => {
@@ -118,6 +124,18 @@ const SurveyViewAll = ({ navigation, route }) => {
       );
     }
   };
+
+
+
+  const SearchBox = () => {
+    setCurrentPage(1);
+    getResult(1, searchQuery);
+  }
+
+  const DefaultData = () => {
+    setSearchQuery('');
+    getResult(1, '');
+  }
 
 
 
@@ -156,11 +174,22 @@ const SurveyViewAll = ({ navigation, route }) => {
           value={searchQuery}
           style={SIPCStyles.searchBar}
           icon={() => (
-            <SimpleLineIcons
-              name="magnifier"
-              size={20}
-              style={{ color: 'grey' }}
-            />
+            <TouchableOpacity onPress={() => { SearchBox() }}>
+              <SimpleLineIcons
+                name="magnifier"
+                size={20}
+                style={{ color: 'grey' }}
+              />
+
+            </TouchableOpacity>
+          )}
+          clearIcon={() => (
+            <TouchableOpacity onPress={() => DefaultData()}>
+              <MaterialIcons
+                name="close"
+                size={24}
+              />
+            </TouchableOpacity>
           )}
         />
 
@@ -175,7 +204,7 @@ const SurveyViewAll = ({ navigation, route }) => {
       <Divider bold={true} />
 
       {/* =============================MENU================== */}
-      <View style={{ bottom: 8 }}>
+      {/* <View style={{ bottom: 8 }}>
         <Provider style={{ zIndex: 9999, }}>
           <View style={{ zIndex: 9999, }}>
             <Menu
@@ -204,9 +233,8 @@ const SurveyViewAll = ({ navigation, route }) => {
             </Menu>
           </View>
         </Provider>
-      </View>
+      </View> */}
       <Divider bold={true} />
-
       {/* ================TABS============================== */}
 
       <View
@@ -279,6 +307,10 @@ const SurveyViewAll = ({ navigation, route }) => {
                 key={index}
                 navigation={navigation}
                 Active={Active}
+                setActive={setActive}
+                setData={setData}
+                setTotalCount={setTotalCount}
+                setCurrentPage={setCurrentPage}
               />
             ))}
             {dataLoading && <Loader marginTop={10} />}

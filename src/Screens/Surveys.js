@@ -48,7 +48,7 @@ const Surveys = ({ navigation }) => {
   const [dataLoading, setDataLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
- 
+
 
 
   const params = JSON.stringify({
@@ -108,7 +108,7 @@ const Surveys = ({ navigation }) => {
         userId: user.id,
         orgId: user.orgId,
       });
-      API.instance.post( '/survey-list-device?is_api=true', newParams).then(
+      API.instance.post('/survey-list-device?is_api=true', newParams).then(
         response => {
           let newData = response.data;
           setDataLoading(false);
@@ -146,11 +146,14 @@ const Surveys = ({ navigation }) => {
           style={SIPCStyles.searchBar}
           placeholderTextColor="grey"
           icon={() => (
-            <SimpleLineIcons
-              name="magnifier"
-              size={20}
-              style={{ color: 'grey' }}
-            />
+            <TouchableOpacity>
+              <SimpleLineIcons
+                name="magnifier"
+                size={20}
+                style={{ color: 'grey' }}
+
+              />
+            </TouchableOpacity>
           )}
         />
       </Surface>
@@ -175,9 +178,9 @@ const Surveys = ({ navigation }) => {
       {/* =========================== */}
 
       <ScrollView
-        contentContainerStyle={{paddingBottom: 35}}
-        onScroll={({nativeEvent}) => {
-          const {layoutMeasurement, contentOffset, contentSize} = nativeEvent;
+        contentContainerStyle={{ paddingBottom: 35 }}
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
           if (
             layoutMeasurement.height + contentOffset.y >=
             contentSize.height - 35
