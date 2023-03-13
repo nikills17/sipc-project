@@ -9,7 +9,7 @@ import {
   TouchableWithoutFeedback,
   SafeAreaView,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button,
   Card,
@@ -25,63 +25,144 @@ import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import DropDownPicker from 'react-native-dropdown-picker';
-import {ScrollView} from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
+import {
+  responsiveScreenHeight,
+  responsiveScreenWidth,
+  responsiveScreenFontSize,
+} from 'react-native-responsive-dimensions';
 
-const StartInspections = ({navigation}) => {
-  const [showDropDown1, setShowDropDown1] = useState(false);
-  const [Group, setGroup] = useState();
-  const [GroupList, setGroupList] = useState([
-    {
-      label: 'SIPC High School',
-      value: '0',
-    },
-    {
-      label: 'SIPC Test Building',
-      value: '1',
-    },
-    {
-      label: 'Test School',
-      value: '2',
-    },
-    {
-      label: 'SIPC High School',
-      value: '3',
-    },
-  ]);
+import { MMKV } from 'react-native-mmkv'
+import { CONFIG } from '../utility/config';
+import API from '../utility/api';
+export const storage = new MMKV();
+
+const StartInspections = ({ navigation, route }) => {
+
+  const jsonUser = storage.getString('user')
+  const user = JSON.parse(jsonUser);
+
+  const [data, setData] = useState([]);
+
+  const [error, setError] = useState(false);
+  const [errorMsg, setErrorMessage] = useState();
+
+  const [showBuildingDropDown, setShowBuildingDropDown] = useState(false);
+  const [building, setBuilding] = useState();
+  const [buildingList, setBuildingList] = useState([]);
   {
     /* ============================SELECT Floor ============================= */
   }
-  const [showDropDown2, setShowDropDown2] = useState(false);
-  const [Group2, setGroup2] = useState();
-  const [GroupList2, setGroupList2] = useState([
-    {
-      label: '1st Floor',
-      value: '0',
-    },
-    {
-      label: '2nd Floor',
-      value: '1',
-    },
-    {
-      label: '3rd Floor',
-      value: '2',
-    },
-  ]);
+  const [showFloorDropDown, setShowFloorDropDown] = useState(false);
+  const [floor, setFloor] = useState();
+  const [floorList, setFloorList] = useState([]);
   {
     /* ============================SELECT Room============================= */
   }
-  const [showDropDown3, setShowDropDown3] = useState(false);
-  const [Group3, setGroup3] = useState();
-  const [GroupList3, setGroupList3] = useState([
-    {
-      label: '214 - SS - Law and Political studies',
-      value: '0',
-    },
-    {
-      label: '200 - SS - Law and Political studies',
-      value: '1',
-    },
-  ]);
+  const [showRoomDropDown, setShowRoomDropDown] = useState(false);
+  const [room, setRoom] = useState();
+  const [roomList, setRoomList] = useState([]);
+
+  // =================================Building NAME =================================
+  useEffect(() => {
+    API.instance
+      .post(
+        `/inspection-building-device?is_api=true`,
+        JSON.stringify({
+          appKey: CONFIG.appKey,
+          device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+          userId: user.id,
+        }),
+      )
+      .then(
+        response => {
+          setBuildingList(response.data);
+        },
+        error => console.error(error),
+      );
+  }, []);
+
+  // =================================FLOOR NAME =================================
+  useEffect(() => {
+    if (building) {
+      API.instance.post(`/floor-by-building-device?is_api=true`, JSON.stringify({
+        appKey: CONFIG.appKey,
+        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+        userId: user.id,
+        buildingId: building
+      })).then(
+        response => {
+          setFloorList(response.data);
+          setFloor(0)
+          setError(false);
+          setErrorMessage("")
+        },
+        error => console.error(error),
+      );
+    }
+  }, [building]);
+
+  // =================================Room NAME =================================
+  useEffect(() => {
+    if (building && floor) {
+      API.instance.post(`/room-by-floor-device?is_api=true`, JSON.stringify({
+        appKey: CONFIG.appKey,
+        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+        userId: user.id,
+        buildingId: building,
+        floorId: floor,
+      })).then(
+        response => {
+          setRoomList(response.data);
+          setRoom(0);
+          setError(false);
+          setErrorMessage("")
+        },
+        error => console.error(error),
+      );
+    }
+  }, [building, floor]);
+  // =================================================
+
+  const params = JSON.stringify({
+    appKey: CONFIG.appKey,
+    device_id: "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
+    buildingId: building,
+    floorId: floor,
+    roomId: room,
+    userId: user.id,
+  });
+
+  const StartInspection = () => {
+    API.instance
+      .post(
+        '/start-inspection-validate-api?is_api=true',
+        params,).then(
+          response => {
+            console.log(response.data)
+            if (response.data === "success") {
+              navigation.navigate('CleaningInspections', {
+                building_id: building,
+                buildingName: buildingList.find(el => el.id === building.toString())
+                  .building_name,
+                inspection_result_id: 27,
+                inspection_type_id: 1,
+              })
+            } else {
+              setError(true);
+              setErrorMessage(response.error);
+            }
+          },
+          error => {
+            console.error(error);
+          },
+        );
+  }
+
+  useEffect(() => {
+    StartInspection()
+  },[])
+
 
   return (
     <View style={SIPCStyles.flex}>
@@ -97,13 +178,20 @@ const StartInspections = ({navigation}) => {
           <Text style={SIPCStyles.AddNewText}>Start Inspections</Text>
         </Surface>
         {/* ============================SELECT ITEM============================= */}
-
-        <View style={{marginHorizontal: 20, marginVertical: 15, zIndex: 10}}>
+        {error && (
+          <View style={{ width: '100%', }}>
+            <Text style={{ color: 'red', fontFamily: 'Poppins-Medium', fontSize: responsiveScreenFontSize(1.8), marginHorizontal: 20, marginTop: 20 }}>
+              Error! {errorMsg}
+            </Text>
+          </View>
+        )
+        }
+        <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
           <DropDownPicker
             listMode="SCROLLVIEW"
             searchable={true}
             searchPlaceholder=""
-            searchContainerStyle={{backgroundColor: '#fffff6'}}
+            searchContainerStyle={{ backgroundColor: '#fffff6' }}
             itemSeparator={true}
             itemSeparatorStyle={{
               backgroundColor: '#D2D2D2',
@@ -116,7 +204,7 @@ const StartInspections = ({navigation}) => {
                 <Entypo
                   size={16}
                   color={'#808080'}
-                  style={{paddingHorizontal: 5}}
+                  style={{ paddingHorizontal: 5 }}
                   name="chevron-thin-down"
                 />
               );
@@ -126,7 +214,7 @@ const StartInspections = ({navigation}) => {
                 <Entypo
                   size={16}
                   color={'#808080'}
-                  style={{paddingHorizontal: 5}}
+                  style={{ paddingHorizontal: 5 }}
                   name="chevron-thin-up"
                 />
               );
@@ -136,23 +224,23 @@ const StartInspections = ({navigation}) => {
             style={SIPCStyles.DropDownPicker1}
             textStyle={SIPCStyles.textSize}
             dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
-            labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
-            open={showDropDown1}
-            value={Group}
-            items={GroupList}
-            setOpen={setShowDropDown1}
-            setValue={setGroup}
-            setItems={setGroupList}
+            labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
+            open={showBuildingDropDown}
+            value={building}
+            items={buildingList.map(item => ({ label: item.building_name, value: item.id }))}
+            setOpen={setShowBuildingDropDown}
+            setValue={setBuilding}
+            setItems={setBuildingList}
           />
         </View>
 
         {/* ============================SELECT ISSUE============================= */}
-        <View style={{marginHorizontal: 20, marginVertical: 15, zIndex: 9}}>
+        <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 9 }}>
           <DropDownPicker
             listMode="SCROLLVIEW"
             searchable={true}
             searchPlaceholder=""
-            searchContainerStyle={{backgroundColor: '#fffff6'}}
+            searchContainerStyle={{ backgroundColor: '#fffff6' }}
             itemSeparator={true}
             itemSeparatorStyle={{
               backgroundColor: '#D2D2D2',
@@ -165,7 +253,7 @@ const StartInspections = ({navigation}) => {
                 <Entypo
                   size={16}
                   color={'#808080'}
-                  style={{paddingHorizontal: 5}}
+                  style={{ paddingHorizontal: 5 }}
                   name="chevron-thin-down"
                 />
               );
@@ -175,7 +263,7 @@ const StartInspections = ({navigation}) => {
                 <Entypo
                   size={16}
                   color={'#808080'}
-                  style={{paddingHorizontal: 5}}
+                  style={{ paddingHorizontal: 5 }}
                   name="chevron-thin-up"
                 />
               );
@@ -185,22 +273,22 @@ const StartInspections = ({navigation}) => {
             style={SIPCStyles.DropDownPicker1}
             textStyle={SIPCStyles.textSize}
             dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
-            labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
-            open={showDropDown2}
-            value={Group2}
-            items={GroupList2}
-            setOpen={setShowDropDown2}
-            setValue={setGroup2}
-            setItems={setGroupList2}
+            labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
+            open={showFloorDropDown}
+            value={floor}
+            items={floorList.map(item => ({ label: item.name, value: item.id }))}
+            setOpen={setShowFloorDropDown}
+            setValue={setFloor}
+            setItems={setFloorList}
           />
         </View>
         {/* ============================SELECT ISSUE TYPE============================= */}
-        <View style={{marginHorizontal: 20, marginVertical: 15, zIndex: 8}}>
+        <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 8 }}>
           <DropDownPicker
             listMode="SCROLLVIEW"
             searchable={true}
             searchPlaceholder=""
-            searchContainerStyle={{backgroundColor: '#fffff6'}}
+            searchContainerStyle={{ backgroundColor: '#fffff6' }}
             itemSeparator={true}
             itemSeparatorStyle={{
               backgroundColor: '#D2D2D2',
@@ -213,7 +301,7 @@ const StartInspections = ({navigation}) => {
                 <Entypo
                   size={16}
                   color={'#808080'}
-                  style={{paddingHorizontal: 5}}
+                  style={{ paddingHorizontal: 5 }}
                   name="chevron-thin-down"
                 />
               );
@@ -223,7 +311,7 @@ const StartInspections = ({navigation}) => {
                 <Entypo
                   size={16}
                   color={'#808080'}
-                  style={{paddingHorizontal: 5}}
+                  style={{ paddingHorizontal: 5 }}
                   name="chevron-thin-up"
                 />
               );
@@ -233,13 +321,13 @@ const StartInspections = ({navigation}) => {
             style={SIPCStyles.DropDownPicker1}
             textStyle={SIPCStyles.textSize}
             dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
-            labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
-            open={showDropDown3}
-            value={Group3}
-            items={GroupList3}
-            setOpen={setShowDropDown3}
-            setValue={setGroup3}
-            setItems={setGroupList3}
+            labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
+            open={showRoomDropDown}
+            value={room}
+            items={roomList.map(item => ({ label: item.room_name, value: item.id }))}
+            setOpen={setShowRoomDropDown}
+            setValue={setRoom}
+            setItems={setRoomList}
           />
         </View>
       </ScrollView>
@@ -254,20 +342,18 @@ const StartInspections = ({navigation}) => {
           position: 'absolute',
           width: '100%',
         }}>
-        <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
           <TouchableWithoutFeedback
-            onPress={() => navigation.navigate('Inspections')}
-            style={{}}>
-            <Text style={[SIPCStyles.NormalFont, {padding: 15}]}>Cancel</Text>
+            onPress={() => navigation.navigate('Inspections')}>
+            <Text style={[SIPCStyles.NormalFont, { padding: 15 }]}>Cancel</Text>
           </TouchableWithoutFeedback>
 
-          <View style={{borderWidth: 1, borderColor: '#e6e6e6'}} />
+          <View style={{ borderWidth: 1, borderColor: '#e6e6e6' }} />
 
           <TouchableWithoutFeedback
-            onPress={() => navigation.navigate('CleaningInspections')}
-            style={{}}>
+            onPress={() => { StartInspection() }}>
             <Text
-              style={[SIPCStyles.NormalFont, {color: '#199be2', padding: 15}]}>
+              style={[SIPCStyles.NormalFont, { color: '#199be2', padding: 15 }]}>
               Start
             </Text>
           </TouchableWithoutFeedback>

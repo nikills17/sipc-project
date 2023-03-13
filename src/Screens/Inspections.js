@@ -13,6 +13,7 @@ import { responsiveScreenHeight, responsiveScreenWidth, responsiveScreenFontSize
 
 
 import { MMKV } from 'react-native-mmkv'
+import { CONFIG } from '../utility/config';
 export const storage = new MMKV();
 
 const Inspections = ({ navigation }) => {
@@ -31,14 +32,16 @@ const Inspections = ({ navigation }) => {
   const [totalCount, setTotalCount] = useState();
   const [isLoading, setIsLoading] = useState(false);
 
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
 
+
+  const [dataLoading, setDataLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+ 
 
   const params = JSON.stringify({
-    pageSize: '10',
+    pageSize: CONFIG.pageSize,
     pageNumber: '1',
-    appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+    appKey: CONFIG.appKey,
     device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
     userId: user.id,
     inspectionStatus: Active === null ? '' : Active,
@@ -51,15 +54,12 @@ const Inspections = ({ navigation }) => {
       API.instance
         .post(
           '/inspection-list-device?is_api=true',
-          params,
-        )
-        .then(
+          params,).then(
           response => {
-            setIsLoading(false);
-            if (response.status == "success") {
+              setIsLoading(false);
               setData(response.data);
               setTotalCount(response.totalCount);
-            }
+              setCurrentPage(1);            
           },
           error => {
             console.error(error);
@@ -69,37 +69,34 @@ const Inspections = ({ navigation }) => {
     }, [Active]),
   );
 
-  const loadMoreData = () => {
-    let newParams = JSON.stringify({
-      pageSize: '10',
-      pageNumber: pageNumber,
-      appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
-      device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-      userId: user.id,
-      inspectionStatus: Active === null ? '' : Active,
-      searchKeyword: '',
-    });
-
-    API.instance
-      .post(
-        '/inspection-list-device?is_api=true',
-        newParams,
-      )
-      .then(
+  const getMoreData = () => {
+    if (currentPage * CONFIG.pageSize < totalCount) {
+      setDataLoading(true);
+      const newParams = JSON.stringify({
+        pageSize: CONFIG.pageSize,
+        pageNumber: (currentPage + 1).toString(),
+        appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+        userId: user.id,
+        inspectionStatus: Active === null ? '' : Active,
+        searchKeyword: '',
+      });
+      API.instance.post('/inspection-list-device?is_api=true', newParams).then(
         response => {
-          setData(data.concat(response.data));
-          setPageNumber(pageNumber + 1)
-
+          let newData = response.data;
+          setDataLoading(false);
+          setData([...data, ...newData]);
+          setCurrentPage(currentPage + 1);
         },
         error => {
           console.error(error);
+          setDataLoading(false);
         },
       );
-  }
+    }
+  };
 
-  const renderItem = ({ item, navigation, index }) => {
-    <InspectionBox data={item} navigation={navigation} key={index} />
-  }
+  //load onces but when change the tab and comeback again no load only show 7 data
 
 
 
@@ -209,31 +206,42 @@ const Inspections = ({ navigation }) => {
         </Card>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* ==========INSPECTIONS ==================================== */}
+      {/* ==========INSPECTIONS ==================================== */}
 
-  
 
-   
-          {isLoading ? (
-            <Loader />
-          ) : totalCount > 0 ? (
-            <>
-              {data.map((item, index) => (
-                <InspectionBox data={item} navigation={navigation} key={index} Active={Active} />
-              ))}
-            </>
-          ) : (
-            <>
-              <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
-                <Image source={require('../assets/no-inspection-found.png')} style={{ height: Height / 3, width: Width / 2, resizeMode: 'contain' }} />
-                <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>{Active == null ? "No Inspections" : Active == 1 ? "No Completed Inspections" : "No Pending Inspections"}</Text>
-                <Text style={{ textAlign: 'center', fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular' }}>{Active == null ? "No inspection were found yet." : Active == 1 ? "No completed inspection were found yet." : "No pending inspection were found yet."}</Text>
-              </View>
-            </>
-          )}
 
- 
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 35 }}
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          if (
+            layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - 35
+          ) {
+            getMoreData();
+          }
+        }}>
+
+        {isLoading ? (
+          <Loader />
+        ) : totalCount > 0 ? (
+          <>
+            {data.map((item, index) => (
+              <InspectionBox data={item} navigation={navigation} key={index} Active={Active} />
+            ))}
+            {dataLoading && <Loader marginTop={10} />}
+          </>
+        ) : (
+          <>
+            <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 100 }}>
+              <Image source={require('../assets/no-inspection-found.png')} style={{ height: Height / 3, width: Width / 2, resizeMode: 'contain' }} />
+              <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>{Active == null ? "No Inspections" : Active == 1 ? "No Completed Inspections" : "No Pending Inspections"}</Text>
+              <Text style={{ textAlign: 'center', fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular' }}>{Active == null ? "No inspection were found yet." : Active == 1 ? "No completed inspection were found yet." : "No pending inspection were found yet."}</Text>
+            </View>
+          </>
+        )}
+
+
 
         {/* =========================================== */}
 

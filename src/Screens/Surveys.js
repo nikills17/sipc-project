@@ -28,6 +28,7 @@ import SurveyBox from '../component/surveybox';
 
 
 import { MMKV } from 'react-native-mmkv'
+import { CONFIG } from '../utility/config';
 export const storage = new MMKV();
 
 const Surveys = ({ navigation }) => {
@@ -44,11 +45,16 @@ const Surveys = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState();
 
+  const [dataLoading, setDataLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+
+
 
   const params = JSON.stringify({
-    pageSize: '10',
+    pageSize: CONFIG.pageSize,
     pageNumber: '1',
-    appKey: 'f9285c6c2d6a6b531ae1f70d2853f612',
+    appKey: CONFIG.appKey,
     device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
     userId: user.id,
     orgId: user.orgId,
@@ -91,10 +97,31 @@ const Surveys = ({ navigation }) => {
     }, []),
   );
 
-  const renderItem = ({ item, index, }) => (
-    <SurveyBox data={item} key={index} navigation={navigation} />
-
-  );
+  const getMoreData = () => {
+    if (currentPage * CONFIG.pageSize < totalCount) {
+      setDataLoading(true);
+      const newParams = JSON.stringify({
+        pageSize: CONFIG.pageSize,
+        pageNumber: (currentPage + 1).toString(),
+        appKey: CONFIG.appKey,
+        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+        userId: user.id,
+        orgId: user.orgId,
+      });
+      API.instance.post('/survey-list-device?is_api=true', newParams).then(
+        response => {
+          let newData = response.data;
+          setDataLoading(false);
+          setData([...data, ...newData]);
+          setCurrentPage(currentPage + 1);
+        },
+        error => {
+          console.error(error);
+          setDataLoading(false);
+        },
+      );
+    }
+  };
 
   return (
     <View style={SIPCStyles.flex}>
@@ -119,11 +146,14 @@ const Surveys = ({ navigation }) => {
           style={SIPCStyles.searchBar}
           placeholderTextColor="grey"
           icon={() => (
-            <SimpleLineIcons
-              name="magnifier"
-              size={20}
-              style={{ color: 'grey' }}
-            />
+            <TouchableOpacity>
+              <SimpleLineIcons
+                name="magnifier"
+                size={20}
+                style={{ color: 'grey' }}
+
+              />
+            </TouchableOpacity>
           )}
         />
       </Surface>
@@ -147,7 +177,17 @@ const Surveys = ({ navigation }) => {
 
       {/* =========================== */}
 
-      <ScrollView>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 35 }}
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          if (
+            layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - 35
+          ) {
+            getMoreData();
+          }
+        }}>
         {isLoading ? (
           <Loader />
         ) :
@@ -156,6 +196,7 @@ const Surveys = ({ navigation }) => {
               {data.map((item, index) => (
                 <SurveyBox data={item} key={index} navigation={navigation} />
               ))}
+              {dataLoading && <Loader marginTop={10} />}
             </>
           ) : (
             <>
