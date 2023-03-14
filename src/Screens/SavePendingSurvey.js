@@ -1126,28 +1126,28 @@ const SavePendingSurvey = ({navigation, route}) => {
       questions: finalAnswer.current,
     });
     console.log('Save Pending Payload: ' + payload);
-    // setIsLoading(true);
-    // API.instance
-    //   .post(
-    //     `/save-user-pending-survey-device?is_api=true`,
-    //     payload,
-    //   )
-    //   .then(
-    //     response => {
-    //       setIsLoading(false);
-    //       if (response.status == "success") {
-    //         navigation.navigate('SurveyViewAll');
-    //       } else {
-    //         setError(true);
-    //         setErrorMessage(response.error);
-    //       }
-    //     },
-    //     error => {
-    //       setIsLoading(false);
-    //       console.error(error);
-    //     },
+    setIsLoading(true);
+    API.instance
+      .post(
+        `/save-user-pending-survey-device?is_api=true`,
+        payload,
+      )
+      .then(
+        response => {
+          setIsLoading(false);
+          if (response.status == "success") {
+            navigation.navigate('SurveyViewAll');
+          } else {
+            setError(true);
+            setErrorMessage(response.error);
+          }
+        },
+        error => {
+          setIsLoading(false);
+          console.error(error);
+        },
 
-    //   );
+      );
   };
 
   const submitSurvey = () => {
@@ -1226,13 +1226,16 @@ const SavePendingSurvey = ({navigation, route}) => {
         closeOnDragDown={false}
         closeOnPressMask={false}
         dragFromTopOnly={true}
-        height={height}
+        height={height/1.12}
         customStyles={{
           wrapper: {
             backgroundColor: 'transparent',
           },
           draggableIcon: {
-            backgroundColor: '#000',
+            backgroundColor: 'transparent',
+          },
+          container:{
+            backgroundColor: 'transparent',
           },
         }}>
         <View

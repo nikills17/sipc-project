@@ -14,7 +14,6 @@ import {CommonActions, useFocusEffect} from '@react-navigation/native';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import {MMKV} from 'react-native-mmkv';
 import {responsiveFontSize} from 'react-native-responsive-dimensions';
-
 import SIPCStyles from './styles';
 import API from '../utility/api';
 import Loader from '../component/activityindicator';

@@ -42,25 +42,25 @@ const StartInspections = ({ navigation, route }) => {
   const jsonUser = storage.getString('user')
   const user = JSON.parse(jsonUser);
 
-  const [data, setData] = useState([]);
+  
 
   const [error, setError] = useState(false);
   const [errorMsg, setErrorMessage] = useState();
 
   const [showBuildingDropDown, setShowBuildingDropDown] = useState(false);
-  const [building, setBuilding] = useState();
+  const [building, setBuilding] = useState(0);
   const [buildingList, setBuildingList] = useState([]);
   {
     /* ============================SELECT Floor ============================= */
   }
   const [showFloorDropDown, setShowFloorDropDown] = useState(false);
-  const [floor, setFloor] = useState();
+  const [floor, setFloor] = useState(0);
   const [floorList, setFloorList] = useState([]);
   {
     /* ============================SELECT Room============================= */
   }
   const [showRoomDropDown, setShowRoomDropDown] = useState(false);
-  const [room, setRoom] = useState();
+  const [room, setRoom] = useState(0);
   const [roomList, setRoomList] = useState([]);
 
   // =================================Building NAME =================================
@@ -76,7 +76,11 @@ const StartInspections = ({ navigation, route }) => {
       )
       .then(
         response => {
+          setError(false);
           setBuildingList(response.data);
+          setBuilding(0);
+          setError(false);
+          setErrorMessage("")
         },
         error => console.error(error),
       );
@@ -85,41 +89,43 @@ const StartInspections = ({ navigation, route }) => {
   // =================================FLOOR NAME =================================
   useEffect(() => {
     if (building) {
-      API.instance.post(`/floor-by-building-device?is_api=true`, JSON.stringify({
-        appKey: CONFIG.appKey,
-        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-        userId: user.id,
-        buildingId: building
-      })).then(
-        response => {
-          setFloorList(response.data);
-          setFloor(0)
-          setError(false);
-          setErrorMessage("")
-        },
-        error => console.error(error),
-      );
+      API.instance.post(`/floor-by-building-device?is_api=true`,
+        JSON.stringify({
+          appKey: CONFIG.appKey,
+          device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+          userId: user.id,
+          buildingId: building
+        })).then(
+          response => {
+            setFloorList(response.data);
+            setFloor(0);
+            setError(false);
+            setErrorMessage("")
+          },
+          error => console.error(error),
+        );
     }
   }, [building]);
 
   // =================================Room NAME =================================
   useEffect(() => {
     if (building && floor) {
-      API.instance.post(`/room-by-floor-device?is_api=true`, JSON.stringify({
-        appKey: CONFIG.appKey,
-        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-        userId: user.id,
-        buildingId: building,
-        floorId: floor,
-      })).then(
-        response => {
-          setRoomList(response.data);
-          setRoom(0);
-          setError(false);
-          setErrorMessage("")
-        },
-        error => console.error(error),
-      );
+      API.instance.post(`/room-by-floor-device?is_api=true`,
+        JSON.stringify({
+          appKey: CONFIG.appKey,
+          device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+          userId: user.id,
+          buildingId: building,
+          floorId: floor,
+        })).then(
+          response => {
+            setRoomList(response.data);
+            setRoom(0);
+            setError(false);
+            setErrorMessage("")
+          },
+          error => console.error(error),
+        );
     }
   }, [building, floor]);
   // =================================================
@@ -139,14 +145,18 @@ const StartInspections = ({ navigation, route }) => {
         '/start-inspection-validate-api?is_api=true',
         params,).then(
           response => {
-            console.log(response.data)
-            if (response.data === "success") {
+            setError(false);
+            setErrorMessage("");
+            if (response.status === "success") {
+              console.log(response.data);
               navigation.navigate('CleaningInspections', {
-                building_id: building,
-                buildingName: buildingList.find(el => el.id === building.toString())
+                data: response.data,
+                buildingName: buildingList.find(el => el.id === building)
                   .building_name,
-                inspection_result_id: 27,
-                inspection_type_id: 1,
+                floorName: floorList.find(el => el.id === floor)
+                  .name,
+                roomName: roomList.find(el => el.id === room)
+                  .room_name,
               })
             } else {
               setError(true);
@@ -159,9 +169,7 @@ const StartInspections = ({ navigation, route }) => {
         );
   }
 
-  useEffect(() => {
-    StartInspection()
-  },[])
+
 
 
   return (
@@ -351,7 +359,7 @@ const StartInspections = ({ navigation, route }) => {
           <View style={{ borderWidth: 1, borderColor: '#e6e6e6' }} />
 
           <TouchableWithoutFeedback
-            onPress={() => { StartInspection() }}>
+            onPress={() => StartInspection()} >
             <Text
               style={[SIPCStyles.NormalFont, { color: '#199be2', padding: 15 }]}>
               Start
