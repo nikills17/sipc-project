@@ -25,7 +25,7 @@ import moment from 'moment';
 
 
 
-const ReportBox = ({ data, Active }) => {
+const ReportBox = ({ data, active }) => {
 
   
 
@@ -104,7 +104,7 @@ const ReportBox = ({ data, Active }) => {
     <View>
       {/* ===================================================== */}
 
-      {Active === 1 || Active === 2 ?
+      {active === 1 || active === 2 ?
         <>
           <Surface
             style={{
@@ -212,7 +212,7 @@ const ReportBox = ({ data, Active }) => {
         </>
         : (<></>)}
 
-      {Active === 3 ?
+      {active === 3 ?
         <>
           <Surface
             style={{
@@ -348,7 +348,7 @@ const ReportBox = ({ data, Active }) => {
         : (<></>)
       }
 
-      {Active === 4 ?
+      {active === 4 ?
         <>
           {/* ===================== */}
           <Surface
