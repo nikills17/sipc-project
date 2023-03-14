@@ -22,11 +22,14 @@ import ReportBox from '../component/reportsbox';
 import {CONFIG} from '../utility/config';
 import {ReportsOptions} from '../utility/constants';
 import ReportsFilterSheet from '../component/reportsfiltersheet';
+import {getDate} from '../utility/helper';
 
 const Reports = ({navigation}) => {
   const storage = new MMKV();
   const jsonUser = storage.getString('user');
   const user = JSON.parse(jsonUser);
+
+  const today = new Date();
 
   const [data, setData] = useState([]);
 
@@ -48,8 +51,8 @@ const Reports = ({navigation}) => {
     user_id: user.id,
     date_type: 'survey_submitted',
     period: '30',
-    start_date: '02-15-2023',
-    end_date: '03-14-2023',
+    start_date: getDate(new Date(today.getTime() - 24 * 60 * 60 * 1000 * 30)),
+    end_date: getDate(today),
     organization_id: 0,
     building_id: 0,
   });
@@ -287,13 +290,15 @@ const Reports = ({navigation}) => {
       </RBSheet>
 
       {/* ====================FILTER SHEET============================ */}
-      {active && <ReportsFilterSheet
-        refFilter={filterRef}
-        active={active}
-        setData={setData}
-        setIsLoading={setIsLoading}
-        user={user}
-      />}
+      {active && (
+        <ReportsFilterSheet
+          refFilter={filterRef}
+          active={active}
+          setData={setData}
+          setIsLoading={setIsLoading}
+          user={user}
+        />
+      )}
 
       <StatusBar barStyle={'dark-content'} backgroundColor="white" />
     </View>
