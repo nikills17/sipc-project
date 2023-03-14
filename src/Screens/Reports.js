@@ -210,9 +210,7 @@ const Reports = ({navigation}) => {
 
   return (
     <View style={SIPCStyles.flex}>
-      <StatusBar barStyle={'dark-content'} backgroundColor="white" />
-
-      {/* ====================================== */}
+      {/* ===================HEADER=================== */}
       <View style={{zIndex: 0}}>
         <Surface style={SIPCStyles.headerSurface}>
           {user.profile_picture != '' ? (
@@ -277,129 +275,8 @@ const Reports = ({navigation}) => {
           </TouchableWithoutFeedback>
         </Surface>
       </View>
-      {/* =============================MENU================== */}
-      {/* <View style={{ bottom: 8 }}>
-        <Provider style={{ zIndex: 9999 }}>
-          <View style={{ zIndex: 9999 }}>
-            <Menu
-              visible={visible}
-              onDismiss={closeMenu}
-              style={{ backgroundColor: 'transparent' }}
-              contentStyle={{ backgroundColor: 'white', }}
-              anchor={{ x: 0, y: 0, }}>
 
-              <Menu.Item onPress={() => { }} title={
-                <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                  <Image source={require('../assets/ii.png')} style={{ height: height / 35, width: width / 23, resizeMode: 'contain' }} />
-                  <Text style={{ color: 'black', fontSize: responsiveFontSize(1.8), marginLeft: 5 }}>Settings</Text>
-                </View>
-              } />
-
-
-              <Menu.Item onPress={() => {
-                storage.set('user', ''); navigation.navigate('Login');
-              }} title={
-                <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                  <Image source={require('../assets/ii.png')} style={{ height: height / 35, width: width / 23, resizeMode: 'contain' }} />
-                  <Text style={{ color: 'black', fontSize: responsiveFontSize(1.8), marginLeft: 5 }}>Log Out</Text>
-                </View>
-              } />
-            </Menu>
-          </View>
-        </Provider>
-      </View> */}
       <Divider bold={true} />
-      {/* ================================================ */}
-      <RBSheet
-        ref={profileRef}
-        closeOnDragDown={false}
-        closeOnPressMask={true}
-        closeOnPressBack={true}
-        dragFromTopOnly={true}
-        fromTop={true}
-        height={height}
-        animated={true}
-        animationType="fade"
-        // closeOnPressBack={true}
-        customStyles={{
-          wrapper: {
-            backgroundColor: 'transparent',
-          },
-          draggableIcon: {
-            backgroundColor: 'transparent',
-          },
-          container: {
-            backgroundColor: '#ccc',
-            height: height / 7,
-            width: width / 3,
-            borderWidth: 1,
-            borderColor: '#ccc',
-            // marginHorizontal: 5,
-            position: 'absolute',
-            top: 80,
-            left: 0,
-            right: 0,
-          },
-        }}>
-        <View
-          style={{
-            height: height / 7,
-            width: width / 3,
-            backgroundColor: 'white',
-            marginHorizontal: 5,
-            padding: 10,
-          }}>
-          <TouchableOpacity
-            style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Image
-              source={require('../assets/ii.png')}
-              style={{
-                height: height / 35,
-                width: width / 23,
-                resizeMode: 'contain',
-              }}
-            />
-            <Text
-              style={{
-                color: 'black',
-                fontSize: responsiveFontSize(1.8),
-                marginLeft: 5,
-              }}>
-              Settings
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-              setIsLoading(true);
-              storage.delete('user');
-              navigation.dispatch(
-                CommonActions.reset({
-                  index: 0,
-                  routes: [{name: 'Login'}],
-                }),
-              );
-            }}
-            style={{flexDirection: 'row', alignItems: 'center', marginTop: 20}}>
-            <Image
-              source={require('../assets/ii.png')}
-              style={{
-                height: height / 35,
-                width: width / 23,
-                resizeMode: 'contain',
-              }}
-            />
-            <Text
-              style={{
-                color: 'black',
-                fontSize: responsiveFontSize(1.8),
-                marginLeft: 5,
-              }}>
-              Log Out
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </RBSheet>
 
       {/* ===================TABS==================== */}
       <View>
@@ -510,7 +387,112 @@ const Reports = ({navigation}) => {
         </ScrollView>
       </View>
 
-      {/* ====================================== */}
+      {/* ===============MAIN================= */}
+      <ScrollView style={{zIndex: -1}}>
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <>
+            {data.map((item, index) => (
+              <ReportBox data={item} key={index} Active={Active} />
+            ))}
+          </>
+        )}
+      </ScrollView>
+
+      {/* ====================PROFILE SHEET============================ */}
+      <RBSheet
+        ref={profileRef}
+        closeOnDragDown={false}
+        closeOnPressMask={true}
+        closeOnPressBack={true}
+        dragFromTopOnly={true}
+        fromTop={true}
+        height={height}
+        animated={true}
+        animationType="fade"
+        // closeOnPressBack={true}
+        customStyles={{
+          wrapper: {
+            backgroundColor: 'transparent',
+          },
+          draggableIcon: {
+            backgroundColor: 'transparent',
+          },
+          container: {
+            backgroundColor: '#ccc',
+            height: height / 7,
+            width: width / 3,
+            borderWidth: 1,
+            borderColor: '#ccc',
+            // marginHorizontal: 5,
+            position: 'absolute',
+            top: 80,
+            left: 0,
+            right: 0,
+          },
+        }}>
+        <View
+          style={{
+            height: height / 7,
+            width: width / 3,
+            backgroundColor: 'white',
+            marginHorizontal: 5,
+            padding: 10,
+          }}>
+          <TouchableOpacity
+            style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Image
+              source={require('../assets/ii.png')}
+              style={{
+                height: height / 35,
+                width: width / 23,
+                resizeMode: 'contain',
+              }}
+            />
+            <Text
+              style={{
+                color: 'black',
+                fontSize: responsiveFontSize(1.8),
+                marginLeft: 5,
+              }}>
+              Settings
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              setIsLoading(true);
+              storage.delete('user');
+              navigation.dispatch(
+                CommonActions.reset({
+                  index: 0,
+                  routes: [{name: 'Login'}],
+                }),
+              );
+            }}
+            style={{flexDirection: 'row', alignItems: 'center', marginTop: 20}}>
+            <Image
+              source={require('../assets/ii.png')}
+              style={{
+                height: height / 35,
+                width: width / 23,
+                resizeMode: 'contain',
+              }}
+            />
+            <Text
+              style={{
+                color: 'black',
+                fontSize: responsiveFontSize(1.8),
+                marginLeft: 5,
+              }}>
+              Log Out
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </RBSheet>
+
+      {/* ===================DATA FILTER=================== */}
       <RBSheet
         ref={filterRef}
         closeOnDragDown={false}
@@ -553,7 +535,7 @@ const Reports = ({navigation}) => {
           </Text>
         </View>
 
-        {Active === 1 || Active === 2 ? (
+        {(Active === 1 || Active === 2) && (
           <>
             {/* ===============DateType DropDown========================= */}
             <View
@@ -609,8 +591,6 @@ const Reports = ({navigation}) => {
               />
             </View>
           </>
-        ) : (
-          <></>
         )}
 
         {/* ===============Period DropDown========================= */}
@@ -664,7 +644,6 @@ const Reports = ({navigation}) => {
         </View>
 
         {/* ========================================Start Date======== */}
-
         <View
           style={[
             SIPCStyles.container,
@@ -918,11 +897,6 @@ const Reports = ({navigation}) => {
                 setItems={setBuildingList}
               />
             </View>
-
-            {/* <View style={{ margin: 20, }}>
-              <Button style={{ backgroundColor: '#3a7fc4', borderRadius: 10, paddingVertical: 5 }} labelStyle={{ color: 'white' }}>
-                <Text style={[SIPCStyles.NormalFont, { color: 'white' }]}> Get Reports</Text> </Button>
-            </View> */}
           </>
         )}
 
@@ -961,21 +935,7 @@ const Reports = ({navigation}) => {
         </View>
       </RBSheet>
 
-      {/* ================================ */}
-
-      <ScrollView style={{zIndex: -1}}>
-        {isLoading ? (
-          <Loader />
-        ) : (
-          <>
-            {data.map((item, index) => (
-              <ReportBox data={item} key={index} Active={Active} />
-            ))}
-          </>
-        )}
-      </ScrollView>
-
-      {/* ================================ */}
+      <StatusBar barStyle={'dark-content'} backgroundColor="white" />
     </View>
   );
 };
