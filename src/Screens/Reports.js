@@ -24,7 +24,6 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {MMKV} from 'react-native-mmkv';
 import {responsiveFontSize} from 'react-native-responsive-dimensions';
-
 import SIPCStyles from './styles';
 import API from '../utility/api';
 import Loader from '../component/activityindicator';

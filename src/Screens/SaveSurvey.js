@@ -1086,26 +1086,26 @@ const SaveSurvey = ({navigation, route}) => {
       questions: finalAnswer.current,
     });
     console.log('Save Answer: ' + payload);
-    // API.instance
-    //   .post(
-    //     `/save-user-survey-device?is_api=true`,
-    //     payload,
-    //   )
-    //   .then(
-    //     response => {
-    //       setIsLoading(false);
-    //       if (response.status == "success") {
-    //         navigation.navigate('SurveyViewAll');
-    //       } else {
-    //         setError(true);
-    //         setErrorMessage(response.error);
-    //       }
-    //     },
-    //     error => {
-    //       setIsLoading(false);
-    //       console.error(error);
-    //     },
-    //   );
+    API.instance
+      .post(
+        `/save-user-survey-device?is_api=true`,
+        payload,
+      )
+      .then(
+        response => {
+          setIsLoading(false);
+          if (response.status == "success") {
+            navigation.navigate('SurveyViewAll');
+          } else {
+            setError(true);
+            setErrorMessage(response.error);
+          }
+        },
+        error => {
+          setIsLoading(false);
+          console.error(error);
+        },
+      );
   };
 
   const submitSurvey = () => {
@@ -1192,13 +1192,16 @@ const SaveSurvey = ({navigation, route}) => {
         closeOnDragDown={false}
         closeOnPressMask={false}
         dragFromTopOnly={true}
-        height={height}
+        height={height/1.12}
         customStyles={{
           wrapper: {
             backgroundColor: 'transparent',
           },
           draggableIcon: {
-            backgroundColor: '#000',
+            backgroundColor: 'transparent',
+          },
+          container:{
+            backgroundColor: 'transparent',
           },
         }}>
         <View
