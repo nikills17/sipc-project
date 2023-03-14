@@ -1,38 +1,13 @@
-import {
-  View,
-  Alert,
-  Image,
-  ScrollView,
-  Dimensions,
-  TouchableWithoutFeedback,
-  StatusBar,
-} from 'react-native';
-import React, { useState } from 'react';
-import {
-  Button,
-  Card,
-  Searchbar,
-  TextInput,
-  Surface,
-  Divider,
-  Text,
-} from 'react-native-paper';
+import {View, Image, TouchableWithoutFeedback} from 'react-native';
+import React, {useState} from 'react';
+import {Surface, Divider, Text} from 'react-native-paper';
 import SIPCStyles from '../screens/styles';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import DropDownPicker from 'react-native-dropdown-picker';
 import moment from 'moment';
 
-
-
-
-const ReportBox = ({ data, active }) => {
-
-  
-
-  const completedDate = data.room_completed_date
-  const parsedDate = moment(completedDate, "YYYY-MM-DD HH:mm:ss.S");
-  const room_completed_date = parsedDate.format("MMM DD, YYYY");
-
+const ReportBox = ({data, active}) => {
+  const completedDate = data.room_completed_date;
+  const parsedDate = moment(completedDate, 'YYYY-MM-DD HH:mm:ss.S');
+  const room_completed_date = parsedDate.format('MMM DD, YYYY');
 
   const checkScore = score => {
     if (score > 90) {
@@ -74,37 +49,9 @@ const ReportBox = ({ data, active }) => {
     year: 'numeric',
   });
 
-  // const [showDropDown1, setShowDropDown1] = useState(false);
-  // const [currentWOStatus, setCurrentWOStatus] = useState(data.work_order_status);
-  // const [workOrderStatus, setWorkOrderStatus] = useState(data.work_order_status);
-
-  // const statusList = [
-  //   {
-  //     label: "UNASSIGNED",
-  //     value: '-1',
-  //   },
-  //   {
-  //     label: "IN-PROGRESS",
-  //     value: '0',
-  //   },
-  //   {
-  //     label: "COMPLETED",
-  //     value: '1',
-  //   },
-  // ];
-
-  // const handleDropDownChange = () => {
-  //   // if (workOrderStatus === '-1' || workOrderStatus === '0' ||workOrderStatus === '1') {
-  //   navigation.navigate('Assignment');
-  //   // }
-  // };
-
-
   return (
     <View>
-      {/* ===================================================== */}
-
-      {active === 1 || active === 2 ?
+      {(active === 1 || active === 2) && (
         <>
           <Surface
             style={{
@@ -112,7 +59,7 @@ const ReportBox = ({ data, active }) => {
               padding: 15,
               backgroundColor: Show == true ? '#fffcf8' : 'white',
             }}>
-            <View style={{ flexDirection: 'column' }}>
+            <View style={{flexDirection: 'column'}}>
               <View style={SIPCStyles.ViewRowAlign}>
                 <TouchableWithoutFeedback
                   onPress={() => {
@@ -130,7 +77,9 @@ const ReportBox = ({ data, active }) => {
                     />
                   )}
                 </TouchableWithoutFeedback>
-                <Text style={[SIPCStyles.SurfaceTitle, { flex: 1 }]}>{data.survey_name}</Text>
+                <Text style={[SIPCStyles.SurfaceTitle, {flex: 1}]}>
+                  {data.survey_name}
+                </Text>
               </View>
 
               <View style={SIPCStyles.healthImageView}>
@@ -138,50 +87,59 @@ const ReportBox = ({ data, active }) => {
                   source={require('../assets/ii.png')}
                   style={SIPCStyles.healthImage}
                 />
-                <Text style={[SIPCStyles.SurfaceType, { flex: 1 }]}>{data.survey_type}</Text>
+                <Text style={[SIPCStyles.SurfaceType, {flex: 1}]}>
+                  {data.survey_type}
+                </Text>
               </View>
             </View>
           </Surface>
 
-          {Show === true ?
+          {Show === true ? (
             <>
-              <Surface style={{ backgroundColor: 'white', padding: 15, }}>
-                <View style={{ flexDirection: 'row', }}>
+              <Surface style={{backgroundColor: 'white', padding: 15}}>
+                <View style={{flexDirection: 'row'}}>
                   <Image
                     source={require('../assets/building.png')}
                     style={SIPCStyles.healthImage}
                   />
-                  <Text style={SIPCStyles.SurfaceType}>{data.building_name}</Text>
+                  <Text style={SIPCStyles.SurfaceType}>
+                    {data.building_name}
+                  </Text>
                 </View>
               </Surface>
 
-              <Surface style={{ backgroundColor: 'white', padding: 15 }}>
-                <View style={{ flexDirection: 'row', }}>
-
+              <Surface style={{backgroundColor: 'white', padding: 15}}>
+                <View style={{flexDirection: 'row'}}>
                   <Image
                     source={require('../assets/Bank.png')}
                     style={SIPCStyles.healthImage}
                   />
-                  <Text style={SIPCStyles.SurfaceType}>{data.organization_name}</Text>
+                  <Text style={SIPCStyles.SurfaceType}>
+                    {data.organization_name}
+                  </Text>
                 </View>
               </Surface>
 
-
-              <Surface style={{ backgroundColor: 'white', padding: 15 }}>
+              <Surface style={{backgroundColor: 'white', padding: 15}}>
                 <View
-                  style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <View style={{ flexDirection: 'row' }}>
-                    <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                       Survey Score:
                     </Text>
-                    <Text style={SIPCStyles.ValueFont}>{data.received_score}</Text>
+                    <Text style={SIPCStyles.ValueFont}>
+                      {data.received_score}
+                    </Text>
                     {/* <Text style={[SIPCStyles.ValueFont,
                   data.received_score > 90 ? SIPCStyles.textSuccess :
                   data.received_score > 80 ? SIPCStyles.textWarning :
                      SIPCStyles.textDanger]}>{data.received_score}%</Text> */}
                   </View>
-                  <View style={{ flexDirection: 'row' }}>
-                    <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                       Total Score:
                     </Text>
                     <Text style={SIPCStyles.ValueFont}>{data.total_score}</Text>
@@ -189,30 +147,34 @@ const ReportBox = ({ data, active }) => {
                 </View>
               </Surface>
 
-              <Surface style={{ backgroundColor: 'white', padding: 15 }}>
+              <Surface style={{backgroundColor: 'white', padding: 15}}>
                 <View
-                  style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <View style={{ flexDirection: 'row' }}>
-                    <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                       Created:
                     </Text>
-                    <Text style={SIPCStyles.ValueFont}>{formattedStartDate}</Text>
+                    <Text style={SIPCStyles.ValueFont}>
+                      {formattedStartDate}
+                    </Text>
                   </View>
-                  <View style={{ flexDirection: 'row' }}>
-                    <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                       Submitted:
                     </Text>
                     <Text style={SIPCStyles.ValueFont}>{formattedEndDate}</Text>
                   </View>
                 </View>
               </Surface>
-
             </>
-            : null}
+          ) : null}
         </>
-        : (<></>)}
+      )}
 
-      {active === 3 ?
+      {active === 3 && (
         <>
           <Surface
             style={{
@@ -220,8 +182,7 @@ const ReportBox = ({ data, active }) => {
               padding: 15,
               backgroundColor: Show == true ? '#fffcf8' : 'white',
             }}>
-
-            <View style={{ flexDirection: 'column' }}>
+            <View style={{flexDirection: 'column'}}>
               <View style={SIPCStyles.ViewRowAlign}>
                 <TouchableWithoutFeedback
                   onPress={() => {
@@ -252,24 +213,28 @@ const ReportBox = ({ data, active }) => {
             </View>
           </Surface>
 
-
           {Show == true ? (
             <>
-              <Surface style={{ backgroundColor: 'white', padding: 15 }}>
+              <Surface style={{backgroundColor: 'white', padding: 15}}>
                 <View
-                  style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <View style={{ flexDirection: 'row' }}>
-                    <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                       Rooms:
                     </Text>
                     <Text style={SIPCStyles.ValueFont}>{data.total_room}</Text>
                   </View>
-                  <View style={{ flexDirection: 'row' }}>
-                    <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                       Type:
                     </Text>
                     <Text style={SIPCStyles.ValueFont}>
-                      {data.inspection_type_id === '2' ? 'Maintenance' : 'Cleaning'}
+                      {data.inspection_type_id === '2'
+                        ? 'Maintenance'
+                        : 'Cleaning'}
                     </Text>
                   </View>
                   {/* <Text
@@ -284,11 +249,14 @@ const ReportBox = ({ data, active }) => {
                 </View>
               </Surface>
 
-              <Surface style={{ backgroundColor: 'white', padding: 15 }}>
+              <Surface style={{backgroundColor: 'white', padding: 15}}>
                 <View
-                  style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <View style={{ flexDirection: 'row' }}>
-                    <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                       Score:
                     </Text>
                     {checkScore(SCORE)}
@@ -299,8 +267,8 @@ const ReportBox = ({ data, active }) => {
                             SIPCStyles.textDanger]}>{data.received_score}%</Text> */}
                   </View>
                   {data.is_completed == '1' ? (
-                    <View style={{ flexDirection: 'row' }}>
-                      <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                         Status:
                       </Text>
                       <Text
@@ -312,8 +280,8 @@ const ReportBox = ({ data, active }) => {
                       </Text>
                     </View>
                   ) : (
-                    <View style={{ flexDirection: 'row' }}>
-                      <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                         Status:
                       </Text>
                       <Text
@@ -328,11 +296,14 @@ const ReportBox = ({ data, active }) => {
                 </View>
               </Surface>
 
-              <Surface style={{ backgroundColor: 'white', padding: 15 }}>
+              <Surface style={{backgroundColor: 'white', padding: 15}}>
                 <View
-                  style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <View style={{ flexDirection: 'row' }}>
-                    <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}>
+                  <View style={{flexDirection: 'row'}}>
+                    <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                       Inspector:
                     </Text>
                     <Text style={SIPCStyles.ValueFont}>
@@ -343,12 +314,10 @@ const ReportBox = ({ data, active }) => {
               </Surface>
             </>
           ) : null}
-
         </>
-        : (<></>)
-      }
+      )}
 
-      {active === 4 ?
+      {active === 4 && (
         <>
           {/* ===================== */}
           <Surface
@@ -357,8 +326,7 @@ const ReportBox = ({ data, active }) => {
               padding: 15,
               backgroundColor: Show === true ? '#fffcf8' : 'white',
             }}>
-
-            <View style={{ flexDirection: 'column' }}>
+            <View style={{flexDirection: 'column'}}>
               <View style={SIPCStyles.ViewRowAlign}>
                 <TouchableWithoutFeedback
                   onPress={() => {
@@ -376,10 +344,7 @@ const ReportBox = ({ data, active }) => {
                     />
                   )}
                 </TouchableWithoutFeedback>
-                <Text style={SIPCStyles.SurfaceTitle}>
-                  {' '}
-                  {data.item_name}
-                </Text>
+                <Text style={SIPCStyles.SurfaceTitle}> {data.item_name}</Text>
               </View>
 
               <View style={SIPCStyles.healthImageView}>
@@ -392,16 +357,14 @@ const ReportBox = ({ data, active }) => {
                 </Text>
               </View>
             </View>
-
-
           </Surface>
           <Divider bold={true} />
 
           {Show === true ? (
-            <Surface style={{ backgroundColor: 'white' }}>
+            <Surface style={{backgroundColor: 'white'}}>
               {/* {data.location_type_id === '1' ? ( */}
               <>
-                <View style={{ flexDirection: 'row', padding: 15 }}>
+                <View style={{flexDirection: 'row', padding: 15}}>
                   <Image
                     source={require('../assets/building.png')}
                     style={SIPCStyles.MainBuilding}
@@ -418,7 +381,7 @@ const ReportBox = ({ data, active }) => {
                     justifyContent: 'space-between',
                     flexWrap: 'wrap',
                   }}>
-                  <View style={{ flexDirection: 'row', padding: 15 }}>
+                  <View style={{flexDirection: 'row', padding: 15}}>
                     <Image
                       source={require('../assets/floor.png')}
                       style={SIPCStyles.MainBuilding}
@@ -428,14 +391,12 @@ const ReportBox = ({ data, active }) => {
                     </Text>
                   </View>
 
-                  <View style={{ flexDirection: 'row', padding: 15 }}>
+                  <View style={{flexDirection: 'row', padding: 15}}>
                     <Image
                       source={require('../assets/room.png')}
                       style={SIPCStyles.MainBuilding}
                     />
-                    <Text style={SIPCStyles.SurfaceType}>
-                      {data.room_name}
-                    </Text>
+                    <Text style={SIPCStyles.SurfaceType}>{data.room_name}</Text>
                   </View>
                 </View>
                 <Divider bold={true} />
@@ -515,30 +476,34 @@ const ReportBox = ({ data, active }) => {
               {/* ================== */}
               {/*  */}
               {/* ================ */}
-              <View style={{ flexDirection: 'row', padding: 15 }}>
-                <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+              <View style={{flexDirection: 'row', padding: 15}}>
+                <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                   Assigned To:
                 </Text>
                 <Text style={SIPCStyles.ValueFont}>
-                  {data.assigned_username === '' ? 'Unassigned' : data.assigned_username}
+                  {data.assigned_username === ''
+                    ? 'Unassigned'
+                    : data.assigned_username}
                 </Text>
               </View>
               <Divider bold={true} />
               {/* ================ */}
 
-              <View style={{ flexDirection: 'row', padding: 15 }}>
-                <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+              <View style={{flexDirection: 'row', padding: 15}}>
+                <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                   Status:
                 </Text>
                 <Text style={SIPCStyles.ValueFont}>
-                  {data.work_order_status === '0' ? 'Unassigned' : data.work_order_status}
+                  {data.work_order_status === '0'
+                    ? 'Unassigned'
+                    : data.work_order_status}
                 </Text>
               </View>
               <Divider bold={true} />
 
               {/* ================ */}
-              <View style={{ flexDirection: 'row', padding: 15 }}>
-                <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+              <View style={{flexDirection: 'row', padding: 15}}>
+                <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                   Inspector:
                 </Text>
                 <Text style={SIPCStyles.ValueFont}>
@@ -548,8 +513,8 @@ const ReportBox = ({ data, active }) => {
               <Divider bold={true} />
 
               {/* ================ */}
-              <View style={{ flexDirection: 'row', padding: 15 }}>
-                <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+              <View style={{flexDirection: 'row', padding: 15}}>
+                <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                   Issue Type:
                 </Text>
                 <Text style={SIPCStyles.ValueFont}>
@@ -559,39 +524,40 @@ const ReportBox = ({ data, active }) => {
               <Divider bold={true} />
               {/* ================ */}
 
-              <View style={{ flexDirection: 'row', padding: 15 }}>
+              <View style={{flexDirection: 'row', padding: 15}}>
                 <Text style={[SIPCStyles.BoldFont]}>Comment:</Text>
                 <Text
                   style={[
                     SIPCStyles.ValueFont,
-                    { paddingHorizontal: 10, flex: 1 },
+                    {paddingHorizontal: 10, flex: 1},
                   ]}>
                   {data.comment}
                 </Text>
               </View>
               <Divider bold={true} />
               {/* ======================== */}
-              <View style={{ flexDirection: 'row', padding: 15, flexWrap: 'wrap' }}>
+              <View
+                style={{flexDirection: 'row', padding: 15, flexWrap: 'wrap'}}>
                 <Text style={SIPCStyles.BoldFont}>Images:</Text>
                 {data.image ? (
                   <Image
-                    source={{ uri: data.image  }}
-                    style={{ height: 65, width: 65, margin: 10 }}
+                    source={{uri: data.image}}
+                    style={{height: 65, width: 65, margin: 10}}
                   />
                 ) : null}
               </View>
               <Divider bold={true} />
               {/* ================ */}
-              <View style={{ flexDirection: 'row', padding: 15 }}>
-                <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+              <View style={{flexDirection: 'row', padding: 15}}>
+                <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                   Date Created:
                 </Text>
                 <Text style={SIPCStyles.ValueFont}>{data.date_created}</Text>
               </View>
               <Divider bold={true} />
               {/* ================ */}
-              <View style={{ flexDirection: 'row', padding: 15 }}>
-                <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+              <View style={{flexDirection: 'row', padding: 15}}>
+                <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                   Date Completed:
                 </Text>
                 <Text style={SIPCStyles.ValueFont}>{room_completed_date}</Text>
@@ -599,8 +565,8 @@ const ReportBox = ({ data, active }) => {
               <Divider bold={true} />
               {/* ================ */}
 
-              <View style={{ flexDirection: 'row', padding: 15 }}>
-                <Text style={[SIPCStyles.BoldFont, { paddingRight: 10 }]}>
+              <View style={{flexDirection: 'row', padding: 15}}>
+                <Text style={[SIPCStyles.BoldFont, {paddingRight: 10}]}>
                   Completed By:
                 </Text>
                 <Text style={SIPCStyles.ValueFont}></Text>
@@ -611,15 +577,10 @@ const ReportBox = ({ data, active }) => {
           ) : null}
 
           {/* ===================== */}
-        </> : (<></>)}
-
-
-
-
-
-      {/* ===================================================== */}
+        </>
+      )}
     </View>
-  )
-}
+  );
+};
 
-export default ReportBox
+export default ReportBox;

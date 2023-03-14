@@ -5,6 +5,7 @@ import {
   View,
   TouchableOpacity,
   Image,
+  ScrollView,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import RBSheet from 'react-native-raw-bottom-sheet';
@@ -212,159 +213,159 @@ const ReportsFilterSheet = ({
           <Ionicons name="ios-close" size={25} color={'#FFFFFF'} />
         </TouchableOpacity>
       </View>
-
-      {(active === 1 || active === 2) && (
-        <>
-          {/* ===============DateType DropDown========================= */}
-          <View style={{marginHorizontal: 20, marginVertical: 15, zIndex: 10}}>
-            <DropDownPicker
-              listMode="SCROLLVIEW"
-              searchable={true}
-              searchPlaceholder=""
-              searchContainerStyle={{
-                backgroundColor: '#fffff6',
-                borderColor: '#D2D2D2',
-              }}
-              searchTextInputStyle={{borderColor: '#D2D2D2'}}
-              itemSeparator={true}
-              itemSeparatorStyle={{
-                backgroundColor: '#D2D2D2',
-              }}
-              showArrowIcon={true}
-              ArrowDownIconComponent={() => {
-                return (
-                  <Entypo
-                    size={16}
-                    color={'#808080'}
-                    style={{paddingHorizontal: 5}}
-                    name="chevron-thin-down"
-                  />
-                );
-              }}
-              ArrowUpIconComponent={() => {
-                return (
-                  <Entypo
-                    size={16}
-                    color={'#808080'}
-                    style={{paddingHorizontal: 5}}
-                    name="chevron-thin-up"
-                  />
-                );
-              }}
-              placeholder="Date Type"
-              placeholderStyle={SIPCStyles.placeholderStyle}
-              style={SIPCStyles.DropDownPicker1}
-              textStyle={SIPCStyles.textSize}
-              dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
-              labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
-              open={dateTypeDropDown}
-              value={dateType}
-              items={dateTypeList}
-              setOpen={setDateTypeDropDown}
-              setValue={setDateType}
-            />
-          </View>
-        </>
-      )}
-
-      {/* ========================================Start Date======== */}
-      <TouchableOpacity
-        onPress={toggleDatePicker}
-        activeOpacity={0.95}
-        style={[
-          SIPCStyles.container,
-          {marginHorizontal: 20, marginVertical: 15, borderWidth: 1},
-        ]}>
-        <Image
-          source={require('../assets/cal.png')}
-          style={[SIPCStyles.MainBuilding, {marginRight: 20, marginLeft: 6}]}
-        />
-        <Text style={SIPCStyles.NormalFont}>
-          {selectedDate ? getDate(selectedDate) : 'Start Date'}
-        </Text>
-      </TouchableOpacity>
-
-      <DateTimePickerModal
-        isVisible={isDatePickerVisible}
-        mode="date"
-        onConfirm={handleConfirm}
-        onCancel={toggleDatePicker}
-        date={selectedDate}
-      />
-
-      {/* ========================================End Date======== */}
-      <TouchableOpacity
-        onPress={toggleEndDatePicker}
-        style={[
-          SIPCStyles.container,
-          {marginHorizontal: 20, marginVertical: 15, borderWidth: 1},
-        ]}>
-        <Image
-          source={require('../assets/cal.png')}
-          style={[SIPCStyles.MainBuilding, {marginRight: 20, marginLeft: 6}]}
-        />
-        <Text style={SIPCStyles.NormalFont}>
-          {selectedEndDate ? getDate(selectedEndDate) : 'End Date'}
-        </Text>
-      </TouchableOpacity>
-
-      <DateTimePickerModal
-        isVisible={isEndDatePickerVisible}
-        mode="date"
-        onConfirm={handleEndDateConfirm}
-        onCancel={toggleEndDatePicker}
-        date={selectedEndDate}
-      />
-      {/* ===============Organization DropDown========================= */}
-      <View style={{marginHorizontal: 20, marginVertical: 15, zIndex: 10}}>
-        <DropDownPicker
-          listMode="SCROLLVIEW"
-          searchable={true}
-          searchPlaceholder=""
-          searchContainerStyle={{
-            backgroundColor: '#fffff6',
-            borderColor: '#D2D2D2',
-          }}
-          searchTextInputStyle={{borderColor: '#D2D2D2'}}
-          itemSeparator={true}
-          itemSeparatorStyle={{backgroundColor: '#D2D2D2', marginVertical: 3}}
-          showArrowIcon={true}
-          // showTickIcon={true}
-          ArrowDownIconComponent={() => {
-            return (
-              <Entypo
-                size={16}
-                color={'#808080'}
-                style={{paddingHorizontal: 5}}
-                name="chevron-thin-down"
+      <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: 150}}>
+        {(active === 1 || active === 2) && (
+          <>
+            {/* ===============DateType DropDown========================= */}
+            <View
+              style={{marginHorizontal: 20, marginVertical: 15, zIndex: 10}}>
+              <DropDownPicker
+                listMode="SCROLLVIEW"
+                searchable={true}
+                searchPlaceholder=""
+                searchContainerStyle={{
+                  backgroundColor: '#fffff6',
+                  borderColor: '#D2D2D2',
+                }}
+                searchTextInputStyle={{borderColor: '#D2D2D2'}}
+                itemSeparator={true}
+                itemSeparatorStyle={{
+                  backgroundColor: '#D2D2D2',
+                }}
+                showArrowIcon={true}
+                ArrowDownIconComponent={() => {
+                  return (
+                    <Entypo
+                      size={16}
+                      color={'#808080'}
+                      style={{paddingHorizontal: 5}}
+                      name="chevron-thin-down"
+                    />
+                  );
+                }}
+                ArrowUpIconComponent={() => {
+                  return (
+                    <Entypo
+                      size={16}
+                      color={'#808080'}
+                      style={{paddingHorizontal: 5}}
+                      name="chevron-thin-up"
+                    />
+                  );
+                }}
+                placeholder="Date Type"
+                placeholderStyle={SIPCStyles.placeholderStyle}
+                style={SIPCStyles.DropDownPicker1}
+                textStyle={SIPCStyles.textSize}
+                dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
+                labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
+                open={dateTypeDropDown}
+                value={dateType}
+                items={dateTypeList}
+                setOpen={setDateTypeDropDown}
+                setValue={setDateType}
               />
-            );
-          }}
-          ArrowUpIconComponent={() => {
-            return (
-              <Entypo
-                size={16}
-                color={'#808080'}
-                style={{paddingHorizontal: 5}}
-                name="chevron-thin-up"
-              />
-            );
-          }}
-          placeholder="Organization"
-          placeholderStyle={SIPCStyles.placeholderStyle}
-          style={SIPCStyles.DropDownPicker1}
-          textStyle={SIPCStyles.textSize}
-          dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
-          labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
-          open={organizationDropDown}
-          value={organization}
-          items={organizationList}
-          setOpen={setOrganizationDropDown}
-          setValue={setOrganization}
-        />
-      </View>
+            </View>
+          </>
+        )}
 
-      <>
+        {/* ========================================Start Date======== */}
+        <TouchableOpacity
+          onPress={toggleDatePicker}
+          activeOpacity={0.95}
+          style={[
+            SIPCStyles.container,
+            {marginHorizontal: 20, marginVertical: 15, borderWidth: 1},
+          ]}>
+          <Image
+            source={require('../assets/cal.png')}
+            style={[SIPCStyles.MainBuilding, {marginRight: 20, marginLeft: 6}]}
+          />
+          <Text style={SIPCStyles.NormalFont}>
+            {selectedDate ? getDate(selectedDate) : 'Start Date'}
+          </Text>
+        </TouchableOpacity>
+
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="date"
+          onConfirm={handleConfirm}
+          onCancel={toggleDatePicker}
+          date={selectedDate}
+        />
+
+        {/* ========================================End Date======== */}
+        <TouchableOpacity
+          onPress={toggleEndDatePicker}
+          style={[
+            SIPCStyles.container,
+            {marginHorizontal: 20, marginVertical: 15, borderWidth: 1},
+          ]}>
+          <Image
+            source={require('../assets/cal.png')}
+            style={[SIPCStyles.MainBuilding, {marginRight: 20, marginLeft: 6}]}
+          />
+          <Text style={SIPCStyles.NormalFont}>
+            {selectedEndDate ? getDate(selectedEndDate) : 'End Date'}
+          </Text>
+        </TouchableOpacity>
+
+        <DateTimePickerModal
+          isVisible={isEndDatePickerVisible}
+          mode="date"
+          onConfirm={handleEndDateConfirm}
+          onCancel={toggleEndDatePicker}
+          date={selectedEndDate}
+        />
+        {/* ===============Organization DropDown========================= */}
+        <View style={{marginHorizontal: 20, marginVertical: 15, zIndex: 10}}>
+          <DropDownPicker
+            listMode="SCROLLVIEW"
+            searchable={true}
+            searchPlaceholder=""
+            searchContainerStyle={{
+              backgroundColor: '#fffff6',
+              borderColor: '#D2D2D2',
+            }}
+            searchTextInputStyle={{borderColor: '#D2D2D2'}}
+            itemSeparator={true}
+            itemSeparatorStyle={{backgroundColor: '#D2D2D2', marginVertical: 3}}
+            showArrowIcon={true}
+            // showTickIcon={true}
+            ArrowDownIconComponent={() => {
+              return (
+                <Entypo
+                  size={16}
+                  color={'#808080'}
+                  style={{paddingHorizontal: 5}}
+                  name="chevron-thin-down"
+                />
+              );
+            }}
+            ArrowUpIconComponent={() => {
+              return (
+                <Entypo
+                  size={16}
+                  color={'#808080'}
+                  style={{paddingHorizontal: 5}}
+                  name="chevron-thin-up"
+                />
+              );
+            }}
+            placeholder="Organization"
+            placeholderStyle={SIPCStyles.placeholderStyle}
+            style={SIPCStyles.DropDownPicker1}
+            textStyle={SIPCStyles.textSize}
+            dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
+            labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
+            open={organizationDropDown}
+            value={organization}
+            items={organizationList}
+            setOpen={setOrganizationDropDown}
+            setValue={setOrganization}
+          />
+        </View>
+
         {/* ===============Building Category DropDown========================= */}
         <View style={{marginHorizontal: 20, marginVertical: 15, zIndex: 10}}>
           <DropDownPicker
@@ -417,27 +418,26 @@ const ReportsFilterSheet = ({
             setItems={setBuildingCategoryList}
           />
         </View>
+      </ScrollView>
 
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={getReports}
-          style={{
-            backgroundColor: '#0091f6',
-            borderRadius: 10,
-            paddingVertical: 10,
-            justifyContent: 'center',
-            alignItems: 'center',
-            margin: 20,
-            position: 'absolute',
-            width: '90%',
-            bottom: 50,
-          }}
-          labelStyle={{color: 'white'}}>
-          <Text style={[SIPCStyles.BoldFont, {color: 'white'}]}>
-            GET REPORTS
-          </Text>
-        </TouchableOpacity>
-      </>
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={getReports}
+        style={{
+          backgroundColor: '#0091f6',
+          borderRadius: 10,
+          paddingVertical: 10,
+          justifyContent: 'center',
+          alignItems: 'center',
+          margin: 20,
+          position: 'absolute',
+          width: '90%',
+          bottom: 50,
+          zIndex: 100,
+        }}
+        labelStyle={{color: 'white'}}>
+        <Text style={[SIPCStyles.BoldFont, {color: 'white'}]}>GET REPORTS</Text>
+      </TouchableOpacity>
     </RBSheet>
   );
 };
