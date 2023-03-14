@@ -1,73 +1,52 @@
 import {
   View,
-  Alert,
   Image,
   ScrollView,
   Dimensions,
   TouchableWithoutFeedback,
   StatusBar,
   TouchableOpacity,
-  Modal,
 } from 'react-native';
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   Button,
-  Card,
   Searchbar,
   TextInput,
   Surface,
   Divider,
   Text,
-  Menu,
-  Provider,
 } from 'react-native-paper';
-import SIPCStyles from './styles';
-import Icon2 from 'react-native-vector-icons/Entypo';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
-import {Col, Grid} from 'react-native-easy-grid';
-import SurveyViewAllBox from '../component/surveyviewallbox';
-import API from '../utility/api';
 import {CommonActions, useFocusEffect} from '@react-navigation/native';
-import Loader from '../component/activityindicator';
-import ReportBox from '../component/reportsbox';
-import {CONFIG} from '../utility/config';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Entypo from 'react-native-vector-icons/Entypo';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-
 import {MMKV} from 'react-native-mmkv';
 import {responsiveFontSize} from 'react-native-responsive-dimensions';
-export const storage = new MMKV();
+
+import SIPCStyles from './styles';
+import API from '../utility/api';
+import Loader from '../component/activityindicator';
+import ReportBox from '../component/reportsbox';
+import {CONFIG} from '../utility/config';
 
 const Reports = ({navigation}) => {
+  const storage = new MMKV();
   const jsonUser = storage.getString('user');
   const user = JSON.parse(jsonUser);
 
-  const [modalVisible, setModalVisible] = useState(false);
+  const filterRef = useRef();
+  const profileRef = useRef();
 
-  const [visible, setVisible] = useState(false);
-  const openMenu = () => setVisible(!visible);
-  const closeMenu = () => setVisible(false);
-
-  const refRBSheet = useRef();
-  const refRBSheet1 = useRef();
-
-  const close = sheetObj => {
-    setError(false);
-    setErrorMessage('');
-    sheetObj.current.close();
-  };
-
-  const Width = Dimensions.get('window').width;
-  const Height = Dimensions.get('window').height;
+  const width = Dimensions.get('window').width;
+  const height = Dimensions.get('window').height;
 
   const [searchQuery, setSearchQuery] = React.useState('');
   const onChangeSearch = query => setSearchQuery(query);
 
   //DataType
   const [dateTypeDropDown, setDateTypeDropDown] = useState(false);
-
   const [dateType, setDateType] = useState('survey_submitted');
   const [dateTypeList, setDateTypeList] = useState([
     {
@@ -170,56 +149,12 @@ const Reports = ({navigation}) => {
   const [Active, setActive] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [apiAction, setAPIAction] = useState('/building-report-api');
-
   const [data, setData] = useState([]);
-  // console.log(endDate);
-
-  const showReport = tabId => {
-    setStartDate(previousDate);
-    setEndDate(currentDate);
-    setOrganizationId(0);
-    setBuildingId(0);
-
-    if (tabId === 1) {
-      setAPIAction('/building-report-api');
-    } else if (tabId === 2) {
-      setBuildingCategoryId(0);
-      setAPIAction('/building-category-report-api');
-    } else if (tabId === 3) {
-      setAPIAction('/inspection-report-api');
-    } else if (tabId === 4) {
-      setAPIAction('/workorder-report-api');
-    } else if (tabId === 5) {
-      setFloorId(0);
-      setRoomId(0);
-      //setAPIAction('/building-report-api');
-    }
-
-    setActive(tabId);
-  };
-  //API--------------->
-  const payload = JSON.stringify({
-    appKey: CONFIG.appKey,
-    device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-    user_id: user.id,
-    date_type: dateType,
-    period: '30',
-    start_date: startDate,
-    end_date: endDate,
-    organization_id: organizationId,
-    building_id: buildingId,
-    building_category_id: buildingCategoryId,
-    floor_id: floorId,
-    room_id: roomId,
-  });
-
-  // console.log("data.organization_id" + organizationId);
 
   useFocusEffect(
     React.useCallback(() => {
       setIsLoading(true);
-      API.instance.post(apiAction + '?is_api=true', payload).then(
+      API.instance.post(apiRoutes[Active] + '?is_api=true', payload).then(
         response => {
           setIsLoading(false);
           if (response.status == 'success') {
@@ -235,6 +170,44 @@ const Reports = ({navigation}) => {
     }, [Active]),
   );
 
+  const showReport = tabId => {
+    setStartDate(previousDate);
+    setEndDate(currentDate);
+    setOrganizationId(0);
+    setBuildingId(0);
+    if (tabId === 5) {
+      setFloorId(0);
+      setRoomId(0);
+      //setAPIAction('/building-report-api');
+    }
+
+    setActive(tabId);
+  };
+  //API--------------->
+
+  const apiRoutes = {
+    1: '/building-report-api',
+    2: '/building-category-report-api',
+    3: '/inspection-report-api',
+    4: '/workorder-report-api',
+    5: '',
+  };
+
+  const payload = JSON.stringify({
+    appKey: CONFIG.appKey,
+    device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+    user_id: user.id,
+    date_type: dateType,
+    period: '30',
+    start_date: startDate,
+    end_date: endDate,
+    organization_id: organizationId,
+    building_id: buildingId,
+    building_category_id: buildingCategoryId,
+    floor_id: floorId,
+    room_id: roomId,
+  });
+
   return (
     <View style={SIPCStyles.flex}>
       <StatusBar barStyle={'dark-content'} backgroundColor="white" />
@@ -243,22 +216,22 @@ const Reports = ({navigation}) => {
       <View style={{zIndex: 0}}>
         <Surface style={SIPCStyles.headerSurface}>
           {user.profile_picture != '' ? (
-            <TouchableOpacity onPress={() => refRBSheet1.current.open()}>
+            <TouchableOpacity onPress={() => profileRef.current.open()}>
               <Image
                 source={{uri: user.profile_picture}}
                 style={[
                   SIPCStyles.headerManImage,
-                  {borderRadius: 100, width: Width / 10, height: Height / 20},
+                  {borderRadius: 100, width: width / 10, height: height / 20},
                 ]}
               />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity onPress={() => refRBSheet1.current.open()}>
+            <TouchableOpacity onPress={() => profileRef.current.open()}>
               <Image
                 source={require('../assets/man.png')}
                 style={[
                   SIPCStyles.headerManImage,
-                  {borderRadius: 100, width: Width / 10, height: Height / 20},
+                  {borderRadius: 100, width: width / 10, height: height / 20},
                 ]}
               />
             </TouchableOpacity>
@@ -285,8 +258,8 @@ const Reports = ({navigation}) => {
               style={[
                 SIPCStyles.playImage,
                 {
-                  height: Height / 18,
-                  width: Width / 10,
+                  height: height / 18,
+                  width: width / 10,
                   resizeMode: 'contain',
                   alignSelf: 'center',
                   marginTop: 0,
@@ -296,7 +269,7 @@ const Reports = ({navigation}) => {
             />
           </TouchableWithoutFeedback>
 
-          <TouchableWithoutFeedback onPress={() => refRBSheet.current.open()}>
+          <TouchableWithoutFeedback onPress={() => filterRef.current.open()}>
             <Image
               source={require('../assets/filter.png')}
               style={SIPCStyles.headerManImage}
@@ -317,7 +290,7 @@ const Reports = ({navigation}) => {
 
               <Menu.Item onPress={() => { }} title={
                 <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                  <Image source={require('../assets/ii.png')} style={{ height: Height / 35, width: Width / 23, resizeMode: 'contain' }} />
+                  <Image source={require('../assets/ii.png')} style={{ height: height / 35, width: width / 23, resizeMode: 'contain' }} />
                   <Text style={{ color: 'black', fontSize: responsiveFontSize(1.8), marginLeft: 5 }}>Settings</Text>
                 </View>
               } />
@@ -327,7 +300,7 @@ const Reports = ({navigation}) => {
                 storage.set('user', ''); navigation.navigate('Login');
               }} title={
                 <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                  <Image source={require('../assets/ii.png')} style={{ height: Height / 35, width: Width / 23, resizeMode: 'contain' }} />
+                  <Image source={require('../assets/ii.png')} style={{ height: height / 35, width: width / 23, resizeMode: 'contain' }} />
                   <Text style={{ color: 'black', fontSize: responsiveFontSize(1.8), marginLeft: 5 }}>Log Out</Text>
                 </View>
               } />
@@ -338,13 +311,13 @@ const Reports = ({navigation}) => {
       <Divider bold={true} />
       {/* ================================================ */}
       <RBSheet
-        ref={refRBSheet1}
+        ref={profileRef}
         closeOnDragDown={false}
         closeOnPressMask={true}
         closeOnPressBack={true}
         dragFromTopOnly={true}
         fromTop={true}
-        height={Height}
+        height={height}
         animated={true}
         animationType="fade"
         // closeOnPressBack={true}
@@ -357,8 +330,8 @@ const Reports = ({navigation}) => {
           },
           container: {
             backgroundColor: '#ccc',
-            height: Height / 7,
-            width: Width / 3,
+            height: height / 7,
+            width: width / 3,
             borderWidth: 1,
             borderColor: '#ccc',
             // marginHorizontal: 5,
@@ -370,8 +343,8 @@ const Reports = ({navigation}) => {
         }}>
         <View
           style={{
-            height: Height / 7,
-            width: Width / 3,
+            height: height / 7,
+            width: width / 3,
             backgroundColor: 'white',
             marginHorizontal: 5,
             padding: 10,
@@ -381,8 +354,8 @@ const Reports = ({navigation}) => {
             <Image
               source={require('../assets/ii.png')}
               style={{
-                height: Height / 35,
-                width: Width / 23,
+                height: height / 35,
+                width: width / 23,
                 resizeMode: 'contain',
               }}
             />
@@ -411,8 +384,8 @@ const Reports = ({navigation}) => {
             <Image
               source={require('../assets/ii.png')}
               style={{
-                height: Height / 35,
-                width: Width / 23,
+                height: height / 35,
+                width: width / 23,
                 resizeMode: 'contain',
               }}
             />
@@ -439,7 +412,7 @@ const Reports = ({navigation}) => {
               backgroundColor: 'white',
               flexDirection: 'row',
               justifyContent: 'space-around',
-              height: Height / 15,
+              height: height / 15,
             }}>
             <TouchableOpacity
               onPress={() => showReport(1)}
@@ -539,11 +512,11 @@ const Reports = ({navigation}) => {
 
       {/* ====================================== */}
       <RBSheet
-        ref={refRBSheet}
+        ref={filterRef}
         closeOnDragDown={false}
         closeOnPressMask={false}
         dragFromTopOnly={true}
-        height={Height}
+        height={height}
         customStyles={{
           wrapper: {
             backgroundColor: 'transparent',
@@ -959,14 +932,14 @@ const Reports = ({navigation}) => {
             borderRadius: 0,
             bottom: 0,
             position: 'absolute',
-            width: Width,
-            height: Height / 13,
+            width: width,
+            height: height / 13,
             borderColor: '#ccc',
             borderWidth: 1,
           }}>
           <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
             <TouchableWithoutFeedback
-              onPress={() => refRBSheet.current.close()}
+              onPress={() => filterRef.current.close()}
               style={{}}>
               <Text style={[SIPCStyles.NormalFont, {padding: 15}]}>Close</Text>
             </TouchableWithoutFeedback>
