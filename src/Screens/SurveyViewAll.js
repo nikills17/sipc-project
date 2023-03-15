@@ -7,21 +7,21 @@ import {
   StatusBar,
   TouchableOpacity,
 } from 'react-native';
-import React, {useState} from 'react';
-import {Card, Searchbar, Surface, Divider, Text} from 'react-native-paper';
+import React, { useState } from 'react';
+import { Card, Searchbar, Surface, Divider, Text } from 'react-native-paper';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {useFocusEffect} from '@react-navigation/native';
-import {responsiveScreenFontSize} from 'react-native-responsive-dimensions';
-import {MMKV} from 'react-native-mmkv';
+import { useFocusEffect } from '@react-navigation/native';
+import { responsiveScreenFontSize } from 'react-native-responsive-dimensions';
+import { MMKV } from 'react-native-mmkv';
 
-import {CONFIG} from '../utility/config';
+import { CONFIG } from '../utility/config';
 import SIPCStyles from './styles';
 import SurveyViewAllBox from '../component/surveyviewallbox';
 import API from '../utility/api';
 import Loader from '../component/activityindicator';
 
-const SurveyViewAll = ({navigation, route}) => {
+const SurveyViewAll = ({ navigation, route }) => {
   const pending = route?.params?.pending ?? 1;
 
   const storage = new MMKV();
@@ -29,8 +29,8 @@ const SurveyViewAll = ({navigation, route}) => {
   const user = JSON.parse(jsonUser);
 
   const [visible, setVisible] = useState(false);
-  const openMenu = () => setVisible(!visible);
-  const closeMenu = () => setVisible(false);
+  // const openMenu = () => setVisible(!visible);
+  // const closeMenu = () => setVisible(false);
 
   const Width = Dimensions.get('window').width;
   const Height = Dimensions.get('window').height;
@@ -122,24 +122,24 @@ const SurveyViewAll = ({navigation, route}) => {
       <StatusBar barStyle={'dark-content'} backgroundColor="white" />
 
       {/* ====================================== */}
-      <Surface style={[SIPCStyles.headerSurface, {zIndex: 0}]}>
+      <Surface style={[SIPCStyles.headerSurface, { zIndex: 0 }]}>
         {user.profile_picture != '' ? (
-          <TouchableOpacity onPress={openMenu}>
+          <TouchableOpacity >
             <Image
-              source={{uri: user.profile_picture}}
+              source={{ uri: user.profile_picture }}
               style={[
                 SIPCStyles.headerManImage,
-                {borderRadius: 100, width: Width / 10, height: Height / 20},
+                { borderRadius: 100, width: Width / 10, height: Height / 20 },
               ]}
             />
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={openMenu}>
+          <TouchableOpacity >
             <Image
               source={require('../assets/man.png')}
               style={[
                 SIPCStyles.headerManImage,
-                {borderRadius: 100, width: Width / 10, height: Height / 20},
+                { borderRadius: 100, width: Width / 10, height: Height / 20 },
               ]}
             />
           </TouchableOpacity>
@@ -156,7 +156,7 @@ const SurveyViewAll = ({navigation, route}) => {
               <SimpleLineIcons
                 name="magnifier"
                 size={20}
-                style={{color: 'grey'}}
+                style={{ color: 'grey' }}
               />
             </TouchableOpacity>
           )}
@@ -176,7 +176,7 @@ const SurveyViewAll = ({navigation, route}) => {
         </TouchableWithoutFeedback>
       </Surface>
       <Divider bold={true} />
-      <Divider bold={true} />
+      {/* <Divider bold={true} /> */}
       {/* ================TABS============================== */}
 
       <View
@@ -200,7 +200,7 @@ const SurveyViewAll = ({navigation, route}) => {
           <Text
             style={[
               SIPCStyles.NormalFont,
-              {textAlign: 'center', color: Active == 1 ? '#1485cc' : '#525252'},
+              { textAlign: 'center', color: Active == 1 ? '#1485cc' : '#525252' },
             ]}>
             Completed
           </Text>
@@ -220,7 +220,7 @@ const SurveyViewAll = ({navigation, route}) => {
           <Text
             style={[
               SIPCStyles.NormalFont,
-              {color: Active == 0 ? '#1485cc' : '#525252', textAlign: 'center'},
+              { color: Active == 0 ? '#1485cc' : '#525252', textAlign: 'center' },
             ]}>
             Pending
           </Text>
@@ -230,10 +230,10 @@ const SurveyViewAll = ({navigation, route}) => {
 
       {/* ===================================================================================== */}
       <ScrollView
-        style={{zIndex: -1}}
-        contentContainerStyle={{paddingBottom: 35}}
-        onScroll={({nativeEvent}) => {
-          const {layoutMeasurement, contentOffset, contentSize} = nativeEvent;
+        style={{ zIndex: -1 }}
+        contentContainerStyle={{ paddingBottom: 35 }}
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
           if (
             layoutMeasurement.height + contentOffset.y >=
             contentSize.height - 35

@@ -157,6 +157,7 @@ const StartInspections = ({ navigation, route }) => {
                   .name,
                 roomName: roomList.find(el => el.id === room)
                   .room_name,
+                building,
               })
             } else {
               setError(true);
@@ -168,7 +169,6 @@ const StartInspections = ({ navigation, route }) => {
           },
         );
   }
-
 
 
 
