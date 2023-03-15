@@ -8,7 +8,7 @@
     "start": "react-native start --reset-cache",
     "reinstall": "npm install --legacy-peer-deps",
     "android-clean-install": "rm -rf node_modules && rm -rf package-lock.json && npm run reinstall",
-    "android-clean": "cd android && gradlew clean && cd ..",
+    "android-clean": "cd android && ./gradlew clean && cd ..",
     "android-apk": "cd android && gradlew assembleRelease && cd ..",
     "test": "jest",
     "lint": "eslint ."
@@ -22,6 +22,7 @@
     "moment": "^2.29.4",
     "react": "18.1.0",
     "react-native": "0.70.6",
+    "react-native-chart-kit": "^6.12.0",
     "react-native-date-picker": "^4.2.6",
     "react-native-dropdown-picker": "^5.4.4",
     "react-native-easy-grid": "^0.2.2",
