@@ -44,17 +44,44 @@ const Reports = ({navigation}) => {
   const [active, setActive] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
-  const payload = JSON.stringify({
-    appKey: CONFIG.appKey,
-    device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-    user_id: user.id,
-    date_type: 'survey_submitted',
-    period: '30',
-    start_date: getDate(new Date(today.getTime() - 24 * 60 * 60 * 1000 * 30)),
-    end_date: getDate(today),
-    organization_id: 0,
-    building_id: 0,
-  });
+  let payload;
+
+  if (active === 1) {
+    payload = JSON.stringify({
+      appKey: CONFIG.appKey,
+      device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+      user_id: user.id,
+      date_type: 'survey_submitted',
+      period: '30',
+      start_date: getDate(new Date(today.getTime() - 24 * 60 * 60 * 1000 * 30)),
+      end_date: getDate(today),
+      organization_id: 0,
+      building_id: 0,
+    });
+  } else if (active === 2) {
+    payload = JSON.stringify({
+      appKey: CONFIG.appKey,
+      device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+      user_id: user.id,
+      date_type: 'survey_submitted',
+      period: '30',
+      start_date: getDate(new Date(today.getTime() - 24 * 60 * 60 * 1000 * 30)),
+      end_date: getDate(today),
+      organization_id: 0,
+      building_category_id: 0,
+    });
+  } else if (active === 3 || active === 4){
+    payload = JSON.stringify({
+      appKey: CONFIG.appKey,
+      device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+      user_id: user.id,
+      period: '30',
+      start_date: getDate(new Date(today.getTime() - 24 * 60 * 60 * 1000 * 30)),
+      end_date: getDate(today),
+      organization_id: 0,
+      building_id: 0,
+    });
+  }
 
   useFocusEffect(
     React.useCallback(() => {
