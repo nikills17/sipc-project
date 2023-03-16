@@ -43,6 +43,7 @@ const Reports = ({navigation}) => {
 
   const [active, setActive] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const payload = JSON.stringify({
     appKey: CONFIG.appKey,
@@ -295,6 +296,8 @@ const Reports = ({navigation}) => {
           active={active}
           setData={setData}
           setIsLoading={setIsLoading}
+          setError={setError}
+          error={error}
           user={user}
         />
       )}

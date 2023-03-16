@@ -64,12 +64,12 @@ const CleaningInspections = ({ navigation, route }) => {
 
   //  -----------------Floor DropDown
   const [showFloorDropDown, setShowFloorDropDown] = useState(false);
-  const [floor, setFloor] = useState(data.floor_id);
+  const [floor, setFloor] = useState(data.floor_id.toString());
   const [floorList, setFloorList] = useState([]);
 
   //  -----------------Room DropDown------------------------
   const [showRoomDropDown, setShowRoomDropDown] = useState(false);
-  const [room, setRoom] = useState(data.room_id);
+  const [room, setRoom] = useState(data.room_id.toString());
   const [roomList, setRoomList] = useState([]);
 
   //  -----------------ALl Items==========
@@ -97,6 +97,7 @@ const CleaningInspections = ({ navigation, route }) => {
       )
       .then(
         response => {
+          // console.log('roomData.detected_condition=====.' +JSON.stringify(roomData));
           setRoomData(response);
           setIsLoading(false);
         },
@@ -108,7 +109,7 @@ const CleaningInspections = ({ navigation, route }) => {
   }, [Active]);
 
   // =================================FLOOR NAME =================================
-
+ 
   useEffect(() => {
     if (building) {
       API.instance.post(`/floor-by-building-device?is_api=true`,
@@ -119,6 +120,7 @@ const CleaningInspections = ({ navigation, route }) => {
           buildingId: building
         })).then(
           response => {
+          console.log('FLOOR DATA===(1)==.' +JSON.stringify(response.data));
             setFloorList(response.data);
             setError(false);
             setErrorMessage("")
@@ -139,6 +141,7 @@ const CleaningInspections = ({ navigation, route }) => {
           floorId: floor,
         })).then(
           response => {
+          console.log('Room DATA====(2)=.' +JSON.stringify(response.data));
             setRoomList(response.data);
             setError(false);
             setErrorMessage("")
@@ -146,18 +149,18 @@ const CleaningInspections = ({ navigation, route }) => {
           error => console.error(error),
         );
     }
-  }, [building, floor]);
+  }, [building,floor]);
 
   // =================================Item NAME =================================
   useEffect(() => {
-    if (building && floor && room) {
+    if (room) {
       API.instance.post(`/item-by-room-device?is_api=true`,
         JSON.stringify({
           appKey: CONFIG.appKey,
           device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-          roomId: room,
+          roomId: room, 
         })).then(
-          response => {
+          response => {;
             setItemList(response.data);
             setError(false);
             setErrorMessage("")
@@ -165,7 +168,7 @@ const CleaningInspections = ({ navigation, route }) => {
           error => console.error(error),
         );
     }
-  }, [building, floor, room]);
+  }, [room]);
 
   //===============================ROOM LIST DATA
 
@@ -182,7 +185,6 @@ const CleaningInspections = ({ navigation, route }) => {
         userId: user.id,
       })).then(
         response => {
-          // console.log('response.data ======>' + JSON.stringify(response.data));
           setListRooms(response.data);
           setError(false);
           setErrorMessage("")
@@ -348,7 +350,7 @@ const CleaningInspections = ({ navigation, route }) => {
                 { paddingLeft: 8, width: Width / 4.9, fontWeight: '800' },
               ]}
               numberOfLines={1}>
-              {floorName}
+              {floorName }
             </Text>
           </View>
 
@@ -901,13 +903,19 @@ const CleaningInspections = ({ navigation, route }) => {
           </>
         )}
 
-        {listRooms.map((item, index) => (
-          <InspectionCheckBox
-            data={item}
-            item={item}
-            key={index}
-            navigation={navigation} />
-        ))}
+
+        {isLoading ? (<>
+          <Loader />
+        </>) : (<>
+          {listRooms.map((item, index) => (
+            <InspectionCheckBox
+              data={item}
+              key={index}
+              navigation={navigation} />
+          ))}
+
+        </>)}
+
 
 
         {/* =================================================================== */}

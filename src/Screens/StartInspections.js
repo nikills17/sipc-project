@@ -78,7 +78,6 @@ const StartInspections = ({ navigation, route }) => {
         response => {
           setError(false);
           setBuildingList(response.data);
-          setBuilding(0);
           setError(false);
           setErrorMessage("")
         },
@@ -98,7 +97,6 @@ const StartInspections = ({ navigation, route }) => {
         })).then(
           response => {
             setFloorList(response.data);
-            setFloor(0);
             setError(false);
             setErrorMessage("")
           },
@@ -120,7 +118,6 @@ const StartInspections = ({ navigation, route }) => {
         })).then(
           response => {
             setRoomList(response.data);
-            setRoom(0);
             setError(false);
             setErrorMessage("")
           },
@@ -148,7 +145,7 @@ const StartInspections = ({ navigation, route }) => {
             setError(false);
             setErrorMessage("");
             if (response.status === "success") {
-              console.log(response.data);
+              console.log('response.data====>' + JSON.stringify(response.data));
               navigation.navigate('CleaningInspections', {
                 data: response.data,
                 buildingName: buildingList.find(el => el.id === building)

@@ -7,16 +7,21 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import {ReportsOptions} from '../utility/constants';
+import {
+  responsiveScreenHeight,
+  responsiveScreenWidth,
+  responsiveScreenFontSize,
+} from 'react-native-responsive-dimensions';
+import { ReportsOptions } from '../utility/constants';
 import DropDownPicker from 'react-native-dropdown-picker';
 import SIPCStyles from '../screens/styles';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import {CONFIG} from '../utility/config';
-import {getDate} from '../utility/helper';
+import { CONFIG } from '../utility/config';
+import { getDate } from '../utility/helper';
 import API from '../utility/api';
 
 const ReportsFilterSheet = ({
@@ -24,9 +29,11 @@ const ReportsFilterSheet = ({
   active,
   setData,
   setIsLoading,
+  setError,
+  error,
   user,
 }) => {
-  const {height} = Dimensions.get('window');
+  const { height } = Dimensions.get('window');
   const today = new Date();
 
   const [notCalled, setNotCalled] = useState(true);
@@ -100,7 +107,7 @@ const ReportsFilterSheet = ({
       .then(
         response => {
           setOrganizationList(
-            response?.data.map(item => ({label: item.name, value: item.id})),
+            response?.data.map(item => ({ label: item.name, value: item.id })),
           );
         },
         error => console.error(error),
@@ -133,7 +140,6 @@ const ReportsFilterSheet = ({
   }, [organization]);
 
   const getReports = () => {
-    refFilter.current.close();
     setIsLoading(true);
     let payload = JSON.stringify({
       appKey: CONFIG.appKey,
@@ -148,9 +154,17 @@ const ReportsFilterSheet = ({
     });
     API.instance.post(ReportsOptions[active].url, payload).then(
       response => {
-        setData(response.data);
+
+        setError('');
         setIsLoading(false);
-        console.log(payload);
+        if (response.status === "success") {
+          refFilter.current.close();
+          setData(response.data);
+        } else {
+          console.log(response.error);
+          setError(response.error);
+        }
+
         setNotCalled(false);
       },
       error => {
@@ -165,6 +179,7 @@ const ReportsFilterSheet = ({
   }, [active]);
 
   const close = check => {
+    setError('')
     refFilter.current.close();
     if (check) {
       setDateType('survey_submitted');
@@ -177,6 +192,7 @@ const ReportsFilterSheet = ({
       setBuildingCategory(0);
       setBuildingCategoryList([]);
       setNotCalled(true);
+  
     }
   };
 
@@ -198,7 +214,7 @@ const ReportsFilterSheet = ({
           backgroundColor: '#1281ca',
         }}>
         <Text
-          style={[SIPCStyles.BoldFont, {alignSelf: 'center', color: 'white'}]}>
+          style={[SIPCStyles.BoldFont, { alignSelf: 'center', color: 'white' }]}>
           {ReportsOptions[active].name}
         </Text>
         <TouchableOpacity
@@ -213,12 +229,20 @@ const ReportsFilterSheet = ({
           <Ionicons name="ios-close" size={25} color={'#FFFFFF'} />
         </TouchableOpacity>
       </View>
-      <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: 150}}>
+      {error && (
+        <View style={{ width: '100%', }}>
+          <Text style={{ color: 'red', fontFamily: 'Poppins-Medium', fontSize: responsiveScreenFontSize(1.8), marginHorizontal: 20, marginTop: 20 }}>
+            Error! {error}
+          </Text>
+        </View>
+      )
+      }
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}>
         {(active === 1 || active === 2) && (
           <>
             {/* ===============DateType DropDown========================= */}
             <View
-              style={{marginHorizontal: 20, marginVertical: 15, zIndex: 10}}>
+              style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
               <DropDownPicker
                 listMode="SCROLLVIEW"
                 searchable={true}
@@ -227,7 +251,7 @@ const ReportsFilterSheet = ({
                   backgroundColor: '#fffff6',
                   borderColor: '#D2D2D2',
                 }}
-                searchTextInputStyle={{borderColor: '#D2D2D2'}}
+                searchTextInputStyle={{ borderColor: '#D2D2D2' }}
                 itemSeparator={true}
                 itemSeparatorStyle={{
                   backgroundColor: '#D2D2D2',
@@ -238,7 +262,7 @@ const ReportsFilterSheet = ({
                     <Entypo
                       size={16}
                       color={'#808080'}
-                      style={{paddingHorizontal: 5}}
+                      style={{ paddingHorizontal: 5 }}
                       name="chevron-thin-down"
                     />
                   );
@@ -248,7 +272,7 @@ const ReportsFilterSheet = ({
                     <Entypo
                       size={16}
                       color={'#808080'}
-                      style={{paddingHorizontal: 5}}
+                      style={{ paddingHorizontal: 5 }}
                       name="chevron-thin-up"
                     />
                   );
@@ -258,7 +282,7 @@ const ReportsFilterSheet = ({
                 style={SIPCStyles.DropDownPicker1}
                 textStyle={SIPCStyles.textSize}
                 dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
-                labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
+                labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
                 open={dateTypeDropDown}
                 value={dateType}
                 items={dateTypeList}
@@ -275,11 +299,11 @@ const ReportsFilterSheet = ({
           activeOpacity={0.95}
           style={[
             SIPCStyles.container,
-            {marginHorizontal: 20, marginVertical: 15, borderWidth: 1},
+            { marginHorizontal: 20, marginVertical: 15, borderWidth: 1 },
           ]}>
           <Image
             source={require('../assets/cal.png')}
-            style={[SIPCStyles.MainBuilding, {marginRight: 20, marginLeft: 6}]}
+            style={[SIPCStyles.MainBuilding, { marginRight: 20, marginLeft: 6 }]}
           />
           <Text style={SIPCStyles.NormalFont}>
             {selectedDate ? getDate(selectedDate) : 'Start Date'}
@@ -299,11 +323,11 @@ const ReportsFilterSheet = ({
           onPress={toggleEndDatePicker}
           style={[
             SIPCStyles.container,
-            {marginHorizontal: 20, marginVertical: 15, borderWidth: 1},
+            { marginHorizontal: 20, marginVertical: 15, borderWidth: 1 },
           ]}>
           <Image
             source={require('../assets/cal.png')}
-            style={[SIPCStyles.MainBuilding, {marginRight: 20, marginLeft: 6}]}
+            style={[SIPCStyles.MainBuilding, { marginRight: 20, marginLeft: 6 }]}
           />
           <Text style={SIPCStyles.NormalFont}>
             {selectedEndDate ? getDate(selectedEndDate) : 'End Date'}
@@ -318,7 +342,7 @@ const ReportsFilterSheet = ({
           date={selectedEndDate}
         />
         {/* ===============Organization DropDown========================= */}
-        <View style={{marginHorizontal: 20, marginVertical: 15, zIndex: 10}}>
+        <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
           <DropDownPicker
             listMode="SCROLLVIEW"
             searchable={true}
@@ -327,9 +351,9 @@ const ReportsFilterSheet = ({
               backgroundColor: '#fffff6',
               borderColor: '#D2D2D2',
             }}
-            searchTextInputStyle={{borderColor: '#D2D2D2'}}
+            searchTextInputStyle={{ borderColor: '#D2D2D2' }}
             itemSeparator={true}
-            itemSeparatorStyle={{backgroundColor: '#D2D2D2', marginVertical: 3}}
+            itemSeparatorStyle={{ backgroundColor: '#D2D2D2', marginVertical: 3 }}
             showArrowIcon={true}
             // showTickIcon={true}
             ArrowDownIconComponent={() => {
@@ -337,7 +361,7 @@ const ReportsFilterSheet = ({
                 <Entypo
                   size={16}
                   color={'#808080'}
-                  style={{paddingHorizontal: 5}}
+                  style={{ paddingHorizontal: 5 }}
                   name="chevron-thin-down"
                 />
               );
@@ -347,7 +371,7 @@ const ReportsFilterSheet = ({
                 <Entypo
                   size={16}
                   color={'#808080'}
-                  style={{paddingHorizontal: 5}}
+                  style={{ paddingHorizontal: 5 }}
                   name="chevron-thin-up"
                 />
               );
@@ -357,7 +381,7 @@ const ReportsFilterSheet = ({
             style={SIPCStyles.DropDownPicker1}
             textStyle={SIPCStyles.textSize}
             dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
-            labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
+            labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
             open={organizationDropDown}
             value={organization}
             items={organizationList}
@@ -367,7 +391,7 @@ const ReportsFilterSheet = ({
         </View>
 
         {/* ===============Building Category DropDown========================= */}
-        <View style={{marginHorizontal: 20, marginVertical: 15, zIndex: 10}}>
+        <View style={{ marginHorizontal: 20, marginVertical: 15, zIndex: 10 }}>
           <DropDownPicker
             listMode="SCROLLVIEW"
             searchable={true}
@@ -376,7 +400,7 @@ const ReportsFilterSheet = ({
               backgroundColor: '#fffff6',
               borderColor: '#D2D2D2',
             }}
-            searchTextInputStyle={{borderColor: '#D2D2D2'}}
+            searchTextInputStyle={{ borderColor: '#D2D2D2' }}
             itemSeparator={true}
             itemSeparatorStyle={{
               backgroundColor: '#D2D2D2',
@@ -389,7 +413,7 @@ const ReportsFilterSheet = ({
                 <Entypo
                   size={16}
                   color={'#808080'}
-                  style={{paddingHorizontal: 5}}
+                  style={{ paddingHorizontal: 5 }}
                   name="chevron-thin-down"
                 />
               );
@@ -399,7 +423,7 @@ const ReportsFilterSheet = ({
                 <Entypo
                   size={16}
                   color={'#808080'}
-                  style={{paddingHorizontal: 5}}
+                  style={{ paddingHorizontal: 5 }}
                   name="chevron-thin-up"
                 />
               );
@@ -409,7 +433,7 @@ const ReportsFilterSheet = ({
             style={SIPCStyles.DropDownPicker1}
             textStyle={SIPCStyles.textSize}
             dropDownContainerStyle={SIPCStyles.dropDownContainerStyle1}
-            labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
+            labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
             open={buildingCategoryDropDown}
             value={buildingCategory}
             items={buildingCategoryList}
@@ -435,8 +459,8 @@ const ReportsFilterSheet = ({
           bottom: 50,
           zIndex: 100,
         }}
-        labelStyle={{color: 'white'}}>
-        <Text style={[SIPCStyles.BoldFont, {color: 'white'}]}>GET REPORTS</Text>
+        labelStyle={{ color: 'white' }}>
+        <Text style={[SIPCStyles.BoldFont, { color: 'white' }]}>GET REPORTS</Text>
       </TouchableOpacity>
     </RBSheet>
   );
