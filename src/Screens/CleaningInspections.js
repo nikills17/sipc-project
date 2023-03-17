@@ -35,11 +35,15 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import API from '../utility/api';
 import { CONFIG } from '../utility/config';
 import { MMKV } from 'react-native-mmkv';
+import InspectionCheckBox from '../component/inspectioncheckbox';
+import Loader from '../component/activityindicator';
 
 
 
 const CleaningInspections = ({ navigation, route }) => {
-  const { data, floorName, roomName, buildingName } = route?.params
+  const { data, floorName, roomName, buildingName, building } = route?.params;
+
+
 
   const storage = new MMKV();
   const jsonUser = storage.getString('user');
@@ -51,56 +55,29 @@ const CleaningInspections = ({ navigation, route }) => {
   const completeRef = useRef();
   const allItemsRef = useRef();
 
-
-  // ========CLEANING Checkbox ============
-  const [checked, setChecked] = useState(false);
-  const [checked1, setChecked1] = useState(false);
-  const [checked2, setChecked2] = useState(false);
-  // ========MAINTENANCE Checkbox ============
-
-  const [CheckedMain, setCheckedMain] = useState('0');
-  const [CheckedMain1, setCheckedMain1] = useState(false);
-  const [CheckedMain2, setCheckedMain2] = useState(false);
-
-  // const Cancel = () => {
-  //     if (checked1) {
-  //         setChecked1(false)
-  //     }
-  // }
-
-  const SatisfactoryPress = () => {
-    if (setChecked(!checked) === setChecked1(false) && setChecked2(false)) {
-    }
-  };
-
-  const UnSatisfactoryPress = () => {
-    if (
-      setChecked1(!checked1) ||
-      setChecked2(!checked2) === setChecked(false)
-    ) {
-      console.log('if');
-    }
-  };
   const [error, setError] = useState(false);
   const [errorMsg, setErrorMessage] = useState();
-  const [Active, setActive] = useState(1);
+  const [Active, setActive] = useState(data.inspection_type_id);
 
   const Width = Dimensions.get('window').width;
   const Height = Dimensions.get('window').height;
 
   //  -----------------Floor DropDown
   const [showFloorDropDown, setShowFloorDropDown] = useState(false);
-  const [floor, setFloor] = useState(0);
+  const [floor, setFloor] = useState(data.floor_id.toString());
   const [floorList, setFloorList] = useState([]);
 
   //  -----------------Room DropDown------------------------
   const [showRoomDropDown, setShowRoomDropDown] = useState(false);
-  const [room, setRoom] = useState(0);
+  const [room, setRoom] = useState(data.room_id.toString());
   const [roomList, setRoomList] = useState([]);
+
   //  -----------------ALl Items==========
   const [showItemDropDown, setShowItemDropDown] = useState(false);
   const [item, setItem] = useState(0);
   const [itemList, setItemList] = useState([]);
+
+  const [listRooms, setListRooms] = useState([]);
 
   // ===================API CALLING==================================//
 
@@ -112,7 +89,6 @@ const CleaningInspections = ({ navigation, route }) => {
     roomId: data.room_id,
     userId: user.id,
   });
-  // console.log('payload' + payload);
   useEffect(() => {
     setIsLoading(true);
     API.instance
@@ -121,6 +97,7 @@ const CleaningInspections = ({ navigation, route }) => {
       )
       .then(
         response => {
+          // console.log('roomData.detected_condition=====.' +JSON.stringify(roomData));
           setRoomData(response);
           setIsLoading(false);
         },
@@ -132,109 +109,91 @@ const CleaningInspections = ({ navigation, route }) => {
   }, [Active]);
 
   // =================================FLOOR NAME =================================
+ 
+  useEffect(() => {
+    if (building) {
+      API.instance.post(`/floor-by-building-device?is_api=true`,
+        JSON.stringify({
+          appKey: CONFIG.appKey,
+          device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+          userId: user.id,
+          buildingId: building
+        })).then(
+          response => {
+          console.log('FLOOR DATA===(1)==.' +JSON.stringify(response.data));
+            setFloorList(response.data);
+            setError(false);
+            setErrorMessage("")
+          },
+          error => console.error(error),
+        );
+    }
+  }, [building]);
+  // =================================Room NAME =================================
+  useEffect(() => {
+    if (building && floor) {
+      API.instance.post(`/room-by-floor-device?is_api=true`,
+        JSON.stringify({
+          appKey: CONFIG.appKey,
+          device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+          userId: user.id,
+          buildingId: building,
+          floorId: floor,
+        })).then(
+          response => {
+          console.log('Room DATA====(2)=.' +JSON.stringify(response.data));
+            setRoomList(response.data);
+            setError(false);
+            setErrorMessage("")
+          },
+          error => console.error(error),
+        );
+    }
+  }, [building,floor]);
 
-  // useEffect(() => {
-  //   API.instance.post(`/floor-by-building-device?is_api=true`,
-  //     JSON.stringify({
-  //       appKey: CONFIG.appKey,
-  //       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-  //       userId: user.id,
-  //       // buildingId: building
-  //     })).then(
-  //       response => {
-  //         setFloorList(response.data);
-  //         setFloor(0);
-  //         setError(false);
-  //         setErrorMessage("")
-  //       },
-  //       error => console.error(error),
-  //     );
-  // }
-  //   , []);
+  // =================================Item NAME =================================
+  useEffect(() => {
+    if (room) {
+      API.instance.post(`/item-by-room-device?is_api=true`,
+        JSON.stringify({
+          appKey: CONFIG.appKey,
+          device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+          roomId: room, 
+        })).then(
+          response => {;
+            setItemList(response.data);
+            setError(false);
+            setErrorMessage("")
+          },
+          error => console.error(error),
+        );
+    }
+  }, [room]);
+
+  //===============================ROOM LIST DATA
 
 
+  useEffect(() => {
+    API.instance.post(`/list-items-by-room-api?is_api=true`,
+      JSON.stringify({
+        appKey: CONFIG.appKey,
+        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+        roomId: room,
+        buildingId: building,
+        inspectionResultId: data.inspection_result_id,
+        inspectionTypeId: Active,
+        userId: user.id,
+      })).then(
+        response => {
+          setListRooms(response.data);
+          setError(false);
+          setErrorMessage("")
+        },
+        error => console.error(error),
+      );
+  }, [Active]);
 
-  // -----------------------IMAGE PICKER---Cleaning---------------------
-  // const [Images, setImages] = useState();
-  const [CamImg, setCamImg] = useState();
 
-  const [images, setImages] = useState([]);
-  const [numColumns, setNumColumns] = useState(3);
-  const maxImages = 10;
-
-  const openCamera = () => {
-    ImagePicker.openCamera({
-      width: 300,
-      height: 400,
-      //cropping: true,
-    }).then(image => {
-      if (images.length + 1 > maxImages) {
-        alert(`Max limit reached: ${maxImages}`);
-        return;
-      }
-      setImages([...images, { path: image.path }]);
-    });
-  };
-
-  const pickImage = () => {
-    ImagePicker.openPicker({
-      multiple: true,
-      maxFiles: maxImages - images.length,
-    })
-      .then(newImages => {
-        if (images.length + newImages.length > maxImages) {
-          alert(`Max limit reached: ${maxImages}`);
-          return;
-        }
-        setImages([...images, ...newImages.map(i => ({ path: i.path }))]);
-      })
-      .catch(error => console.error(error));
-  };
-
-  const deleteImage = index => {
-    setImages(images.filter((_, i) => i !== index));
-  };
-
-  // -----------------------IMAGE PICKER---MAINTENANCE---------------------
-  const [MainImages, setMainImages] = useState([]);
-
-  const [numMainColumns, setNumMainColumns] = useState(3);
-  const maxMainImages = 10;
-
-  const openMainCamera = () => {
-    ImagePicker.openCamera({
-      width: 300,
-      height: 400,
-      //cropping: true,
-    }).then(image => {
-      if (MainImages.length + 1 > maxMainImages) {
-        alert(`Max limit reached: ${maxMainImages}`);
-        return;
-      }
-      setMainImages([...MainImages, { path: image.path }]);
-    });
-  };
-
-  const pickMainImage = () => {
-    ImagePicker.openPicker({
-      multiple: true,
-      maxFiles: maxMainImages - MainImages.length,
-    })
-      .then(newMainImages => {
-        if (MainImages.length + newMainImages.length > maxMainImages) {
-          alert(`Max limit reached: ${maxMainImages}`);
-          return;
-        }
-        setImages([...MainImages, ...newMainImages.map(i => ({ path: i.path }))]);
-      })
-      .catch(error => console.error(error));
-  };
-
-  const deleteMainImage = index => {
-    setMainImages(MainImages.filter((_, i) => i !== index));
-  };
-
-  // ============================================
 
   return (
     <View style={SIPCStyles.flex}>
@@ -250,7 +209,7 @@ const CleaningInspections = ({ navigation, route }) => {
           </TouchableWithoutFeedback>
 
           <View style={{ marginHorizontal: 10 }}>
-            {Active == 1 ? (
+            {Active === 1 ? (
               <Text
                 style={[SIPCStyles.NormalFont, { width: Width / 2 }]}
                 numberOfLines={1}>
@@ -368,11 +327,10 @@ const CleaningInspections = ({ navigation, route }) => {
               <Divider bold={true} style={{ marginLeft: 30, marginTop: 10 }} />
             </Surface>
           </View>
-
-
         </RBSheet>
 
         {/* ===========================FLOOR Room Items======================================= */}
+
         <Surface
           style={{
             backgroundColor: 'white',
@@ -392,7 +350,7 @@ const CleaningInspections = ({ navigation, route }) => {
                 { paddingLeft: 8, width: Width / 4.9, fontWeight: '800' },
               ]}
               numberOfLines={1}>
-              {floorName}
+              {floorName }
             </Text>
           </View>
 
@@ -541,16 +499,17 @@ const CleaningInspections = ({ navigation, route }) => {
                     borderTopLeftRadius: 10,
                   },
                 ]}
-                placeholder="Select Floor"
                 textStyle={SIPCStyles.textSize}
                 dropDownContainerStyle={[SIPCStyles.dropDownContainerStyle2, {}]}
                 labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
                 open={showFloorDropDown}
                 value={floor}
-                items={floorList}
+                items={floorList.map(item => ({ label: item.name, value: item.id }))}
                 setOpen={setShowFloorDropDown}
                 setValue={setFloor}
                 setItems={setFloorList}
+                placeholder="Select Floor"
+
               />
             </View>
 
@@ -608,18 +567,10 @@ const CleaningInspections = ({ navigation, route }) => {
                 labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
                 open={showRoomDropDown}
                 value={room}
-                items={roomList}
+                items={roomList.map(item => ({ label: item.room_name, value: item.id }))}
                 setOpen={setShowRoomDropDown}
                 setValue={setRoom}
                 setItems={setRoomList}
-                selectedItemLabelStyle={() => {
-                  return (
-                    <Image
-                      source={require('../assets/building.png')}
-                      style={SIPCStyles.MainBuilding}
-                    />
-                  );
-                }}
               />
             </View>
             {/* ===========================Items Dropdown=================== */}
@@ -682,7 +633,7 @@ const CleaningInspections = ({ navigation, route }) => {
                 labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
                 open={showItemDropDown}
                 value={item}
-                items={itemList}
+                items={itemList.map(item => ({ label: item.item_name, value: item.room_item_id }))}
                 setOpen={setShowItemDropDown}
                 setValue={setItem}
                 setItems={setItemList}
@@ -706,8 +657,8 @@ const CleaningInspections = ({ navigation, route }) => {
               paddingVertical: 15,
               paddingHorizontal: 20,
               backgroundColor: 'white',
-              borderBottomWidth: Active == 1 ? 1 : 0,
-              borderColor: Active == 1 ? '#1485cc' : 'transparent',
+              borderBottomWidth: Active === 1 ? 1 : 0,
+              borderColor: Active === 1 ? '#1485cc' : 'transparent',
               width: Width / 2,
             }}
             onPress={() => setActive(1)}>
@@ -716,7 +667,7 @@ const CleaningInspections = ({ navigation, route }) => {
                 SIPCStyles.NormalFont,
                 {
                   textAlign: 'center',
-                  color: Active == 1 ? '#1485cc' : '#525252',
+                  color: Active === 1 ? '#1485cc' : '#525252',
                 },
               ]}>
               Cleaning
@@ -729,8 +680,8 @@ const CleaningInspections = ({ navigation, route }) => {
               paddingVertical: 15,
               paddingHorizontal: 20,
               backgroundColor: 'white',
-              borderBottomWidth: Active == 2 ? 1 : 0,
-              borderColor: Active == 2 ? '#1485cc' : 'transparent',
+              borderBottomWidth: Active === 2 ? 1 : 0,
+              borderColor: Active === 2 ? '#1485cc' : 'transparent',
               width: Width / 2,
             }}
             onPress={() => setActive(2)}>
@@ -738,7 +689,7 @@ const CleaningInspections = ({ navigation, route }) => {
               style={[
                 SIPCStyles.NormalFont,
                 {
-                  color: Active == 2 ? '#1485cc' : '#525252',
+                  color: Active === 2 ? '#1485cc' : '#525252',
                   textAlign: 'center',
                 },
               ]}>
@@ -751,7 +702,7 @@ const CleaningInspections = ({ navigation, route }) => {
         {/* --------------------------IF USER CLICK ON MAINTENANCE --------------------------*/}
         {/* MAINTENANCE+_------------------------------------------- */}
 
-        {Active == 2 ? (
+        {Active === 2 && (
           <>
             <View
               style={{
@@ -821,460 +772,16 @@ const CleaningInspections = ({ navigation, route }) => {
             </View>
             <Divider bold={true} />
 
-            {/* ===========================================FLOOR DATA ========================== */}
-            <Surface
-              elevation={4}
-              style={{
-                marginTop: 25,
-                backgroundColor: 'white',
-                paddingBottom: 20,
-              }}>
-              <View style={{ backgroundColor: '#fffcf8', padding: 15 }}>
-                <View style={{ flexDirection: 'row' }}>
-                  <Text style={[SIPCStyles.BoldFont, { paddingHorizontal: 15 }]}>
-                    Chair - Student
-                  </Text>
-                  {/* <Text style={SIPCStyles.BoldFont}>LVT or VCT</Text> */}
-                </View>
 
-                <View style={{ flexDirection: 'row' }}>
-                  <Text
-                    style={[SIPCStyles.NormalFont, { paddingHorizontal: 15 }]}>
-                    3 conditions |
-                  </Text>
-                  <Text style={SIPCStyles.NormalFont}>0 Issues</Text>
-                </View>
-              </View>
-
-              {/* ==========================CHECKBOX============================== */}
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'flex-start',
-                  flexWrap: Width > 500 ? 'wrap' : 'wrap',
-                }}>
-                <View
-                  style={{
-                    flexDirection: 'column',
-                    width: Width > 500 ? '50%' : '100%',
-                  }}>
-                  <View style={{ flexDirection: 'column' }}>
-                    <View style={SIPCStyles.CheckboxView}>
-                      <View
-                        style={{
-                          padding: 10,
-                          alignItems: 'center',
-                          alignSelf: 'center',
-                        }}>
-                        <Checkbox
-                          status={CheckedMain ? 'checked' : 'unchecked'}
-                          onPress={() => {
-                            setCheckedMain(!CheckedMain);
-                          }}
-                        />
-                      </View>
-                      <View style={{ borderWidth: 1, borderColor: '#ccc' }} />
-
-                      <View
-                        style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text
-                          style={[
-                            SIPCStyles.checkboxFont,
-                            { paddingLeft: 10, color: '#00aa34' },
-                          ]}>
-                          Satisfactory
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-                {/* ================= */}
-
-                <View
-                  style={{
-                    flexDirection: 'column',
-                    width: Width > 500 ? '50%' : '100%',
-                  }}>
-                  <View style={{ flexDirection: 'column' }}>
-                    <View
-                      style={[
-                        SIPCStyles.CheckboxView,
-                        {
-                          borderTopRightRadius: 10,
-                          borderTopLeftRadius: 10,
-                          borderBottomLeftRadius: CheckedMain == 1 ? 0 : 10,
-                          borderBottomRightRadius: CheckedMain == 1 ? 0 : 10,
-                        },
-                      ]}>
-                      <View style={{ padding: 10, alignSelf: 'center' }}>
-                        <Checkbox
-                          status={CheckedMain == 1 ? 'checked' : 'unchecked'}
-                          onPress={() => {
-                            setCheckedMain(!CheckedMain);
-                          }}
-                        />
-                      </View>
-
-                      <View style={{ borderWidth: 1, borderColor: '#ccc' }} />
-
-                      <Text
-                        style={[
-                          SIPCStyles.checkboxFont,
-                          { paddingLeft: 10, alignSelf: 'center' },
-                        ]}>
-                        Duty
-                      </Text>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          position: 'absolute',
-                          right: 0,
-                          alignSelf: 'center',
-                        }}>
-                        {CheckedMain == 1 ? (
-                          <>
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setCheckedMain(!CheckedMain);
-                              }}>
-                              <Text
-                                style={[
-                                  SIPCStyles.checkboxFont,
-                                  { marginHorizontal: 10 },
-                                ]}>
-                                Cancel
-                              </Text>
-                            </TouchableWithoutFeedback>
-
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setCheckedMain(!CheckedMain);
-                              }}>
-                              <Text
-                                style={[
-                                  SIPCStyles.checkboxFont,
-                                  { color: '#199be2', marginHorizontal: 10 },
-                                ]}>
-                                Submit
-                              </Text>
-                            </TouchableWithoutFeedback>
-                          </>
-                        ) : (
-                          <>
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setCheckedMain(!CheckedMain);
-                              }}>
-                              <Image
-                                source={require('../assets/msg.png')}
-                                style={SIPCStyles.commentImage}
-                              />
-                            </TouchableWithoutFeedback>
-
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setCheckedMain(!CheckedMain);
-                              }}>
-                              <Image
-                                source={require('../assets/img.png')}
-                                style={SIPCStyles.commentImage}
-                              />
-                            </TouchableWithoutFeedback>
-                          </>
-                        )}
-                      </View>
-                    </View>
-                    {CheckedMain == 1 ? (
-                      <View style={{ marginHorizontal: 20 }}>
-                        <TextInput
-                          mode="text"
-                          //  label="Outlined input"
-                          placeholder="Enter Your Comment"
-                          numberOfLines={8}
-                          multiline={true}
-                          underlineColor="transparent"
-                          theme={{ colors: { primary: '#cccccc' } }}
-                          style={SIPCStyles.TextInput1}
-                        />
-
-                        <View
-                          style={{
-                            borderWidth: 1,
-                            paddingBottom: 10,
-                            borderColor: '#ccc',
-                            borderBottomLeftRadius: 10,
-                            borderBottomRightRadius: 10,
-                            borderTopLeftRadius: 0,
-                            borderTopRightRadius: 0,
-                          }}>
-                          <Card style={SIPCStyles.CameraImageCard}>
-                            <View
-                              style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-around',
-                              }}>
-                              <TouchableWithoutFeedback
-                                onPress={() => openMainCamera()}>
-                                <Image
-                                  source={require('../assets/camera.png')}
-                                  style={SIPCStyles.cameraImage}
-                                />
-                              </TouchableWithoutFeedback>
-
-                              <View
-                                style={{ borderWidth: 1, borderColor: '#e6e6e6' }}
-                              />
-
-                              <TouchableWithoutFeedback onPress={pickMainImage}>
-                                <Image
-                                  source={require('../assets/gallery.png')}
-                                  style={SIPCStyles.cameraImage}
-                                />
-                              </TouchableWithoutFeedback>
-                            </View>
-                          </Card>
-
-                          <View
-                            style={{
-                              marginTop: 10,
-                              flexDirection: 'row',
-                              flexWrap: 'wrap',
-                              flex: 1,
-                            }}>
-                            <ScrollView
-                              nestedScrollEnabled={true}
-                              horizontal={true}>
-                              <View style={{ flexDirection: 'column-reverse' }}>
-                                <FlatList
-                                  data={MainImages}
-                                  numColumns={2}
-                                  decelerationRate="fast"
-                                  bounces={false}
-                                  renderItem={({ item, index }) => (
-                                    <View
-                                      style={{
-                                        flexDirection: 'row',
-                                        flexWrap: 'wrap',
-                                      }}>
-                                      <Image
-                                        style={{
-                                          width: Width / 4,
-                                          height: Height / 10,
-                                          marginHorizontal: 35,
-                                          marginVertical: 5,
-                                          resizeMode: 'contain',
-                                          borderRadius: 10,
-                                        }}
-                                        source={{
-                                          uri: `data:${item.type};base64,${item.data}`,
-                                        }}
-                                      />
-                                    </View>
-                                  )}
-                                  keyExtractor={(item, index) => item.id}
-                                />
-                              </View>
-                            </ScrollView>
-                          </View>
-                        </View>
-                      </View>
-                    ) : null}
-                  </View>
-                </View>
-                {/* ======================= */}
-
-                <View style={{ width: Width > 500 ? '50%' : '100%' }}>
-                  <View style={{ flexDirection: 'column' }}>
-                    <View
-                      style={[
-                        SIPCStyles.CheckboxView,
-                        {
-                          borderTopRightRadius: 10,
-                          borderTopLeftRadius: 10,
-                          borderBottomLeftRadius: CheckedMain2 == 1 ? 0 : 10,
-                          borderBottomRightRadius: CheckedMain2 == 1 ? 0 : 10,
-                        },
-                      ]}>
-                      <View style={{ padding: 10, alignSelf: 'center' }}>
-                        <Checkbox
-                          status={CheckedMain2 ? 'checked' : 'unchecked'}
-                          onPress={() => {
-                            setCheckedMain2(!CheckedMain2);
-                          }}
-                        />
-                      </View>
-
-                      <View style={{ borderWidth: 1, borderColor: '#ccc' }} />
-
-                      <Text
-                        style={[
-                          SIPCStyles.checkboxFont,
-                          { paddingLeft: 10, alignSelf: 'center' },
-                        ]}>
-                        Streak
-                      </Text>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          position: 'absolute',
-                          right: 0,
-                          alignSelf: 'center',
-                        }}>
-                        {CheckedMain2 == 1 ? (
-                          <>
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setCheckedMain2(!CheckedMain2);
-                              }}>
-                              <Text
-                                style={[
-                                  SIPCStyles.checkboxFont,
-                                  { marginHorizontal: 10 },
-                                ]}>
-                                Cancel
-                              </Text>
-                            </TouchableWithoutFeedback>
-
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setCheckedMain2(!CheckedMain2);
-                              }}>
-                              <Text
-                                style={[
-                                  SIPCStyles.checkboxFont,
-                                  { color: '#199be2', marginHorizontal: 10 },
-                                ]}>
-                                Submit
-                              </Text>
-                            </TouchableWithoutFeedback>
-                          </>
-                        ) : (
-                          <>
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setCheckedMain2(!CheckedMain2);
-                              }}>
-                              <Image
-                                source={require('../assets/msg.png')}
-                                style={SIPCStyles.commentImage}
-                              />
-                            </TouchableWithoutFeedback>
-
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setCheckedMain2(!CheckedMain2);
-                              }}>
-                              <Image
-                                source={require('../assets/img.png')}
-                                style={SIPCStyles.commentImage}
-                              />
-                            </TouchableWithoutFeedback>
-                          </>
-                        )}
-                      </View>
-                    </View>
-
-                    {CheckedMain2 == 1 ? (
-                      <View style={{ marginHorizontal: 20 }}>
-                        <TextInput
-                          mode="text"
-                          //  label="Outlined input"
-                          placeholder="Enter Your Comment"
-                          numberOfLines={8}
-                          multiline={true}
-                          underlineColor="transparent"
-                          theme={{ colors: { primary: '#cccccc' } }}
-                          style={SIPCStyles.TextInput1}
-                        />
-
-                        <View
-                          style={{
-                            borderWidth: 1,
-                            paddingBottom: 10,
-                            borderColor: '#ccc',
-                            borderBottomLeftRadius: 10,
-                            borderBottomRightRadius: 10,
-                            borderTopLeftRadius: 0,
-                            borderTopRightRadius: 0,
-                          }}>
-                          <Card style={SIPCStyles.CameraImageCard}>
-                            <View
-                              style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-around',
-                              }}>
-                              <TouchableWithoutFeedback
-                                onPress={() => openMainCamera()}>
-                                <Image
-                                  source={require('../assets/camera.png')}
-                                  style={SIPCStyles.cameraImage}
-                                />
-                              </TouchableWithoutFeedback>
-
-                              <View
-                                style={{ borderWidth: 1, borderColor: '#e6e6e6' }}
-                              />
-
-                              <TouchableWithoutFeedback
-                                onPress={() => pickMainImage()}>
-                                <Image
-                                  source={require('../assets/gallery.png')}
-                                  style={SIPCStyles.cameraImage}
-                                />
-                              </TouchableWithoutFeedback>
-                            </View>
-                          </Card>
-                          <View
-                            style={{
-                              marginTop: 10,
-                              flexDirection: 'row',
-                              flexWrap: Width > 500 ? 'wrap' : 'wrap',
-                              flex: 1,
-                            }}>
-                            <ScrollView
-                              nestedScrollEnabled={true}
-                              horizontal={true}>
-                              <FlatList
-                                numColumns={numMainColumns}
-                                data={MainImages}
-                                keyExtractor={(item, index) => index.toString()}
-                                renderItem={({ item, index }) => (
-                                  <View style={{ position: 'relative' }}>
-                                    <Image
-                                      source={{ uri: item.path }}
-                                      style={SIPCStyles.CameraClickImage}
-                                    />
-                                    <TouchableOpacity
-                                      style={SIPCStyles.crossImage}
-                                      onPress={() => deleteMainImage(index)}>
-                                      <Text
-                                        style={{
-                                          color: 'white',
-                                          fontWeight: 'bold',
-                                        }}>
-                                        X
-                                      </Text>
-                                    </TouchableOpacity>
-                                  </View>
-                                )}
-                              />
-                            </ScrollView>
-                          </View>
-                        </View>
-                      </View>
-                    ) : null}
-                  </View>
-                </View>
-              </View>
-            </Surface>
           </>
-        ) : null}
+        )}
+
 
         {/* ===========================IF USER CLICK ON CLEANING ===================== */}
 
         {/* ===========================================ROOM QUALITY=================== */}
 
-        {Active == 1 ? (
+        {Active === 1 && (
           <>
             <View
               style={{
@@ -1393,450 +900,23 @@ const CleaningInspections = ({ navigation, route }) => {
                 </Text>
               </View>
             </View>
-            {/* ===========================================FLOOR DATA ========================== */}
-            <Surface
-              elevation={4}
-              style={{
-                marginTop: 25,
-                backgroundColor: 'white',
-                paddingBottom: 20,
-              }}>
-              <View style={{ backgroundColor: '#fffcf8', padding: 15 }}>
-                <View style={{ flexDirection: 'row' }}>
-                  <Text style={[SIPCStyles.BoldFont, { paddingHorizontal: 15 }]}>
-                    Floor -
-                  </Text>
-                  <Text style={SIPCStyles.BoldFont}>LVT or VCT</Text>
-                </View>
-
-                <View style={{ flexDirection: 'row' }}>
-                  <Text
-                    style={[SIPCStyles.NormalFont, { paddingHorizontal: 15 }]}>
-                    3 conditions |
-                  </Text>
-                  <Text style={SIPCStyles.NormalFont}>0 Issues</Text>
-                </View>
-              </View>
-
-              {/* ==========================CHECKBOX============================== */}
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'flex-start',
-                  flexWrap: Width > 500 ? 'wrap' : 'wrap',
-                }}>
-                <View
-                  style={{
-                    flexDirection: 'column',
-                    width: Width > 500 ? '50%' : '100%',
-                  }}>
-                  <View style={{ flexDirection: 'column' }}>
-                    {/* <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}> */}
-                    <View style={SIPCStyles.CheckboxView}>
-                      <View
-                        style={{
-                          padding: 10,
-                          alignItems: 'center',
-                          alignSelf: 'center',
-                        }}>
-                        <Checkbox
-                          status={checked ? 'checked' : 'unchecked'}
-                          onPress={SatisfactoryPress}
-                        />
-                      </View>
-                      <View style={{ borderWidth: 1, borderColor: '#ccc' }} />
-
-                      <View
-                        style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text
-                          style={[
-                            SIPCStyles.checkboxFont,
-                            { paddingLeft: 10, color: '#00aa34' },
-                          ]}>
-                          Satisfactory
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-                {/* ================= */}
-                <View
-                  style={{
-                    flexDirection: 'column',
-                    width: Width > 500 ? '50%' : '100%',
-                  }}>
-                  <View style={{ flexDirection: 'column' }}>
-                    <View
-                      style={[
-                        SIPCStyles.CheckboxView,
-                        {
-                          borderTopRightRadius: 10,
-                          borderTopLeftRadius: 10,
-                          borderBottomLeftRadius: checked1 == 1 ? 0 : 10,
-                          borderBottomRightRadius: checked1 == 1 ? 0 : 10,
-                        },
-                      ]}>
-                      <View style={{ padding: 10, alignSelf: 'center' }}>
-                        <Checkbox
-                          status={checked1 ? 'checked' : 'unchecked'}
-                          onPress={() => {
-                            setChecked1(!checked1);
-                          }}
-                        />
-                      </View>
-
-                      <View style={{ borderWidth: 1, borderColor: '#ccc' }} />
-
-                      <Text
-                        style={[
-                          SIPCStyles.checkboxFont,
-                          { paddingLeft: 10, alignSelf: 'center' },
-                        ]}>
-                        Duty
-                      </Text>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          position: 'absolute',
-                          right: 0,
-                          alignSelf: 'center',
-                        }}>
-                        {checked1 == 1 ? (
-                          <>
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setChecked1(!checked1);
-                              }}>
-                              <Text
-                                style={[
-                                  SIPCStyles.checkboxFont,
-                                  { marginHorizontal: 10 },
-                                ]}>
-                                Cancel
-                              </Text>
-                            </TouchableWithoutFeedback>
-
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setChecked1(!checked1);
-                              }}>
-                              <Text
-                                style={[
-                                  SIPCStyles.checkboxFont,
-                                  { color: '#199be2', marginHorizontal: 10 },
-                                ]}>
-                                Submit
-                              </Text>
-                            </TouchableWithoutFeedback>
-                          </>
-                        ) : (
-                          <>
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setChecked1(!checked1);
-                              }}>
-                              <Image
-                                source={require('../assets/msg.png')}
-                                style={SIPCStyles.commentImage}
-                              />
-                            </TouchableWithoutFeedback>
-
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setChecked1(!checked1);
-                              }}>
-                              <Image
-                                source={require('../assets/img.png')}
-                                style={SIPCStyles.commentImage}
-                              />
-                            </TouchableWithoutFeedback>
-                          </>
-                        )}
-                      </View>
-
-
-                    </View>
-                    {checked1 == 1 ? (
-                      <View style={{ marginHorizontal: 20 }}>
-                        <TextInput
-                          mode="text"
-                          //  label="Outlined input"
-                          placeholder="Enter Your Comment"
-                          numberOfLines={8}
-                          multiline={true}
-                          underlineColor="transparent"
-                          theme={{ colors: { primary: '#cccccc' } }}
-                          style={SIPCStyles.TextInput1}
-                        />
-
-                        <View
-                          style={{
-                            borderWidth: 1,
-                            paddingBottom: 10,
-                            borderColor: '#ccc',
-                            borderBottomLeftRadius: 10,
-                            borderBottomRightRadius: 10,
-                            borderTopLeftRadius: 0,
-                            borderTopRightRadius: 0,
-                          }}>
-                          <Card style={SIPCStyles.CameraImageCard}>
-                            <View
-                              style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-around',
-                              }}>
-                              <TouchableWithoutFeedback onPress={openCamera}>
-                                <Image
-                                  source={require('../assets/camera.png')}
-                                  style={SIPCStyles.cameraImage}
-                                />
-                              </TouchableWithoutFeedback>
-
-                              <View
-                                style={{ borderWidth: 1, borderColor: '#e6e6e6' }}
-                              />
-
-                              <TouchableWithoutFeedback onPress={pickImage}>
-                                <Image
-                                  source={require('../assets/gallery.png')}
-                                  style={SIPCStyles.cameraImage}
-                                />
-                              </TouchableWithoutFeedback>
-                            </View>
-                          </Card>
-
-                          <View
-                            style={{
-                              marginTop: 10,
-                              flexDirection: 'row',
-                              flexWrap: Width > 500 ? 'wrap' : 'wrap',
-                              flex: 1,
-                            }}>
-                            <ScrollView
-                              nestedScrollEnabled={true}
-                              horizontal={true}>
-                              <FlatList
-                                numColumns={numColumns}
-                                data={images}
-                                keyExtractor={(item, index) => index.toString()}
-                                renderItem={({ item, index }) => (
-                                  <View style={{ position: 'relative' }}>
-                                    <Image
-                                      source={{ uri: item.path }}
-                                      style={SIPCStyles.CameraClickImage}
-                                    />
-                                    <TouchableOpacity
-                                      style={SIPCStyles.crossImage}
-                                      onPress={() => deleteImage(index)}>
-                                      <Text
-                                        style={{
-                                          color: 'white',
-                                          fontWeight: 'bold',
-                                        }}>
-                                        X
-                                      </Text>
-                                    </TouchableOpacity>
-                                  </View>
-                                )}
-                              />
-                            </ScrollView>
-                          </View>
-                        </View>
-                      </View>
-                    ) : null}
-                  </View>
-                </View>
-                {/* ======================= */}
-                <View
-                  style={{
-                    flexDirection: 'column',
-                    width: Width > 500 ? '50%' : '100%',
-                  }}>
-                  <View style={{ flexDirection: 'column' }}>
-                    <View
-                      style={[
-                        SIPCStyles.CheckboxView,
-                        {
-                          borderTopRightRadius: 10,
-                          borderTopLeftRadius: 10,
-                          borderBottomLeftRadius: checked2 == 1 ? 0 : 10,
-                          borderBottomRightRadius: checked2 == 1 ? 0 : 10,
-                        },
-                      ]}>
-                      <View style={{ padding: 10, alignSelf: 'center' }}>
-                        <Checkbox
-                          status={checked2 ? 'checked' : 'unchecked'}
-                          onPress={() => {
-                            setChecked2(!checked2);
-                          }}
-                        />
-                      </View>
-
-                      <View style={{ borderWidth: 1, borderColor: '#ccc' }} />
-
-                      <Text
-                        style={[
-                          SIPCStyles.checkboxFont,
-                          { paddingLeft: 10, alignSelf: 'center' },
-                        ]}>
-                        Streak
-                      </Text>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          position: 'absolute',
-                          right: 0,
-                          alignSelf: 'center',
-                        }}>
-                        {checked2 == 1 ? (
-                          <>
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setChecked2(!checked2);
-                              }}>
-                              <Text
-                                style={[
-                                  SIPCStyles.checkboxFont,
-                                  { marginHorizontal: 10 },
-                                ]}>
-                                Cancel
-                              </Text>
-                            </TouchableWithoutFeedback>
-
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setChecked2(!checked2);
-                              }}>
-                              <Text
-                                style={[
-                                  SIPCStyles.checkboxFont,
-                                  { color: '#199be2', marginHorizontal: 10 },
-                                ]}>
-                                Submit
-                              </Text>
-                            </TouchableWithoutFeedback>
-                          </>
-                        ) : (
-                          <>
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setChecked2(!checked2);
-                              }}>
-                              <Image
-                                source={require('../assets/msg.png')}
-                                style={SIPCStyles.commentImage}
-                              />
-                            </TouchableWithoutFeedback>
-
-                            <TouchableWithoutFeedback
-                              onPress={() => {
-                                setChecked2(!checked2);
-                              }}>
-                              <Image
-                                source={require('../assets/img.png')}
-                                style={SIPCStyles.commentImage}
-                              />
-                            </TouchableWithoutFeedback>
-                          </>
-                        )}
-                      </View>
-                    </View>
-
-                    {checked2 == 1 ? (
-                      <View style={{ marginHorizontal: 20 }}>
-                        <TextInput
-                          mode="text"
-                          //  label="Outlined input"
-                          placeholder="Enter Your Comment"
-                          numberOfLines={8}
-                          multiline={true}
-                          underlineColor="transparent"
-                          theme={{ colors: { primary: '#cccccc' } }}
-                          style={SIPCStyles.TextInput1}
-                        />
-
-                        <View
-                          style={{
-                            borderWidth: 1,
-                            paddingBottom: 10,
-                            borderColor: '#ccc',
-                            borderBottomLeftRadius: 10,
-                            borderBottomRightRadius: 10,
-                            borderTopLeftRadius: 0,
-                            borderTopRightRadius: 0,
-                          }}>
-                          <Card style={SIPCStyles.CameraImageCard}>
-                            <View
-                              style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-around',
-                              }}>
-                              <TouchableWithoutFeedback onPress={openCamera}>
-                                <Image
-                                  source={require('../assets/camera.png')}
-                                  style={SIPCStyles.cameraImage}
-                                />
-                              </TouchableWithoutFeedback>
-
-                              <View
-                                style={{ borderWidth: 1, borderColor: '#e6e6e6' }}
-                              />
-
-                              <TouchableWithoutFeedback onPress={pickImage}>
-                                <Image
-                                  source={require('../assets/gallery.png')}
-                                  style={SIPCStyles.cameraImage}
-                                />
-                              </TouchableWithoutFeedback>
-                            </View>
-                          </Card>
-
-                          <View
-                            style={{
-                              marginTop: 10,
-                              flexDirection: 'row',
-                              flexWrap: 'wrap',
-                              flex: 1,
-                            }}>
-                            <ScrollView
-                              nestedScrollEnabled={true}
-                              horizontal={true}>
-                              <FlatList
-                                numColumns={numColumns}
-                                data={images}
-                                keyExtractor={(item, index) => index.toString()}
-                                renderItem={({ item, index }) => (
-                                  <View style={{ position: 'relative' }}>
-                                    <Image
-                                      source={{ uri: item.path }}
-                                      style={SIPCStyles.CameraClickImage}
-                                    />
-                                    <TouchableOpacity
-                                      style={SIPCStyles.crossImage}
-                                      onPress={() => deleteImage(index)}>
-                                      <Text
-                                        style={{
-                                          color: 'white',
-                                          fontWeight: 'bold',
-                                        }}>
-                                        X
-                                      </Text>
-                                    </TouchableOpacity>
-                                  </View>
-                                )}
-                              />
-                            </ScrollView>
-                          </View>
-                        </View>
-                      </View>
-                    ) : null}
-                  </View>
-                </View>
-              </View>
-            </Surface>
           </>
-        ) : null}
-        {/* ACTIVE == 1 close here */}
+        )}
+
+
+        {isLoading ? (<>
+          <Loader />
+        </>) : (<>
+          {listRooms.map((item, index) => (
+            <InspectionCheckBox
+              data={item}
+              key={index}
+              navigation={navigation} />
+          ))}
+
+        </>)}
+
+
 
         {/* =================================================================== */}
       </ScrollView>
@@ -1844,5 +924,4 @@ const CleaningInspections = ({ navigation, route }) => {
     </View>
   );
 };
-
 export default CleaningInspections;

@@ -10,7 +10,7 @@ import {
   FlatList,
   Alert,
 } from 'react-native';
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Text,
   TextInput,
@@ -22,18 +22,18 @@ import {
 } from 'react-native-paper';
 import Entypo from 'react-native-vector-icons/Entypo';
 import ImagePicker from 'react-native-image-crop-picker';
-import {responsiveScreenFontSize} from 'react-native-responsive-dimensions';
+import { responsiveScreenFontSize } from 'react-native-responsive-dimensions';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import {MMKV} from 'react-native-mmkv';
+import { MMKV } from 'react-native-mmkv';
 
 import SIPCStyles from './styles';
 import API from '../utility/api';
 import Loader from '../component/activityindicator';
-import {SurveyOptions} from '../utility/constants';
-import {CONFIG} from '../utility/config';
+import { SurveyOptions } from '../utility/constants';
+import { CONFIG } from '../utility/config';
 
-const SaveSurvey = ({navigation, route}) => {
-  const {orgId, orgName, buildingId, buildingName, surveyId} = route?.params;
+const SaveSurvey = ({ navigation, route }) => {
+  const { orgId, orgName, buildingId, buildingName, surveyId } = route?.params;
 
   const storage = new MMKV();
   const jsonUser = storage.getString('user');
@@ -158,7 +158,7 @@ const SaveSurvey = ({navigation, route}) => {
     //setImages(images.filter((_, i) => i !== index));
   };
 
-  const RadioBox = ({answers, answer, setAnswer, selected}) => {
+  const RadioBox = ({ answers, answer, setAnswer, selected }) => {
     const [comment, setComment] = useState('');
     const [completed, setCompleted] = useState(false);
     const [imagePath, setImagePath] = useState([]);
@@ -201,8 +201,8 @@ const SaveSurvey = ({navigation, route}) => {
       } else {
         const filteredArray = Array.isArray(imagePath)
           ? imagePath
-              .map(el => ({image: el.split('/').pop()}))
-              .filter(el => el.image)
+            .map(el => ({ image: el.split('/').pop() }))
+            .filter(el => el.image)
           : [];
         const answerObject = [
           {
@@ -239,18 +239,18 @@ const SaveSurvey = ({navigation, route}) => {
             height: height / 12,
             borderBottomRightRadius:
               commentType.completePopup &&
-              answer &&
-              answer[0] === answers.answer_id
+                answer &&
+                answer[0] === answers.answer_id
                 ? 0
                 : 12,
             borderBottomLeftRadius:
               commentType.completePopup &&
-              answer &&
-              answer[0] === answers.answer_id
+                answer &&
+                answer[0] === answers.answer_id
                 ? 0
                 : 12,
           }}>
-          <View style={{paddingHorizontal: 10}}>
+          <View style={{ paddingHorizontal: 10 }}>
             <RadioButton
               status={selected ? 'checked' : 'unchecked'}
               onPress={onPress}
@@ -259,7 +259,7 @@ const SaveSurvey = ({navigation, route}) => {
             />
           </View>
           <View
-            style={{borderWidth: 1, height: '100%', borderColor: '#CCCCCC'}}
+            style={{ borderWidth: 1, height: '100%', borderColor: '#CCCCCC' }}
           />
           <Text
             style={{
@@ -286,7 +286,7 @@ const SaveSurvey = ({navigation, route}) => {
                       <Text
                         style={[
                           SIPCStyles.checkboxFont,
-                          {marginHorizontal: 10},
+                          { marginHorizontal: 10 },
                         ]}>
                         Cancel
                       </Text>
@@ -299,7 +299,7 @@ const SaveSurvey = ({navigation, route}) => {
                       <Text
                         style={[
                           SIPCStyles.checkboxFont,
-                          {color: '#199be2', marginHorizontal: 10},
+                          { color: '#199be2', marginHorizontal: 10 },
                         ]}>
                         Submit
                       </Text>
@@ -340,8 +340,8 @@ const SaveSurvey = ({navigation, route}) => {
                 numberOfLines={8}
                 multiline={true}
                 underlineColor="transparent"
-                theme={{colors: {primary: '#cccccc'}}}
-                style={[SIPCStyles.TextInput1, {marginHorizontal: 20}]}
+                theme={{ colors: { primary: '#cccccc' } }}
+                style={[SIPCStyles.TextInput1, { marginHorizontal: 20 }]}
                 placeholder={'Add Comments'}
                 value={comment}
                 onChangeText={setComment}
@@ -407,10 +407,10 @@ const SaveSurvey = ({navigation, route}) => {
                       horizontal
                       data={imagePath}
                       keyExtractor={(item, index) => index}
-                      renderItem={({item, index}) => (
-                        <View style={{position: 'relative'}}>
+                      renderItem={({ item, index }) => (
+                        <View style={{ position: 'relative' }}>
                           <Image
-                            source={{uri: item}}
+                            source={{ uri: item }}
                             style={SIPCStyles.CameraClickImage}
                           />
                           <TouchableOpacity
@@ -437,7 +437,7 @@ const SaveSurvey = ({navigation, route}) => {
     );
   };
 
-  const RadioBoxComponent = ({data}) => {
+  const RadioBoxComponent = ({ data }) => {
     const [answer, setAnswer] = useState([]);
 
     useEffect(() => {
@@ -455,18 +455,18 @@ const SaveSurvey = ({navigation, route}) => {
           ? finalAnswer.current.push(answerObject)
           : (finalAnswer.current[answerIndex] = answerObject)
         : (finalAnswer.current = finalAnswer.current.filter(
-            el => el.question_id !== data.id.toString(),
-          ));
+          el => el.question_id !== data.id.toString(),
+        ));
     }, [answer]);
 
     return (
-      <View style={{backgroundColor: 'white', padding: 15}}>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+      <View style={{ backgroundColor: 'white', padding: 15 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Image
             source={require('../assets/question.png')}
             style={SIPCStyles.headerManImage}
           />
-          <Text style={[SIPCStyles.SemiBold, {flex: 1, marginLeft: 15}]}>
+          <Text style={[SIPCStyles.SemiBold, { flex: 1, marginLeft: 15 }]}>
             {data.question}
           </Text>
         </View>
@@ -484,7 +484,7 @@ const SaveSurvey = ({navigation, route}) => {
   };
 
   //Here answers is the for the item being used in check box and answer is the state which contains all the answer for the particular question
-  const CheckBox = ({answers, answer, setAnswer}) => {
+  const CheckBox = ({ answers, answer, setAnswer }) => {
     const [checked, setChecked] = useState(false);
     const [comment, setComment] = useState('');
     const [completed, setCompleted] = useState(false);
@@ -502,8 +502,8 @@ const SaveSurvey = ({navigation, route}) => {
         if (commentType.directAdd) {
           const filteredArray = Array.isArray(imagePath)
             ? imagePath
-                .map(el => ({image: el.split('/').pop()}))
-                .filter(el => el.image)
+              .map(el => ({ image: el.split('/').pop() }))
+              .filter(el => el.image)
             : [];
           const result = filteredArray.length ? filteredArray : '';
           setAnswer([
@@ -535,13 +535,13 @@ const SaveSurvey = ({navigation, route}) => {
     const onSubmit = () => {
       if (comment === '' && (commentType.commentRequired || !commentType.commentRequired)) {
         Alert.alert('Comment is required.');
-      }  else if (commentType.imageRequired && imagePath === '') {
+      } else if (commentType.imageRequired && imagePath === '') {
         Alert.alert('Image is required.');
       } else {
         const filteredArray = Array.isArray(imagePath)
           ? imagePath
-              .map(el => ({image: el.split('/').pop()}))
-              .filter(el => el.image)
+            .map(el => ({ image: el.split('/').pop() }))
+            .filter(el => el.image)
           : [];
         const answerObject = {
           id: answers.answer_id.toString(),
@@ -597,7 +597,7 @@ const SaveSurvey = ({navigation, route}) => {
                 borderBottomLeftRadius: checked && completed === 1 ? 0 : 12,
               }}>
               <TouchableOpacity
-                style={{paddingHorizontal: 10}}
+                style={{ paddingHorizontal: 10 }}
                 onPress={onPress}
                 activeOpacity={0.85}>
                 <Checkbox
@@ -638,7 +638,7 @@ const SaveSurvey = ({navigation, route}) => {
                           <Text
                             style={[
                               SIPCStyles.checkboxFont,
-                              {marginHorizontal: 10},
+                              { marginHorizontal: 10 },
                             ]}>
                             Cancel
                           </Text>
@@ -651,7 +651,7 @@ const SaveSurvey = ({navigation, route}) => {
                           <Text
                             style={[
                               SIPCStyles.checkboxFont,
-                              {color: '#199be2', marginHorizontal: 10},
+                              { color: '#199be2', marginHorizontal: 10 },
                             ]}>
                             Submit
                           </Text>
@@ -699,7 +699,7 @@ const SaveSurvey = ({navigation, route}) => {
                 )} */}
 
                 {checked && (
-                  <View style={{marginHorizontal: 20}}>
+                  <View style={{ marginHorizontal: 20 }}>
                     <TextInput
                       mode="text"
                       //  label="Outlined input"
@@ -713,7 +713,7 @@ const SaveSurvey = ({navigation, route}) => {
                       numberOfLines={8}
                       multiline={true}
                       underlineColor="transparent"
-                      theme={{colors: {primary: '#cccccc'}}}
+                      theme={{ colors: { primary: '#cccccc' } }}
                       style={SIPCStyles.TextInput1}
                     />
 
@@ -775,10 +775,10 @@ const SaveSurvey = ({navigation, route}) => {
                               horizontal
                               data={imagePath}
                               keyExtractor={(item, index) => index}
-                              renderItem={({item, index}) => (
-                                <View style={{position: 'relative'}}>
+                              renderItem={({ item, index }) => (
+                                <View style={{ position: 'relative' }}>
                                   <Image
-                                    source={{uri: item}}
+                                    source={{ uri: item }}
                                     style={SIPCStyles.CameraClickImage}
                                   />
                                   <TouchableOpacity
@@ -809,7 +809,7 @@ const SaveSurvey = ({navigation, route}) => {
     );
   };
 
-  const CheckBoxComponent = ({data}) => {
+  const CheckBoxComponent = ({ data }) => {
     const [answer, setAnswer] = useState([]);
 
     useEffect(() => {
@@ -826,18 +826,18 @@ const SaveSurvey = ({navigation, route}) => {
           ? finalAnswer.current.push(answerObject)
           : (finalAnswer.current[answerIndex] = answerObject)
         : (finalAnswer.current = finalAnswer.current.filter(
-            el => el.question_id !== data.id.toString(),
-          ));
+          el => el.question_id !== data.id.toString(),
+        ));
     }, [answer]);
 
     return (
-      <View style={{backgroundColor: 'white', padding: 15}}>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+      <View style={{ backgroundColor: 'white', padding: 15 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Image
             source={require('../assets/question.png')}
             style={SIPCStyles.headerManImage}
           />
-          <Text style={[SIPCStyles.SemiBold, {flex: 1, marginLeft: 15}]}>
+          <Text style={[SIPCStyles.SemiBold, { flex: 1, marginLeft: 15 }]}>
             {data.question}
           </Text>
         </View>
@@ -873,20 +873,20 @@ const SaveSurvey = ({navigation, route}) => {
     }
   };
 
-  const TextBox = ({data}) => {
+  const TextBox = ({ data }) => {
     const [answer, setAnswer] = useState('');
 
     return (
-      <View style={{borderRadius: 12, flex: 1}}>
+      <View style={{ borderRadius: 12, flex: 1 }}>
         <TextInput
           mode="text"
           numberOfLines={8}
           multiline={true}
           underlineColor="transparent"
-          theme={{colors: {primary: '#cccccc'}}}
+          theme={{ colors: { primary: '#cccccc' } }}
           style={[
             SIPCStyles.TextInput1,
-            {marginHorizontal: 20, marginTop: 10, borderRadius: 12, flex: 1},
+            { marginHorizontal: 20, marginTop: 10, borderRadius: 12, flex: 1 },
           ]}
           placeholder={'Answer'}
           value={answer}
@@ -899,7 +899,7 @@ const SaveSurvey = ({navigation, route}) => {
     );
   };
 
-  const SurveyQuestions = ({data, index}) => {
+  const SurveyQuestions = ({ data, index }) => {
     const [active, setActive] = useState(index === 0);
     const [subActive, setSubActive] = useState(false);
 
@@ -934,7 +934,7 @@ const SaveSurvey = ({navigation, route}) => {
               />
             )}
           </TouchableWithoutFeedback>
-          <Text style={[SIPCStyles.BoldFont, {marginLeft: '5%'}]}>
+          <Text style={[SIPCStyles.BoldFont, { marginLeft: '5%' }]}>
             {data.section}
           </Text>
         </View>
@@ -942,13 +942,13 @@ const SaveSurvey = ({navigation, route}) => {
           return (
             <View key={question.id}>
               {question.question_type_id === 1 && (
-                <View style={!active && {display: 'none'}}>
+                <View style={!active && { display: 'none' }}>
                   <RadioBoxComponent data={question} />
                 </View>
               )}
 
               {question.question_type_id === 2 && (
-                <View style={!active && {display: 'none'}}>
+                <View style={!active && { display: 'none' }}>
                   <CheckBoxComponent data={question} />
                 </View>
               )}
@@ -956,16 +956,16 @@ const SaveSurvey = ({navigation, route}) => {
               {question.question_type_id === 3 && (
                 <View
                   style={[
-                    !active && {display: 'none'},
-                    {backgroundColor: 'white', padding: 15},
+                    !active && { display: 'none' },
+                    { backgroundColor: 'white', padding: 15 },
                   ]}>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Image
                       source={require('../assets/question.png')}
                       style={SIPCStyles.headerManImage}
                     />
                     <Text
-                      style={[SIPCStyles.SemiBold, {flex: 1, paddingLeft: 15}]}>
+                      style={[SIPCStyles.SemiBold, { flex: 1, paddingLeft: 15 }]}>
                       {question.question}
                     </Text>
                   </View>
@@ -989,7 +989,7 @@ const SaveSurvey = ({navigation, route}) => {
                     borderBottomWidth: 1,
                     borderColor: '#CCCCCC',
                   },
-                  !active && {display: 'none'},
+                  !active && { display: 'none' },
                 ]}>
                 <TouchableWithoutFeedback
                   onPress={() => {
@@ -1007,7 +1007,7 @@ const SaveSurvey = ({navigation, route}) => {
                     />
                   )}
                 </TouchableWithoutFeedback>
-                <Text style={[SIPCStyles.BoldFont, {marginLeft: '5%'}]}>
+                <Text style={[SIPCStyles.BoldFont, { marginLeft: '5%' }]}>
                   {sub.sub_section}
                 </Text>
               </View>
@@ -1016,14 +1016,14 @@ const SaveSurvey = ({navigation, route}) => {
                   <View key={question.id}>
                     {question.question_type_id === 1 && (
                       <View
-                        style={(!active || !subActive) && {display: 'none'}}>
+                        style={(!active || !subActive) && { display: 'none' }}>
                         <RadioBoxComponent data={question} />
                       </View>
                     )}
 
                     {question.question_type_id === 2 && (
                       <View
-                        style={(!active || !subActive) && {display: 'none'}}>
+                        style={(!active || !subActive) && { display: 'none' }}>
                         <CheckBoxComponent data={question} />
                       </View>
                     )}
@@ -1031,11 +1031,11 @@ const SaveSurvey = ({navigation, route}) => {
                     {question.question_type_id === 3 && (
                       <View
                         style={[
-                          (!active || !subActive) && {display: 'none'},
-                          {backgroundColor: 'white', padding: 15},
+                          (!active || !subActive) && { display: 'none' },
+                          { backgroundColor: 'white', padding: 15 },
                         ]}>
                         <View
-                          style={{flexDirection: 'row', alignItems: 'center'}}>
+                          style={{ flexDirection: 'row', alignItems: 'center' }}>
                           <Image
                             source={require('../assets/question.png')}
                             style={SIPCStyles.headerManImage}
@@ -1043,7 +1043,7 @@ const SaveSurvey = ({navigation, route}) => {
                           <Text
                             style={[
                               SIPCStyles.SemiBold,
-                              {flex: 1, paddingLeft: 15},
+                              { flex: 1, paddingLeft: 15 },
                             ]}>
                             {question.question}
                           </Text>
@@ -1148,7 +1148,7 @@ const SaveSurvey = ({navigation, route}) => {
     <View style={SIPCStyles.flex}>
       <StatusBar barStyle={'dark-content'} backgroundColor="#acbcc6" />
       {/* ======================HEader============================================= */}
-      <Surface style={[SIPCStyles.headerSurface, {alignItems: 'center'}]}>
+      <Surface style={[SIPCStyles.headerSurface, { alignItems: 'center' }]}>
         <TouchableWithoutFeedback onPress={() => navigation.goBack()}>
           <Image
             source={require('../assets/left.png')}
@@ -1156,23 +1156,23 @@ const SaveSurvey = ({navigation, route}) => {
           />
         </TouchableWithoutFeedback>
 
-        <View style={{marginHorizontal: 10}}>
+        <View style={{ marginHorizontal: 10 }}>
           <Text
-            style={[SIPCStyles.NormalFont, {width: width / 2}]}
+            style={[SIPCStyles.NormalFont, { width: width / 2 }]}
             numberOfLines={1}>
             Survey: {surveyData.title}
           </Text>
         </View>
 
         <TouchableWithoutFeedback onPress={() => refRBSheet.current.open()}>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={[SIPCStyles.NormalFont, {color: '#199be2'}]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={[SIPCStyles.NormalFont, { color: '#199be2' }]}>
               Save/Submit
             </Text>
             <Entypo
               size={18}
               color={'#818081'}
-              style={{paddingHorizontal: 5, alignSelf: 'center'}}
+              style={{ paddingHorizontal: 5, alignSelf: 'center' }}
               name="chevron-down"
             />
           </View>
@@ -1192,7 +1192,7 @@ const SaveSurvey = ({navigation, route}) => {
         closeOnDragDown={false}
         closeOnPressMask={false}
         dragFromTopOnly={true}
-        height={height/1.12}
+        height={height / 1.12}
         customStyles={{
           wrapper: {
             backgroundColor: 'transparent',
@@ -1200,7 +1200,7 @@ const SaveSurvey = ({navigation, route}) => {
           draggableIcon: {
             backgroundColor: 'transparent',
           },
-          container:{
+          container: {
             backgroundColor: 'transparent',
           },
         }}>
@@ -1225,7 +1225,7 @@ const SaveSurvey = ({navigation, route}) => {
               <Text style={[SIPCStyles.NormalFont, {}]}>Cancel</Text>
             </TouchableWithoutFeedback>
             <TouchableWithoutFeedback onPress={() => close(refRBSheet)}>
-              <Text style={[SIPCStyles.NormalFont, {color: '#199be2'}]}>
+              <Text style={[SIPCStyles.NormalFont, { color: '#199be2' }]}>
                 Done
               </Text>
             </TouchableWithoutFeedback>
@@ -1263,25 +1263,25 @@ const SaveSurvey = ({navigation, route}) => {
                 source={require('../assets/save.png')}
                 style={SIPCStyles.MainBuilding}
               />
-              <Text style={[SIPCStyles.NormalFont, {paddingLeft: 10}]}>
+              <Text style={[SIPCStyles.NormalFont, { paddingLeft: 10 }]}>
                 Save
               </Text>
             </TouchableOpacity>
-            <Divider bold={true} style={{marginLeft: 30, marginTop: 10}} />
+            <Divider bold={true} style={{ marginLeft: 30, marginTop: 10 }} />
 
             <TouchableOpacity
               onPress={() => refRBSheet1.current.open()}
-              style={[SIPCStyles.healthImageView, {marginTop: 25}]}>
+              style={[SIPCStyles.healthImageView, { marginTop: 25 }]}>
               <Image
                 source={require('../assets/submit.png')}
                 style={SIPCStyles.MainBuilding}
               />
-              <Text style={[SIPCStyles.NormalFont, {paddingLeft: 10}]}>
+              <Text style={[SIPCStyles.NormalFont, { paddingLeft: 10 }]}>
                 Submit Survey
               </Text>
             </TouchableOpacity>
 
-            <Divider bold={true} style={{marginLeft: 30, marginTop: 10}} />
+            <Divider bold={true} style={{ marginLeft: 30, marginTop: 10 }} />
           </Surface>
         </View>
       </RBSheet>
@@ -1319,7 +1319,7 @@ const SaveSurvey = ({navigation, route}) => {
             <Text
               style={[
                 SIPCStyles.NormalFont,
-                {textAlign: 'center', color: 'white'},
+                { textAlign: 'center', color: 'white' },
               ]}>
               Survey Completed By
             </Text>
@@ -1354,10 +1354,10 @@ const SaveSurvey = ({navigation, route}) => {
               placeholder="First Name"
               placeholderTextColor={'black'}
               underlineColor="transparent"
-              theme={{colors: {primary: '#cccccc'}}}
+              theme={{ colors: { primary: '#cccccc' } }}
               style={[
                 SIPCStyles.TextInput,
-                {height: height / 18, marginTop: 15, borderRadius: 0},
+                { height: height / 18, marginTop: 15, borderRadius: 0 },
               ]}
             />
 
@@ -1367,10 +1367,10 @@ const SaveSurvey = ({navigation, route}) => {
               placeholder="Last Name"
               placeholderTextColor={'black'}
               underlineColor="transparent"
-              theme={{colors: {primary: '#cccccc'}}}
+              theme={{ colors: { primary: '#cccccc' } }}
               style={[
                 SIPCStyles.TextInput,
-                {height: height / 18, marginTop: 25, borderRadius: 0},
+                { height: height / 18, marginTop: 25, borderRadius: 0 },
               ]}
             />
 
@@ -1382,14 +1382,14 @@ const SaveSurvey = ({navigation, route}) => {
               }}>
               <TouchableWithoutFeedback
                 onPress={() => close(refRBSheet1)}
-                style={{borderWidth: 1}}>
-                <Text style={[SIPCStyles.NormalFont, {marginRight: 15}]}>
+                style={{ borderWidth: 1 }}>
+                <Text style={[SIPCStyles.NormalFont, { marginRight: 15 }]}>
                   Cancel
                 </Text>
               </TouchableWithoutFeedback>
 
               <TouchableWithoutFeedback onPress={() => submitSurvey()}>
-                <Text style={[SIPCStyles.NormalFont, {color: '#199be2'}]}>
+                <Text style={[SIPCStyles.NormalFont, { color: '#199be2' }]}>
                   Continue
                 </Text>
               </TouchableWithoutFeedback>

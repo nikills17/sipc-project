@@ -43,6 +43,7 @@ const Reports = ({navigation}) => {
 
   const [active, setActive] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   let payload;
 
@@ -322,6 +323,8 @@ const Reports = ({navigation}) => {
           active={active}
           setData={setData}
           setIsLoading={setIsLoading}
+          setError={setError}
+          error={error}
           user={user}
         />
       )}

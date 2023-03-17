@@ -14,6 +14,7 @@ import { responsiveScreenHeight, responsiveScreenWidth, responsiveScreenFontSize
 
 import { MMKV } from 'react-native-mmkv'
 import { CONFIG } from '../utility/config';
+import HeaderBox from '../component/headerbox';
 export const storage = new MMKV();
 
 const Inspections = ({ navigation }) => {
@@ -36,7 +37,7 @@ const Inspections = ({ navigation }) => {
 
   const [dataLoading, setDataLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
- 
+
 
   const params = JSON.stringify({
     pageSize: CONFIG.pageSize,
@@ -55,17 +56,17 @@ const Inspections = ({ navigation }) => {
         .post(
           '/inspection-list-device?is_api=true',
           params,).then(
-          response => {
+            response => {
               setIsLoading(false);
               setData(response.data);
               setTotalCount(response.totalCount);
-              setCurrentPage(1);            
-          },
-          error => {
-            console.error(error);
-            setIsLoading(false);
-          },
-        );
+              setCurrentPage(1);
+            },
+            error => {
+              console.error(error);
+              setIsLoading(false);
+            },
+          );
     }, [Active]),
   );
 
@@ -105,7 +106,8 @@ const Inspections = ({ navigation }) => {
       <StatusBar barStyle={'dark-content'} backgroundColor="white" />
 
       {/* ====================================== */}
-      <Surface style={SIPCStyles.headerSurface}>
+      <HeaderBox navigation={navigation}/>
+      {/* <Surface style={SIPCStyles.headerSurface}>
         {
           user.profile_picture != '' ?
             <TouchableOpacity>
@@ -139,7 +141,7 @@ const Inspections = ({ navigation }) => {
           />
         </TouchableWithoutFeedback>
       </Surface>
-      <Divider bold={true} />
+      <Divider bold={true} /> */}
       {/* ================TABS============================== */}
 
       <View
