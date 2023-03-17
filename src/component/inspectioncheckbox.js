@@ -24,17 +24,28 @@ import {
 } from 'react-native-paper';
 import SIPCStyles from '../screens/styles'
 import ImagePicker from 'react-native-image-crop-picker';
+import { MMKV } from 'react-native-mmkv';
 
-const InspectionCheckBox = ({ data, navigation }) => {
+const InspectionCheckBox = ({ data, navigation, routeData,Active }) => {
+
+
+    const storage = new MMKV();
+    const jsonUser = storage.getString('user');
+    const user = JSON.parse(jsonUser);
 
     const Width = Dimensions.get('window').width;
     const Height = Dimensions.get('window').height;
 
-    
+    const [satisfactoryChecked, setSatisfactoryChecked] = useState(false);  
+
+    // const satisfactoryValue = satisfactoryChecked ? 1 : 0;
+    // // console.log('satisfactoryChecked(8)====>' + satisfactoryValue);
+
+
     const [images, setImages] = useState([]);
     const [numColumns, setNumColumns] = useState(3);
     const maxImages = 10;
-    
+
     const openCamera = () => {
         ImagePicker.openCamera({
             width: 300,
@@ -48,47 +59,83 @@ const InspectionCheckBox = ({ data, navigation }) => {
             setImages([...images, { path: image.path }]);
         });
     };
-    
+
     const pickImage = () => {
         ImagePicker.openPicker({
             multiple: true,
             maxFiles: maxImages - images.length,
         })
-        .then(newImages => {
-            if (images.length + newImages.length > maxImages) {
-                alert(`Max limit reached: ${maxImages}`);
-                return;
-            }
-            setImages([...images, ...newImages.map(i => ({ path: i.path }))]);
-        })
-        .catch(error => console.error(error));
+            .then(newImages => {
+                if (images.length + newImages.length > maxImages) {
+                    alert(`Max limit reached: ${maxImages}`);
+                    return;
+                }
+                setImages([...images, ...newImages.map(i => ({ path: i.path }))]);
+            })
+            .catch(error => console.error(error));
     };
-    
+
     const deleteImage = index => {
         setImages(images.filter((_, i) => i !== index));
     };
 
-    const [satisfactoryChecked, setSatisfactoryChecked] = useState(false);
-    const [conditionChecked, setConditionChecked] = useState(false);
-    
-    const handleCheck1 = () => {
-        if (conditionChecked) {
-            setConditionChecked(false);
+
+
+    // const handleCheck1 = () => {
+    //     if (conditionChecked) {
+    //         setConditionChecked(false);
+    //     }
+    //     setSatisfactoryChecked(!satisfactoryChecked);
+    // };
+
+    // const handleCheck2 = () => {
+    //     if (satisfactoryChecked) {
+    //         setSatisfactoryChecked(false);
+    //     }
+    //     setConditionChecked(!conditionChecked);
+    // };
+
+
+
+
+
+
+    const CheckBox = ({ condition, }) => {
+
+        const [conditionChecked, setConditionChecked] = useState(false);
+        const [isOpen, setIsOpen] = useState(false);
+
+        const value = conditionChecked ? 0 : 1;
+
+        const onCommentImagePress = () => {
+            setConditionChecked(true);
+            setIsOpen(!isOpen);
+          };
+
+          const onPress = () => {
+            if (!conditionChecked) {
+                setConditionChecked(true);
+                setIsOpen(true);
+            }
+          };
+
+        const checkBoxPress = () => {
+            if (!conditionChecked) {
+                setConditionChecked(true);
+                setIsOpen(true);
+            }else if (conditionChecked) {
+                setConditionChecked(false);
+                setIsOpen(false);
+            }
+            // console.log('data.user_id(1)====>' + user.id);
+            // console.log('data.room_item_id(2)====>' + condition.room_item_id);
+            // console.log('data.room_id(3)====>' + routeData.room_id);
+            // console.log('data.conditionId(4)====>' + condition.id);
+            // console.log('data.inspectionResultId(5)====>' + routeData.inspection_result_id);
+            // console.log('data.inspectionTypeId(6)====>' + Active);
+            // console.log('data.checked(7)====>' + value);
         }
-        setSatisfactoryChecked(!satisfactoryChecked);
-      };
-    
-      const handleCheck2 = () => {
-        if (satisfactoryChecked) {
-            setSatisfactoryChecked(false);
-        }
-        setConditionChecked(!conditionChecked);
-      };
 
-
-
-    const CheckBox = ({ condition }) => {
-        // const [conditionChecked, setConditionChecked] = useState(false);
         return (
             <>
                 <View
@@ -97,14 +144,14 @@ const InspectionCheckBox = ({ data, navigation }) => {
                         {
                             borderTopRightRadius: 10,
                             borderTopLeftRadius: 10,
-                            borderBottomLeftRadius: conditionChecked === true ? 0 : 10,
-                            borderBottomRightRadius: conditionChecked === true ? 0 : 10,
+                            borderBottomLeftRadius: isOpen  === true ? 0 : 10,
+                            borderBottomRightRadius: isOpen  === true ? 0 : 10,
                         },
                     ]}>
                     <View style={{ padding: 10, alignSelf: 'center' }}>
                         <Checkbox
                             status={conditionChecked ? 'checked' : 'unchecked'}
-                            onPress={handleCheck2}
+                            onPress={checkBoxPress}
                         />
                     </View>
 
@@ -124,11 +171,11 @@ const InspectionCheckBox = ({ data, navigation }) => {
                             right: 0,
                             alignSelf: 'center',
                         }}>
-                        {conditionChecked === true ? (
+                        {isOpen === true ? (
                             <>
                                 <TouchableWithoutFeedback
                                     onPress={() => {
-                                        setConditionChecked(!conditionChecked);
+                                        setIsOpen(!isOpen);
                                     }}>
                                     <Text
                                         style={[
@@ -141,7 +188,7 @@ const InspectionCheckBox = ({ data, navigation }) => {
 
                                 <TouchableWithoutFeedback
                                     onPress={() => {
-                                        setConditionChecked(!conditionChecked);
+                                        setIsOpen(!isOpen);
                                     }}>
                                     <Text
                                         style={[
@@ -154,10 +201,9 @@ const InspectionCheckBox = ({ data, navigation }) => {
                             </>
                         ) : (
                             <>
-                                <TouchableWithoutFeedback
-                                    onPress={() => {
-                                        setConditionChecked(!conditionChecked);
-                                    }}>
+                                <TouchableWithoutFeedback 
+                                    onPress={conditionChecked?onCommentImagePress:onPress}
+                                    >
                                     <Image
                                         source={require('../assets/msg.png')}
                                         style={SIPCStyles.commentImage}
@@ -165,9 +211,8 @@ const InspectionCheckBox = ({ data, navigation }) => {
                                 </TouchableWithoutFeedback>
 
                                 <TouchableWithoutFeedback
-                                    onPress={() => {
-                                        setConditionChecked(!conditionChecked);
-                                    }}>
+                                    onPress={conditionChecked ? onCommentImagePress : onPress}
+                                    >
                                     <Image
                                         source={require('../assets/img.png')}
                                         style={SIPCStyles.commentImage}
@@ -178,7 +223,7 @@ const InspectionCheckBox = ({ data, navigation }) => {
                     </View>
                 </View>
 
-                {conditionChecked === true ? (
+                {isOpen === true ? (
                     <>
                         <View style={{ marginHorizontal: 20 }}>
                             <TextInput
@@ -272,6 +317,10 @@ const InspectionCheckBox = ({ data, navigation }) => {
         )
     }
 
+
+
+
+
     return (
         <View style={SIPCStyles.flex}>
             <Surface
@@ -297,7 +346,7 @@ const InspectionCheckBox = ({ data, navigation }) => {
                     </View>
                 </View>
 
-                {/* ==========================CHECKBOX============================== */}
+                {/* ==========================CHECKBOX=== satisfactoryChecked=============== */}
                 <View
                     style={{
                         flexDirection: 'row',
@@ -320,7 +369,13 @@ const InspectionCheckBox = ({ data, navigation }) => {
                                     }}>
                                     <Checkbox
                                         status={satisfactoryChecked ? 'checked' : 'unchecked'}
-                                        onPress={handleCheck1}
+                                        onPress={() => {
+                                            console.log("data.room_item_id=>"+data.room_item_id);
+                                            console.log("data.room_id=>"+data.room_id);
+                                            console.log("inspectionTypeId=>"+Active);
+                                            console.log("conditionId=>"+0);
+                                            setSatisfactoryChecked(!satisfactoryChecked);
+                                        }}
                                     />
                                 </View>
                                 <View style={{ borderWidth: 1, borderColor: '#ccc' }} />
@@ -357,6 +412,7 @@ const InspectionCheckBox = ({ data, navigation }) => {
                             {data.conditions.map(conditions => (
                                 <CheckBox
                                     condition={conditions}
+                                    data={data}
                                     key={conditions.id}
                                 />
                             ))}

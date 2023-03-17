@@ -79,6 +79,7 @@ const CleaningInspections = ({ navigation, route }) => {
 
   const [listRooms, setListRooms] = useState([]);
 
+
   // ===================API CALLING==================================//
 
   const payload = JSON.stringify({
@@ -97,7 +98,6 @@ const CleaningInspections = ({ navigation, route }) => {
       )
       .then(
         response => {
-          // console.log('roomData.detected_condition=====.' +JSON.stringify(roomData));
           setRoomData(response);
           setIsLoading(false);
         },
@@ -108,48 +108,52 @@ const CleaningInspections = ({ navigation, route }) => {
       );
   }, [Active]);
 
-  // =================================FLOOR NAME =================================
- 
+  //Load Default Floor/Room/Item here
   useEffect(() => {
-    if (building) {
-      API.instance.post(`/floor-by-building-device?is_api=true`,
-        JSON.stringify({
-          appKey: CONFIG.appKey,
-          device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-          userId: user.id,
-          buildingId: building
-        })).then(
-          response => {
-          console.log('FLOOR DATA===(1)==.' +JSON.stringify(response.data));
-            setFloorList(response.data);
-            setError(false);
-            setErrorMessage("")
-          },
-          error => console.error(error),
-        );
-    }
-  }, [building]);
-  // =================================Room NAME =================================
-  useEffect(() => {
-    if (building && floor) {
-      API.instance.post(`/room-by-floor-device?is_api=true`,
-        JSON.stringify({
-          appKey: CONFIG.appKey,
-          device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-          userId: user.id,
-          buildingId: building,
-          floorId: floor,
-        })).then(
-          response => {
-          console.log('Room DATA====(2)=.' +JSON.stringify(response.data));
-            setRoomList(response.data);
-            setError(false);
-            setErrorMessage("")
-          },
-          error => console.error(error),
-        );
-    }
-  }, [building,floor]);
+    API.instance.post(`/load-floor-room-item-api?is_api=true`,
+      JSON.stringify({
+        appKey: CONFIG.appKey,
+        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+        userId: user.id,
+        buildingId: data.building_id,
+        floorId: data.floor_id,
+        roomId: data.room_id
+      })).then(
+        response => {
+          if (response.status == "success") {
+            setFloorList(response.floors);
+            setRoomList(response.rooms);
+            setItemList(response.items);
+          }
+          setError(false);
+          setErrorMessage("")
+        },
+        error => console.error(error),
+      );
+  }, []);
+
+  const loadRoomByFloor = () => {
+    // console.log("Load Rooms on changing floor");
+    // API.instance.post(`/room-by-floor-device?is_api=true`,
+    //     JSON.stringify({
+    //       appKey: CONFIG.appKey,
+    //       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+    //       userId: user.id,
+    //       buildingId: data.building_id,
+    //       floorId: floor,
+    //     })).then(
+    //       response => {
+    //         setRoomList(response.data);
+    //         setRoom(0);
+    //         setItem(0);
+    //         setError(false);
+    //         setErrorMessage("")
+    //       },
+    //       error => console.error(error),
+    //     );
+  }
+
+
 
   // =================================Item NAME =================================
   useEffect(() => {
@@ -158,9 +162,9 @@ const CleaningInspections = ({ navigation, route }) => {
         JSON.stringify({
           appKey: CONFIG.appKey,
           device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-          roomId: room, 
+          roomId: room,
         })).then(
-          response => {;
+          response => {
             setItemList(response.data);
             setError(false);
             setErrorMessage("")
@@ -169,10 +173,8 @@ const CleaningInspections = ({ navigation, route }) => {
         );
     }
   }, [room]);
-
-  //===============================ROOM LIST DATA
-
-
+  // Load Items based on room, call this api whenever we come from start/continue inspection or 
+  //we change any item from dropdown either from floor or room
   useEffect(() => {
     API.instance.post(`/list-items-by-room-api?is_api=true`,
       JSON.stringify({
@@ -193,6 +195,45 @@ const CleaningInspections = ({ navigation, route }) => {
       );
   }, [Active]);
 
+  //==================COMPLETE ROOM=============
+  const CompleteRoom = () => {
+    API.instance.post(`/mark-room-as-completed-api?is_api=true`,
+      JSON.stringify({
+        appKey: CONFIG.appKey,
+        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+        inspectionResultId: data.inspection_result_id,
+        roomId: room,
+
+      })).then(
+        response => {
+          if (response.status == "success") {
+
+          }
+          setError(false);
+          setErrorMessage("")
+        },
+        error => console.error(error),
+      );
+  }
+  //==================COMPLETE BUILDING=============
+  const CompleteBuilding = () => {
+    API.instance.post(`/mark-building-as-completed-api?is_api=true`,
+      JSON.stringify({
+        appKey: CONFIG.appKey,
+        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+        inspectionResultId: data.inspection_result_id,
+      })).then(
+        response => {
+          if (response.status == "success") {
+
+            navigation.navigate('Inspections')
+          }
+          setError(false);
+          setErrorMessage("")
+        },
+        error => console.error(error),
+      );
+  }
 
 
   return (
@@ -302,7 +343,7 @@ const CleaningInspections = ({ navigation, route }) => {
                   source={require('../assets/room.png')}
                   style={SIPCStyles.MainBuilding}
                 />
-                <TouchableOpacity>
+                <TouchableOpacity onPress={CompleteRoom}>
                   <Text style={[SIPCStyles.NormalFont, { paddingLeft: 10 }]}>
                     Complete Room
                   </Text>
@@ -316,7 +357,7 @@ const CleaningInspections = ({ navigation, route }) => {
                   source={require('../assets/building.png')}
                   style={SIPCStyles.MainBuilding}
                 />
-                <TouchableOpacity>
+                <TouchableOpacity onPress={CompleteBuilding}>
                   <Text style={[SIPCStyles.NormalFont, { paddingLeft: 10 }]}>
                     Complete Building{' '}
                   </Text>
@@ -350,7 +391,7 @@ const CleaningInspections = ({ navigation, route }) => {
                 { paddingLeft: 8, width: Width / 4.9, fontWeight: '800' },
               ]}
               numberOfLines={1}>
-              {floorName }
+              {floorName}
             </Text>
           </View>
 
@@ -509,7 +550,7 @@ const CleaningInspections = ({ navigation, route }) => {
                 setValue={setFloor}
                 setItems={setFloorList}
                 placeholder="Select Floor"
-
+                onChangeValue={loadRoomByFloor}
               />
             </View>
 
@@ -911,7 +952,10 @@ const CleaningInspections = ({ navigation, route }) => {
             <InspectionCheckBox
               data={item}
               key={index}
-              navigation={navigation} />
+              navigation={navigation}
+              routeData={data}
+              Active={Active}
+            />
           ))}
 
         </>)}
