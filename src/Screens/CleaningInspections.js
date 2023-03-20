@@ -198,12 +198,7 @@ const CleaningInspections = ({ navigation, route }) => {
       )
       .then(
         response => {
-          // console.log('response' + JSON.stringify(response));
-          // setRoomData(response);
-          // const loadRoomData = roomData
-          // setRoomData(loadRoomData)
-          // console.log('roomData' + JSON.stringify(roomData));
-          // console.log('loadRoomData' + JSON.stringify(loadRoomData));
+          setRoomData(response);
         },
         error => {
           console.error(error);
