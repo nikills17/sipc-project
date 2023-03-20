@@ -49,7 +49,7 @@ const CleaningInspections = ({ navigation, route }) => {
   const jsonUser = storage.getString('user');
   const user = JSON.parse(jsonUser);
 
-  const [roomData, setRoomData] = useState([])
+  let [roomData, setRoomData] = useState([])
   const [isLoading, setIsLoading] = useState(false);
 
   const completeRef = useRef();
@@ -79,77 +79,62 @@ const CleaningInspections = ({ navigation, route }) => {
 
   const [listRooms, setListRooms] = useState([]);
 
+
   // ===================API CALLING==================================//
 
-  const payload = JSON.stringify({
-    appKey: CONFIG.appKey,
-    device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-    inspectionResultId: data.inspection_result_id,
-    inspectionTypeId: data.inspection_type_id,
-    roomId: data.room_id,
-    userId: user.id,
-  });
+  const [comment, setComment] = useState('');
+
+
   useEffect(() => {
-    setIsLoading(true);
-    API.instance
-      .post(
-        `/room-summary-api?is_api=true`, payload
-      )
-      .then(
-        response => {
-          // console.log('roomData.detected_condition=====.' +JSON.stringify(roomData));
-          setRoomData(response);
-          setIsLoading(false);
-        },
-        error => {
-          console.error(error);
-          setIsLoading(false);
-        },
-      );
+    loadRoomSummary();
   }, [Active]);
 
-  // =================================FLOOR NAME =================================
- 
+  //Load Default Floor/Room/Item here
   useEffect(() => {
-    if (building) {
-      API.instance.post(`/floor-by-building-device?is_api=true`,
-        JSON.stringify({
-          appKey: CONFIG.appKey,
-          device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-          userId: user.id,
-          buildingId: building
-        })).then(
-          response => {
-          console.log('FLOOR DATA===(1)==.' +JSON.stringify(response.data));
-            setFloorList(response.data);
-            setError(false);
-            setErrorMessage("")
-          },
-          error => console.error(error),
-        );
-    }
-  }, [building]);
-  // =================================Room NAME =================================
-  useEffect(() => {
-    if (building && floor) {
-      API.instance.post(`/room-by-floor-device?is_api=true`,
-        JSON.stringify({
-          appKey: CONFIG.appKey,
-          device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-          userId: user.id,
-          buildingId: building,
-          floorId: floor,
-        })).then(
-          response => {
-          console.log('Room DATA====(2)=.' +JSON.stringify(response.data));
-            setRoomList(response.data);
-            setError(false);
-            setErrorMessage("")
-          },
-          error => console.error(error),
-        );
-    }
-  }, [building,floor]);
+    API.instance.post(`/load-floor-room-item-api?is_api=true`,
+      JSON.stringify({
+        appKey: CONFIG.appKey,
+        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+        userId: user.id,
+        buildingId: data.building_id,
+        floorId: data.floor_id,
+        roomId: data.room_id
+      })).then(
+        response => {
+          if (response.status == "success") {
+            setFloorList(response.floors);
+            setRoomList(response.rooms);
+            setItemList(response.items);
+          }
+          setError(false);
+          setErrorMessage("")
+        },
+        error => console.error(error),
+      );
+  }, []);
+
+  const loadRoomByFloor = () => {
+    // console.log("Load Rooms on changing floor");
+    // API.instance.post(`/room-by-floor-device?is_api=true`,
+    //     JSON.stringify({
+    //       appKey: CONFIG.appKey,
+    //       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+    //       userId: user.id,
+    //       buildingId: data.building_id,
+    //       floorId: floor,
+    //     })).then(
+    //       response => {
+    //         setRoomList(response.data);
+    //         setRoom(0);
+    //         setItem(0);
+    //         setError(false);
+    //         setErrorMessage("")
+    //       },
+    //       error => console.error(error),
+    //     );
+  }
+
+
 
   // =================================Item NAME =================================
   useEffect(() => {
@@ -158,9 +143,9 @@ const CleaningInspections = ({ navigation, route }) => {
         JSON.stringify({
           appKey: CONFIG.appKey,
           device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-          roomId: room, 
+          roomId: room,
         })).then(
-          response => {;
+          response => {
             setItemList(response.data);
             setError(false);
             setErrorMessage("")
@@ -169,11 +154,10 @@ const CleaningInspections = ({ navigation, route }) => {
         );
     }
   }, [room]);
-
-  //===============================ROOM LIST DATA
-
-
+  // Load Items based on room, call this api whenever we come from start/continue inspection or 
+  //we change any item from dropdown either from floor or room
   useEffect(() => {
+    setIsLoading(true);
     API.instance.post(`/list-items-by-room-api?is_api=true`,
       JSON.stringify({
         appKey: CONFIG.appKey,
@@ -187,12 +171,585 @@ const CleaningInspections = ({ navigation, route }) => {
         response => {
           setListRooms(response.data);
           setError(false);
-          setErrorMessage("")
+          setErrorMessage("");
+          setIsLoading(false);
         },
         error => console.error(error),
       );
   }, [Active]);
 
+
+
+
+
+  const loadRoomSummary = () => {
+    const payload = JSON.stringify({
+      appKey: CONFIG.appKey,
+      device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+      inspectionResultId: data.inspection_result_id,
+      inspectionTypeId: data.inspection_type_id,
+      roomId: data.room_id,
+      userId: user.id,
+    });
+
+    API.instance
+      .post(
+        `/room-summary-api?is_api=true`, payload
+      )
+      .then(
+        response => {
+          // console.log('response' + JSON.stringify(response));
+          // setRoomData(response);
+          // const loadRoomData = roomData
+          // setRoomData(loadRoomData)
+          // console.log('roomData' + JSON.stringify(roomData));
+          // console.log('loadRoomData' + JSON.stringify(loadRoomData));
+        },
+        error => {
+          console.error(error);
+        },
+      );
+  }
+
+
+
+  //==================COMPLETE ROOM=============
+  const CompleteRoom = () => {
+    API.instance.post(`/mark-room-as-completed-api?is_api=true`,
+      JSON.stringify({
+        appKey: CONFIG.appKey,
+        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+        inspectionResultId: data.inspection_result_id,
+        roomId: room,
+
+      })).then(
+        response => {
+          if (response.status == "success") {
+
+          }
+          setError(false);
+          setErrorMessage("")
+        },
+        error => console.error(error),
+      );
+  }
+  //==================COMPLETE BUILDING=============
+  const CompleteBuilding = () => {
+    API.instance.post(`/mark-building-as-completed-api?is_api=true`,
+      JSON.stringify({
+        appKey: CONFIG.appKey,
+        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+        inspectionResultId: data.inspection_result_id,
+      })).then(
+        response => {
+          if (response.status == "success") {
+
+            navigation.navigate('Inspections')
+          }
+          setError(false);
+          setErrorMessage("")
+        },
+        error => console.error(error),
+      );
+  }
+
+  // ===============================save api ==========
+
+  const SaveConditionCheckbox = (isChecked, condition) => {
+
+    const payload = JSON.stringify({
+      appKey: CONFIG.appKey,
+      device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+      inspectionResultId: data.inspection_result_id,
+      roomId: room,
+      user_id: user.id,
+      roomItemId: condition.room_item_id,
+      conditionId: condition.id,
+      inspectionTypeId: data.inspection_type_id,
+      isChecked: isChecked ? "1" : "0"
+
+    })
+
+    console.log(payload);
+    loadRoomSummary();
+    // API.instance.post(`/save-inspection-item-condition-api?is_api=true`,
+    // payload
+    // ).then(
+    //   response => {
+    //     if (response.status == "success") {
+    //       loadRoomSummary();
+    //     }
+    //     setError(false);
+    //     setErrorMessage("")
+    //   },
+    //   error => console.error(error),
+    // );
+  }
+
+  const saveComment = (condition) => {
+    const payload = JSON.stringify({
+      appKey: CONFIG.appKey,
+      device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+      roomId: room,
+      roomItemId: condition.room_item_id,
+      inspectionResultId: data.inspection_result_id,
+      inspectionTypeId: Active,
+      userId: user.id,
+      comment: comment,
+      conditionId: condition.id,
+    })
+
+    console.log('payload===>' + payload);
+
+    // useEffect(() => {
+    //   API.instance.post(`/save-condition-comment-image-api?is_api=true`,
+    //     payload).then(
+    //       response => {
+    //         setListRooms(response.data);
+    //         setError(false);
+    //         setErrorMessage("");
+    //       },
+    //       error => console.error(error),
+    //     );
+    // }, [Active]);
+  }
+
+
+
+
+
+
+  // =========================new 
+
+  const InspectionCheckBox = ({ data, navigation, routeData, }) => {
+
+    const storage = new MMKV();
+    const jsonUser = storage.getString('user');
+    const user = JSON.parse(jsonUser);
+
+    const Width = Dimensions.get('window').width;
+    const Height = Dimensions.get('window').height;
+
+    const [satisfactoryChecked, setSatisfactoryChecked] = useState(false);
+
+    // const satisfactoryValue = satisfactoryChecked ? 1 : 0;
+    // // console.log('satisfactoryChecked(8)====>' + satisfactoryValue);
+
+
+    const [images, setImages] = useState([]);
+    const [numColumns, setNumColumns] = useState(3);
+    const maxImages = 10;
+
+    const openCamera = () => {
+      ImagePicker.openCamera({
+        width: 300,
+        height: 400,
+        //cropping: true,
+      }).then(image => {
+        if (images.length + 1 > maxImages) {
+          alert(`Max limit reached: ${maxImages}`);
+          return;
+        }
+        setImages([...images, { path: image.path }]);
+      });
+    };
+
+    const pickImage = () => {
+      ImagePicker.openPicker({
+        multiple: true,
+        maxFiles: maxImages - images.length,
+      })
+        .then(newImages => {
+          if (images.length + newImages.length > maxImages) {
+            alert(`Max limit reached: ${maxImages}`);
+            return;
+          }
+          setImages([...images, ...newImages.map(i => ({ path: i.path }))]);
+        })
+        .catch(error => console.error(error));
+    };
+
+    const deleteImage = index => {
+      setImages(images.filter((_, i) => i !== index));
+    };
+
+
+
+    // const handleCheck1 = () => {
+    //     if (conditionChecked) {
+    //         setConditionChecked(false);
+    //     }
+    //     setSatisfactoryChecked(!satisfactoryChecked);
+    // };
+
+    // const handleCheck2 = () => {
+    //     if (satisfactoryChecked) {
+    //         setSatisfactoryChecked(false);
+    //     }
+    //     setConditionChecked(!conditionChecked);
+    // };
+
+
+    // -------------------CHECKBOX ---------------------------
+    const CheckBox = ({ condition, }) => {
+      const [conditionChecked, setConditionChecked] = useState(false);
+      const [isOpen, setIsOpen] = useState(false);
+
+
+
+      const onSubmit = () => {
+        if (comment === '') {
+          Alert.alert('Comment is Required')
+        }
+        console.log('submit press')
+        saveComment(condition);
+        setIsOpen(true);
+      }
+
+
+      const onCommentImagePress = () => {
+        setConditionChecked(true);
+        setIsOpen(!isOpen);
+      };
+
+      const onPress = () => {
+        if (!conditionChecked) {
+          setConditionChecked(true);
+          setIsOpen(true);
+        }
+      };
+
+      const checkBoxPress = () => {
+        var isChecked = false;
+        if (!conditionChecked) {
+          setConditionChecked(true);
+          isChecked = true;
+          setIsOpen(true);
+        } else if (conditionChecked) {
+          setConditionChecked(false);
+          setIsOpen(false);
+        }
+
+        SaveConditionCheckbox(isChecked, condition);
+
+        // console.log('data.user_id(1)====>' + user.id);
+        // console.log('data.room_item_id(2)====>' + condition.room_item_id);
+        // console.log('data.room_id(3)====>' + routeData.room_id);
+        // console.log('data.conditionId(4)====>' + condition.id);
+        // console.log('data.inspectionResultId(5)====>' + routeData.inspection_result_id);
+        // console.log('data.inspectionTypeId(6)====>' + Active);
+        // console.log('data.checked(7)====>' + value);
+
+      }
+
+      return (
+        <>
+          <View
+            style={[
+              SIPCStyles.CheckboxView,
+              {
+                borderTopRightRadius: 10,
+                borderTopLeftRadius: 10,
+                borderBottomLeftRadius: isOpen === true ? 0 : 10,
+                borderBottomRightRadius: isOpen === true ? 0 : 10,
+              },
+            ]}>
+            <View style={{ padding: 10, alignSelf: 'center' }}>
+              <Checkbox
+                status={conditionChecked ? 'checked' : 'unchecked'}
+                onPress={checkBoxPress}
+              />
+            </View>
+
+            <View style={{ borderWidth: 1, borderColor: '#ccc' }} />
+
+            <Text
+              style={[
+                SIPCStyles.checkboxFont,
+                { paddingLeft: 10, alignSelf: 'center' },
+              ]}>
+              {condition.condition_name}
+            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                position: 'absolute',
+                right: 0,
+                alignSelf: 'center',
+              }}>
+              {isOpen === true ? (
+                <>
+                  <TouchableWithoutFeedback
+                    onPress={() => {
+                      setIsOpen(!isOpen);
+                    }}>
+                    <Text
+                      style={[
+                        SIPCStyles.checkboxFont,
+                        { marginHorizontal: 10 },
+                      ]}>
+                      Cancel
+                    </Text>
+                  </TouchableWithoutFeedback>
+
+                  <TouchableWithoutFeedback
+                    onPress={() => {
+                      onSubmit(condition)
+                    }}>
+                    <Text
+                      style={[
+                        SIPCStyles.checkboxFont,
+                        { color: '#199be2', marginHorizontal: 10 },
+                      ]}>
+                      Submit
+                    </Text>
+                  </TouchableWithoutFeedback>
+                </>
+              ) : (
+                <>
+                  <TouchableWithoutFeedback
+                    onPress={conditionChecked ? onCommentImagePress : onPress}
+                  >
+                    <Image
+                      source={require('../assets/msg.png')}
+                      style={SIPCStyles.commentImage}
+                    />
+                  </TouchableWithoutFeedback>
+
+                  <TouchableWithoutFeedback
+                    onPress={conditionChecked ? onCommentImagePress : onPress}
+                  >
+                    <Image
+                      source={require('../assets/img.png')}
+                      style={SIPCStyles.commentImage}
+                    />
+                  </TouchableWithoutFeedback>
+                </>
+              )}
+            </View>
+          </View>
+
+          {isOpen === true ? (
+            <>
+              <View style={{ marginHorizontal: 20 }}>
+                <TextInput
+                  mode="text"
+                  placeholder="Enter Your Comment"
+                  numberOfLines={8}
+                  multiline={true}
+                  underlineColor="transparent"
+                  theme={{ colors: { primary: '#cccccc' } }}
+                  style={SIPCStyles.TextInput1}
+                  value={comment}
+                  onChangeText={setComment}
+                />
+
+                <View
+                  style={{
+                    borderWidth: 1,
+                    paddingBottom: 10,
+                    borderColor: '#ccc',
+                    borderBottomLeftRadius: 10,
+                    borderBottomRightRadius: 10,
+                    borderTopLeftRadius: 0,
+                    borderTopRightRadius: 0,
+                  }}>
+                  <Card style={SIPCStyles.CameraImageCard}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-around',
+                      }}>
+                      <TouchableWithoutFeedback onPress={openCamera}>
+                        <Image
+                          source={require('../assets/camera.png')}
+                          style={SIPCStyles.cameraImage}
+                        />
+                      </TouchableWithoutFeedback>
+
+                      <View
+                        style={{ borderWidth: 1, borderColor: '#e6e6e6' }}
+                      />
+
+                      <TouchableWithoutFeedback onPress={pickImage}>
+                        <Image
+                          source={require('../assets/gallery.png')}
+                          style={SIPCStyles.cameraImage}
+                        />
+                      </TouchableWithoutFeedback>
+                    </View>
+                  </Card>
+
+                  <View
+                    style={{
+                      marginTop: 10,
+                      flexDirection: 'row',
+                      flexWrap: Width > 500 ? 'wrap' : 'wrap',
+                      flex: 1,
+                    }}>
+                    <ScrollView
+                      nestedScrollEnabled={true}
+                      horizontal={true}>
+                      <FlatList
+                        numColumns={numColumns}
+                        data={images}
+                        keyExtractor={(item, index) => index.toString()}
+                        renderItem={({ item, index }) => (
+                          <View style={{ position: 'relative' }}>
+                            <Image
+                              source={{ uri: item.path }}
+                              style={SIPCStyles.CameraClickImage}
+                            />
+                            <TouchableOpacity
+                              style={SIPCStyles.crossImage}
+                              onPress={() => deleteImage(index)}>
+                              <Text
+                                style={{
+                                  color: 'white',
+                                  fontWeight: 'bold',
+                                }}>
+                                X
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      />
+                    </ScrollView>
+                  </View>
+                </View>
+              </View>
+            </>
+          ) : null}
+
+        </>
+      )
+    }
+
+    return (
+      <View style={SIPCStyles.flex}>
+        <Surface
+          elevation={4}
+          style={{
+            marginTop: 25,
+            backgroundColor: 'white',
+            paddingBottom: 20,
+          }}>
+          <View style={{ backgroundColor: '#fffcf8', padding: 15 }}>
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={[SIPCStyles.BoldFont, { paddingHorizontal: 15 }]}>
+                {data.item_name}
+              </Text>
+            </View>
+
+            <View style={{ flexDirection: 'row' }}>
+              <Text
+                style={[SIPCStyles.NormalFont, { paddingHorizontal: 15 }]}>
+                {data.conditions.length} {data.conditions.length === 1 ? "Condition" : "Conditions"} |
+              </Text>
+              <Text style={SIPCStyles.NormalFont}>0 Issues</Text>
+            </View>
+          </View>
+
+          {/* ==========================CHECKBOX=== satisfactoryChecked=============== */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'flex-start',
+              flexWrap: Width > 500 ? 'wrap' : 'wrap',
+            }}>
+            <View
+              style={{
+                flexDirection: 'column',
+                width: Width > 500 ? '50%' : '100%',
+              }}>
+              <View style={{ flexDirection: 'column' }}>
+                {/* <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}> */}
+                <View style={SIPCStyles.CheckboxView}>
+                  <View
+                    style={{
+                      padding: 10,
+                      alignItems: 'center',
+                      alignSelf: 'center',
+                    }}>
+                    <Checkbox
+                      status={satisfactoryChecked ? 'checked' : 'unchecked'}
+                      onPress={() => {
+                        // console.log("data.room_item_id=>" + data.room_item_id);
+                        // console.log("data.room_id=>" + data.room_id);
+                        // console.log("inspectionTypeId=>" + Active);
+                        // console.log("conditionId=>" + 0);
+                        // loadRoomSummary();
+                        setSatisfactoryChecked(!satisfactoryChecked);
+                      }}
+                    />
+                  </View>
+                  <View style={{ borderWidth: 1, borderColor: '#ccc' }} />
+
+                  <View
+                    style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text
+                      style={[
+                        SIPCStyles.checkboxFont,
+                        { paddingLeft: 10, color: '#00aa34' },
+                      ]}>
+                      Satisfactory
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+            {/* ================= */}
+            <View
+              style={{
+                flexDirection: 'column',
+                width: Width > 500 ? '50%' : '100%',
+              }}>
+              <View style={{ flexDirection: 'column', }}>
+
+
+                {data.conditions.map(conditions => (
+                  <CheckBox
+                    condition={conditions}
+                    data={data}
+                    key={conditions.id}
+                  />
+                ))}
+
+              </View>
+            </View>
+          </View>
+        </Surface>
+      </View>
+    )
+  }
+
+  // =========================CLEANING INSPECTIONS RETURN    
+
+
+  const checkScore = score => {
+    if (score > 90) {
+      return (
+        <Text style={[SIPCStyles.inspectionScore, SIPCStyles.textSuccess]}>
+          {score}%
+        </Text>
+      );
+    } else if (score > 80) {
+      return (
+        <Text style={[SIPCStyles.inspectionScore, SIPCStyles.textWarning]}>
+          {score}%
+        </Text>
+      );
+    } else {
+      return (
+        <Text style={[SIPCStyles.inspectionScore, SIPCStyles.textDanger]}>
+          {score}%
+        </Text>
+      );
+    }
+  };
+
+  let SCORE = roomData.room_quality;
+  SCORE = parseFloat(SCORE).toFixed(2);
 
 
   return (
@@ -302,7 +859,7 @@ const CleaningInspections = ({ navigation, route }) => {
                   source={require('../assets/room.png')}
                   style={SIPCStyles.MainBuilding}
                 />
-                <TouchableOpacity>
+                <TouchableOpacity onPress={CompleteRoom}>
                   <Text style={[SIPCStyles.NormalFont, { paddingLeft: 10 }]}>
                     Complete Room
                   </Text>
@@ -316,7 +873,7 @@ const CleaningInspections = ({ navigation, route }) => {
                   source={require('../assets/building.png')}
                   style={SIPCStyles.MainBuilding}
                 />
-                <TouchableOpacity>
+                <TouchableOpacity onPress={CompleteBuilding}>
                   <Text style={[SIPCStyles.NormalFont, { paddingLeft: 10 }]}>
                     Complete Building{' '}
                   </Text>
@@ -350,7 +907,7 @@ const CleaningInspections = ({ navigation, route }) => {
                 { paddingLeft: 8, width: Width / 4.9, fontWeight: '800' },
               ]}
               numberOfLines={1}>
-              {floorName }
+              {floorName}
             </Text>
           </View>
 
@@ -509,7 +1066,7 @@ const CleaningInspections = ({ navigation, route }) => {
                 setValue={setFloor}
                 setItems={setFloorList}
                 placeholder="Select Floor"
-
+                onChangeValue={loadRoomByFloor}
               />
             </View>
 
@@ -850,13 +1407,9 @@ const CleaningInspections = ({ navigation, route }) => {
                   flexShrink: 1,
                 }}>
 
-                <Text style={[SIPCStyles.inspectionScore, SIPCStyles.BoldFont,
-                roomData.room_quality > 90 ? SIPCStyles.textSuccess :
-                  roomData.room_quality > 80 ? SIPCStyles.textWarning :
-                    SIPCStyles.textDanger]}>{roomData.room_quality}%</Text>
-
-
+                <Text style={SIPCStyles.inspectionScore}>{checkScore(SCORE)}</Text>
                 <Text style={[SIPCStyles.lowFont, {}]}>Room Quality</Text>
+
               </View>
 
               <View
@@ -904,19 +1457,37 @@ const CleaningInspections = ({ navigation, route }) => {
         )}
 
 
-        {isLoading ? (<>
+        {/* {isLoading ? (<>
           <Loader />
         </>) : (<>
           {listRooms.map((item, index) => (
             <InspectionCheckBox
               data={item}
               key={index}
-              navigation={navigation} />
+              navigation={navigation}
+              routeData={data}
+            />
           ))}
 
-        </>)}
+        </>)} */}
 
+        <>
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <>
+              {listRooms.map((item, index) => (
+                <InspectionCheckBox
+                  data={item}
+                  key={index}
+                  navigation={navigation}
+                  routeData={data}
 
+                />
+              ))}
+            </>
+          )}
+        </>
 
         {/* =================================================================== */}
       </ScrollView>
