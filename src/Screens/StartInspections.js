@@ -140,12 +140,11 @@ const StartInspections = ({ navigation, route }) => {
     API.instance
       .post(
         '/start-inspection-validate-api?is_api=true',
-        params,).then(
+        params).then(
           response => {
             setError(false);
             setErrorMessage("");
             if (response.status === "success") {
-              console.log('response.data====>' + JSON.stringify(response.data));
               navigation.navigate('CleaningInspections', {
                 data: response.data,
                 buildingName: buildingList.find(el => el.id === building)
