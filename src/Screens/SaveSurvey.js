@@ -25,7 +25,6 @@ import ImagePicker from 'react-native-image-crop-picker';
 import { responsiveScreenFontSize } from 'react-native-responsive-dimensions';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import { MMKV } from 'react-native-mmkv';
-
 import SIPCStyles from './styles';
 import API from '../utility/api';
 import Loader from '../component/activityindicator';
