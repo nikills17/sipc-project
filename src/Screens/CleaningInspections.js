@@ -57,6 +57,8 @@ const CleaningInspections = ({navigation, route}) => {
 
   const completeRef = useRef();
   const allItemsRef = useRef();
+  const checkBoxRef = useRef([]);
+  const checkBoxCommentRef = useRef([]);
 
   const [showFloorDropDown, setShowFloorDropDown] = useState(false);
   const [floor, setFloor] = useState(data.floor_id.toString());
@@ -389,8 +391,8 @@ const CleaningInspections = ({navigation, route}) => {
   };
 
   const CheckBox = ({condition, setSatisfactory, satisfactory}) => {
-    const [conditionChecked, setConditionChecked] = useState(false);
-    const [isOpen, setIsOpen] = useState(false);
+    const [conditionChecked, setConditionChecked] = useState(checkBoxRef.current.find(el => el === condition?.id));
+    const [isOpen, setIsOpen] = useState(checkBoxRef.current.find(el => el === condition?.id) && !(checkBoxCommentRef.current.find(el => el === condition?.id)));
     const [comment, setComment] = useState('');
     const [images, setImages] = useState([]);
 
@@ -418,7 +420,7 @@ const CleaningInspections = ({navigation, route}) => {
         .then(
           response => {
             if (response.status == 'success') {
-              // loadSummary();
+              loadSummary();
             }
           },
           error => console.error(error),
@@ -450,9 +452,11 @@ const CleaningInspections = ({navigation, route}) => {
     const onSubmit = () => {
       if (comment === '') {
         Alert.alert('Comment is Required');
+        setIsOpen(true);
+      } else {
+        saveComment(condition);
+        checkBoxCommentRef.current.push(condition?.id)
       }
-      saveComment(condition);
-      setIsOpen(true);
     };
 
     const onCommentImagePress = () => {
@@ -464,6 +468,9 @@ const CleaningInspections = ({navigation, route}) => {
       if (!conditionChecked) {
         setConditionChecked(true);
         setIsOpen(true);
+        // checkBoxRef.current.push()
+      } else {
+
       }
     };
 
@@ -480,11 +487,14 @@ const CleaningInspections = ({navigation, route}) => {
       if (conditionChecked) {
         setConditionChecked(false);
         setIsOpen(false);
+        checkBoxRef.current = checkBoxRef.current.filter(el => el !== condition?.id);
+        checkBoxCommentRef.current = checkBoxCommentRef.current.filter(el => el !== condition?.id);
       } else {
         setConditionChecked(true);
         setSatisfactory(false);
         isChecked = true;
         setIsOpen(true);
+        checkBoxRef.current.push(condition.id)
       }
 
       SaveConditionCheckbox(isChecked, condition);
