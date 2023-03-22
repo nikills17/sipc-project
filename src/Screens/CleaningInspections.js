@@ -11,6 +11,7 @@ import {
   Modal,
   Dimensions,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import {
@@ -54,6 +55,7 @@ const CleaningInspections = ({navigation, route}) => {
   const [roomData, setRoomData] = useState([]);
   const [listRooms, setListRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [reloading, setReloading] = useState(false);
 
   const completeRef = useRef();
   const allItemsRef = useRef();
@@ -234,6 +236,7 @@ const CleaningInspections = ({navigation, route}) => {
   };
 
   const loadSummary = () => {
+    setReloading(true);
     const newPayload = JSON.stringify({
       appKey: CONFIG.appKey,
       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
@@ -248,8 +251,10 @@ const CleaningInspections = ({navigation, route}) => {
         {
           setRoomData(response);
         }
+        setReloading(false);
       },
       error => {
+        setReloading(false);
         console.error(error);
       },
     );
@@ -391,19 +396,25 @@ const CleaningInspections = ({navigation, route}) => {
   };
 
   const CheckBox = ({condition, setSatisfactory, satisfactory}) => {
-    const [conditionChecked, setConditionChecked] = useState(checkBoxRef.current.find(el => el === condition?.id));
-    const [isOpen, setIsOpen] = useState(checkBoxRef.current.find(el => el === condition?.id) && !(checkBoxCommentRef.current.find(el => el === condition?.id)));
+    const [conditionChecked, setConditionChecked] = useState(
+      checkBoxRef.current.find(el => el === condition?.id),
+    );
+    const [isOpen, setIsOpen] = useState(
+      checkBoxRef.current.find(el => el === condition?.id) &&
+        !checkBoxCommentRef.current.find(el => el === condition?.id),
+    );
     const [comment, setComment] = useState('');
     const [images, setImages] = useState([]);
 
     useEffect(() => {
-      if(satisfactory) {
+      if (satisfactory) {
         setConditionChecked(false);
         setIsOpen(false);
       }
-    }, [satisfactory])
+    }, [satisfactory]);
 
     const SaveConditionCheckbox = (isChecked, condition) => {
+      setReloading(true);
       const payload = JSON.stringify({
         appKey: CONFIG.appKey,
         device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
@@ -455,7 +466,7 @@ const CleaningInspections = ({navigation, route}) => {
         setIsOpen(true);
       } else {
         saveComment(condition);
-        checkBoxCommentRef.current.push(condition?.id)
+        checkBoxCommentRef.current.push(condition?.id);
       }
     };
 
@@ -470,7 +481,6 @@ const CleaningInspections = ({navigation, route}) => {
         setIsOpen(true);
         // checkBoxRef.current.push()
       } else {
-
       }
     };
 
@@ -487,14 +497,18 @@ const CleaningInspections = ({navigation, route}) => {
       if (conditionChecked) {
         setConditionChecked(false);
         setIsOpen(false);
-        checkBoxRef.current = checkBoxRef.current.filter(el => el !== condition?.id);
-        checkBoxCommentRef.current = checkBoxCommentRef.current.filter(el => el !== condition?.id);
+        checkBoxRef.current = checkBoxRef.current.filter(
+          el => el !== condition?.id,
+        );
+        checkBoxCommentRef.current = checkBoxCommentRef.current.filter(
+          el => el !== condition?.id,
+        );
       } else {
         setConditionChecked(true);
         setSatisfactory(false);
         isChecked = true;
         setIsOpen(true);
-        checkBoxRef.current.push(condition.id)
+        checkBoxRef.current.push(condition.id);
       }
 
       SaveConditionCheckbox(isChecked, condition);
@@ -1458,6 +1472,21 @@ const CleaningInspections = ({navigation, route}) => {
           </Surface>
         </View>
       </RBSheet>
+      {reloading && (
+        <View
+          style={{
+            position: 'absolute',
+            height: height,
+            width: width,
+            backgroundColor: '#00000088'
+          }}>
+          <ActivityIndicator
+            style={{position: 'absolute', top: height / 2, right: width / 2}}
+            color={'#3a7fc4'}
+            size={Platform.OS === 'ios' ? 'large' : 50}
+          />
+        </View>
+      )}
     </View>
   );
 };
