@@ -25,7 +25,6 @@ import ImagePicker from 'react-native-image-crop-picker';
 import { responsiveScreenFontSize } from 'react-native-responsive-dimensions';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import { MMKV } from 'react-native-mmkv';
-
 import SIPCStyles from './styles';
 import API from '../utility/api';
 import Loader from '../component/activityindicator';
@@ -108,6 +107,7 @@ const SaveSurvey = ({ navigation, route }) => {
     API.instance
       .upload('/upload-survey-image-api?is_api=true', data)
       .then(response => {
+        console.log(response);
         if (response.status === 'success') {
           const imageName = response.uploaded_url;
           setImageNames([...imageNames, imageName]);
