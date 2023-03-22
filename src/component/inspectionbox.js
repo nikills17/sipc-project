@@ -20,9 +20,19 @@ import {
 import SIPCStyles from '../screens/styles';
 import Moment from 'moment';
 import { Col, Grid } from 'react-native-easy-grid';
+import API from '../utility/api';
+import { CONFIG } from '../utility/config';
+import { MMKV } from 'react-native-mmkv'
+export const storage = new MMKV();
 
-const InspectionBox = ({ data, navigation }) => {
- 
+
+
+
+const InspectionBox = ({ data, navigation, setError, setErrorMessage }) => {
+
+  const jsonUser = storage.getString('user')
+  const user = JSON.parse(jsonUser);
+
   const [Show, setShow] = useState(false);
 
   const checkScore = score => {
@@ -49,6 +59,41 @@ const InspectionBox = ({ data, navigation }) => {
 
   let SCORE = data.received_score;
   SCORE = parseFloat(SCORE).toFixed(2);
+
+
+  const params = JSON.stringify({
+    appKey: CONFIG.appKey,
+    device_id: "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
+    buildingId: data.building_id,
+    inspectionResultId: data.id,
+    inspectionTypeId:'1',
+    userId: user.id,
+  });
+  const continuePendingInspection = () => {
+    API.instance
+      .post(
+        '/pending-inspection-api?is_api=true',
+        params).then(
+          response => {
+            if (response.status === "success") {
+              navigation.navigate('CleaningInspections', {
+                buildingName: response.buildingName,
+                floorName: response.floorName,
+                roomName: response.roomName,
+              }
+              )
+            } else {
+              setError(true);
+              setErrorMessage(response.error);
+            }
+          },
+          error => {
+            console.error(error);
+          },
+        );
+  }
+
+
 
   return (
     <View>
@@ -92,7 +137,7 @@ const InspectionBox = ({ data, navigation }) => {
           </Col>
 
           <Col size={16} style={{ alignItems: 'center' }}>
-            <TouchableWithoutFeedback>
+            <TouchableWithoutFeedback onPress={() => continuePendingInspection()} >
               {data.is_completed == '1' ? (
                 <Image
                   source={require('../assets/share.png')}

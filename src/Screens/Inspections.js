@@ -33,6 +33,8 @@ const Inspections = ({ navigation }) => {
   const [totalCount, setTotalCount] = useState();
   const [isLoading, setIsLoading] = useState(false);
 
+  const [error, setError] = useState(false);
+  const [errorMsg, setErrorMessage] = useState('');
 
 
   const [dataLoading, setDataLoading] = useState(false);
@@ -57,6 +59,7 @@ const Inspections = ({ navigation }) => {
           '/inspection-list-device?is_api=true',
           params,).then(
             response => {
+              // console.log('response==>' + JSON.stringify(response));
               setIsLoading(false);
               setData(response.data);
               setTotalCount(response.totalCount);
@@ -229,7 +232,7 @@ const Inspections = ({ navigation }) => {
         ) : totalCount > 0 ? (
           <>
             {data.map((item, index) => (
-              <InspectionBox data={item} navigation={navigation} key={index} Active={Active} />
+              <InspectionBox data={item} navigation={navigation} key={index} Active={Active} setErrorMessage={setErrorMessage} setError={setError}/>
             ))}
             {dataLoading && <Loader marginTop={10} />}
           </>

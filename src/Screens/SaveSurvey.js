@@ -107,6 +107,7 @@ const SaveSurvey = ({ navigation, route }) => {
     API.instance
       .upload('/upload-survey-image-api?is_api=true', data)
       .then(response => {
+        console.log(response);
         if (response.status === 'success') {
           const imageName = response.uploaded_url;
           setImageNames([...imageNames, imageName]);

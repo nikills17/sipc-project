@@ -37,8 +37,8 @@ import { MMKV } from 'react-native-mmkv';
 import InspectionCheckBox from '../component/inspectioncheckbox';
 import Loader from '../component/activityindicator';
 
-const CleaningInspections = ({ navigation, route }) => {
-  const { data, floorName, roomName, buildingName, building } = route?.params;
+const CleaningInspections = ({ navigation, route, condition }) => {
+  const { data, floorName, roomName, buildingName} = route?.params;
 
   const storage = new MMKV();
   const jsonUser = storage.getString('user');
@@ -69,6 +69,8 @@ const CleaningInspections = ({ navigation, route }) => {
   const [showItemDropDown, setShowItemDropDown] = useState(false);
   const [item, setItem] = useState(0);
   const [itemList, setItemList] = useState([]);
+
+
 
   useEffect(() => {
     setIsLoading(true);
@@ -128,7 +130,7 @@ const CleaningInspections = ({ navigation, route }) => {
           appKey: CONFIG.appKey,
           device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
           roomId: room,
-          buildingId: building,
+          buildingId: data.building_id,
           inspectionResultId: data.inspection_result_id,
           inspectionTypeId: active,
           userId: user.id,
@@ -136,6 +138,7 @@ const CleaningInspections = ({ navigation, route }) => {
       )
       .then(
         response => {
+          console.log('response...' + JSON.stringify(response));
           if (response?.status === 'success') {
             setListRooms(response?.data);
             setIsLoading(false);
@@ -305,43 +308,135 @@ const CleaningInspections = ({ navigation, route }) => {
       );
   };
 
- 
+  const saveComment = (condition,comment) => {
+    const payload = JSON.stringify({
+      appKey: CONFIG.appKey,
+      device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+      roomItemId: condition.room_item_id,
+      inspectionResultId: data.inspection_result_id,
+      inspectionTypeId: active,
+      userId: user.id,
+      comment: comment,
+      conditionId: condition.id,
+    });
+    console.log(payload);
+    API.instance
+      .post(`/save-condition-comment-api?is_api=true`, payload)
+      .then(
+        response => {
+          console.log(response);
+          if (response.status === "failed") {
+            setError(response.error)
+          }
+        },
+        error => console.error(error),
+      );
+  };
+
+
+  const uploadImage = (images, imageNames, setImageNames, condition) => {
+    if (!images) return;
+    const ImageData = new FormData();
+    ImageData.append('appKey', CONFIG.appKey);
+    ImageData.append('device_id', '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1');
+    ImageData.append('orgId', user.orgId);
+    ImageData.append('inspectionTypeId', active);
+    ImageData.append('inspectionResultId', data.inspection_result_id);
+    ImageData.append('conditionId', condition.id);
+    ImageData.append('roomItemId', condition.room_item_id);
+    ImageData.append('file', {
+      name: 'image.png',
+      fileName: 'image',
+      type: 'image/png',
+      uri:
+        Platform.OS === 'android'
+          ? images
+          : images.replace('file://', ''),
+    });
+    console.log('data====>' + JSON.stringify(ImageData))
+
+    API.instance
+      .upload('/upload-condition-image-api?is_api=true', ImageData)
+      .then(response => {
+        console.log('response' + JSON.stringify(response));
+        if (response.status === 'success') {
+          setImageNames([...imageNames, response.uploaded_url]);
+        }
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
+
+  const openCamera = (imageNames, setImageNames, condition) => {
+    ImagePicker.openCamera({
+      width: 300,
+      height: 400,
+    }).then(
+      image => {
+        if (imageNames.length + 1 > maxImages) {
+          alert(`Max limit reached: ${maxImages}`);
+          return;
+        }
+        uploadImage(image.path, imageNames, setImageNames, condition);
+      },
+      error => {
+        console.error(error);
+      },
+    );
+  };
+
+  const pickImage = (imageNames, setImageNames, condition) => {
+    ImagePicker.openPicker({})
+      .then(image => {
+        if (imageNames.length + 1 > maxImages) {
+          alert(`Max limit reached: ${maxImages}`);
+          return;
+        }
+        uploadImage(image.path, imageNames, setImageNames, condition);
+      })
+      .catch(error => console.error(error));
+  };
+
+  const deleteImage = index => {
+    //setImages(images.filter((_, i) => i !== index));
+  };
 
   // ==============================================
   const [numColumns, setNumColumns] = useState(3);
   const maxImages = 10;
 
-  const openCamera = (images, setImages) => {
-    ImagePicker.openCamera({
-      width: 300,
-      height: 400,
-    }).then(image => {
-      if (images.length + 1 > maxImages) {
-        alert(`Max limit reached: ${maxImages}`);
-        return;
-      }
-      setImages([...images, { path: image.path }]);
-    });
-  };
+  // const openCamera = (images, setImages) => {
+  //   ImagePicker.openCamera({
+  //     width: 300,
+  //     height: 400,
+  //   }).then(image => {
+  //     if (images.length + 1 > maxImages) {
+  //       alert(`Max limit reached: ${maxImages}`);
+  //       return;
+  //     }
+  //     setImages([...images, { path: image.path }]);
+  //   });
+  // };
 
-  const pickImage = (images, setImages) => {
-    ImagePicker.openPicker({
-      multiple: true,
-      maxFiles: maxImages - images.length,
-    })
-      .then(newImages => {
-        if (images.length + newImages.length > maxImages) {
-          alert(`Max limit reached: ${maxImages}`);
-          return;
-        }
-        setImages([...images, ...newImages.map(i => ({ path: i.path }))]);
-      })
-      .catch(error => console.error(error));
-  };
+  // const pickImage = (images, setImages) => {
+  //   ImagePicker.openPicker({
+  //     multiple: true,
+  //     maxFiles: maxImages - images.length,
+  //   })
+  //     .then(newImages => {
+  //       if (images.length + newImages.length > maxImages) {
+  //         alert(`Max limit reached: ${maxImages}`);
+  //         return;
+  //       }
+  //       setImages([...images, ...newImages.map(i => ({ path: i.path }))]);
+  //     })
+  //     .catch(error => console.error(error));
+  // };
 
-  const deleteImage = (index, images, setImages) => {
-    setImages(images.filter((_, i) => i !== index));
-  };
+  // const deleteImage = (index, images, setImages) => {
+  //   setImages(images.filter((_, i) => i !== index));
+  // };
 
   // ==========================================
 
@@ -358,6 +453,9 @@ const CleaningInspections = ({ navigation, route }) => {
         saveSatisfactoryCondition(true, roomItemId);
       }
     }
+
+
+
 
     return (
       <View style={SIPCStyles.flex}>
@@ -380,7 +478,7 @@ const CleaningInspections = ({ navigation, route }) => {
                 {data.conditions.length}{' '}
                 {data.conditions.length === 1 ? 'Condition' : 'Conditions'} |
               </Text>
-              <Text style={SIPCStyles.NormalFont}>0 Issues</Text>
+              <Text style={SIPCStyles.NormalFont} >0 Issues </Text>
             </View>
           </View>
 
@@ -457,6 +555,9 @@ const CleaningInspections = ({ navigation, route }) => {
     const [comment, setComment] = useState(condition.comment);
     const [images, setImages] = useState([]);
 
+    // ======================
+
+
 
     useEffect(() => {
       if (satisfactory) {
@@ -468,36 +569,12 @@ const CleaningInspections = ({ navigation, route }) => {
 
 
 
-
-    const saveComment = condition => {
-      const payload = JSON.stringify({
-        appKey: CONFIG.appKey,
-        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-        roomItemId: condition.room_item_id,
-        inspectionResultId: data.inspection_result_id,
-        inspectionTypeId: active,
-        userId: user.id,
-        comment: comment,
-        conditionId: condition.id,
-      });
-      API.instance
-        .post(`/save-condition-comment-api?is_api=true`, payload)
-        .then(
-          response => {
-            if (response.status === "failed") {
-              setError(response.error)
-            }
-          },
-          error => console.error(error),
-        );
-    };
-
-
     const checkBoxPress = () => {
       if (conditionChecked) {
         setConditionChecked(false);
         setIsOpen(false);
         setComment('')
+        setImages('')
         SaveConditionCheckbox(false, condition);
       } else {
         setConditionChecked(true);
@@ -511,17 +588,16 @@ const CleaningInspections = ({ navigation, route }) => {
       setIsOpen(!isOpen);
     }
 
-    const onSubmit = () => {
+    const onSubmit = (condition,comment) => {
       if (comment === '') {
         Alert.alert('Comment is Required');
       } else {
-        saveComment(condition);
+        saveComment(condition,comment);
         setIsOpen(false);
       }
     };
 
     const onCommentImagePress = () => {
-      setConditionChecked(true);
       setIsOpen(!isOpen);
     };
 
@@ -531,10 +607,6 @@ const CleaningInspections = ({ navigation, route }) => {
         setSatisfactory(false);
         SaveConditionCheckbox(true, condition);
         setIsOpen(true);
-      } else (conditionChecked);
-      {
-        setIsOpen(true);
-
       }
     };
 
@@ -587,7 +659,7 @@ const CleaningInspections = ({ navigation, route }) => {
 
                 <TouchableWithoutFeedback
                   onPress={() => {
-                    onSubmit(condition);
+                    onSubmit(condition,comment);
                   }}>
                   <Text
                     style={[
@@ -601,8 +673,7 @@ const CleaningInspections = ({ navigation, route }) => {
             ) : (
               <>
                 <TouchableWithoutFeedback
-                  // onPress={conditionChecked ? onCommentImagePress : onPress}>
-                  onPress={() => { conditionChecked ? onCommentImagePress : onPress(condition) }}>
+                  onPress={() => { conditionChecked ? onCommentImagePress() : onPress(condition) }}>
                   <Image
                     source={require('../assets/msg.png')}
                     style={SIPCStyles.commentImage}
@@ -610,8 +681,7 @@ const CleaningInspections = ({ navigation, route }) => {
                 </TouchableWithoutFeedback>
 
                 <TouchableWithoutFeedback
-                  // onPress={conditionChecked ? onCommentImagePress : onPress}>
-                  onPress={() => { conditionChecked ? onCommentImagePress : onPress(condition) }}>
+                  onPress={() => { conditionChecked ? onCommentImagePress() : onPress(condition) }}>
                   <Image
                     source={require('../assets/img.png')}
                     style={SIPCStyles.commentImage}
@@ -653,7 +723,7 @@ const CleaningInspections = ({ navigation, route }) => {
                     justifyContent: 'space-around',
                   }}>
                   <TouchableWithoutFeedback
-                    onPress={() => openCamera(images, setImages)}>
+                    onPress={() => openCamera(images, setImages, condition)}>
                     <Image
                       source={require('../assets/camera.png')}
                       style={SIPCStyles.cameraImage}
@@ -663,7 +733,7 @@ const CleaningInspections = ({ navigation, route }) => {
                   <View style={{ borderWidth: 1, borderColor: '#e6e6e6' }} />
 
                   <TouchableWithoutFeedback
-                    onPress={() => pickImage(images, setImages)}>
+                    onPress={() => pickImage(images, setImages, condition)}>
                     <Image
                       source={require('../assets/gallery.png')}
                       style={SIPCStyles.cameraImage}
@@ -672,7 +742,7 @@ const CleaningInspections = ({ navigation, route }) => {
                 </View>
               </Card>
 
-              <View
+              {/* <View
                 style={{
                   marginTop: 10,
                   flexDirection: 'row',
@@ -705,6 +775,40 @@ const CleaningInspections = ({ navigation, route }) => {
                     )}
                   />
                 </ScrollView>
+              </View> */}
+              <View
+                style={{
+                  marginTop: 10,
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  flex: 1,
+                }}>
+                {images[0] !== '' && (
+                  <FlatList
+                    horizontal
+                    data={images}
+                    keyExtractor={(item, index) => index}
+                    renderItem={({ item, index }) => (
+                      <View style={{ position: 'relative' }}>
+                        <Image
+                          source={{ uri: item }}
+                          style={SIPCStyles.CameraClickImage}
+                        />
+                        <TouchableOpacity
+                          style={SIPCStyles.crossImage}
+                          onPress={() => deleteImage(index)}>
+                          <Text
+                            style={{
+                              color: 'white',
+                              fontWeight: 'bold',
+                            }}>
+                            X
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  />
+                )}
               </View>
             </View>
           </View>
