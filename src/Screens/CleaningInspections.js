@@ -1478,7 +1478,7 @@ const CleaningInspections = ({navigation, route}) => {
             position: 'absolute',
             height: height,
             width: width,
-            backgroundColor: '#00000088'
+            backgroundColor: '#00000088',
           }}>
           <ActivityIndicator
             style={{position: 'absolute', top: height / 2, right: width / 2}}
