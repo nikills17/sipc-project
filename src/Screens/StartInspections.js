@@ -42,7 +42,7 @@ const StartInspections = ({ navigation, route }) => {
   const jsonUser = storage.getString('user')
   const user = JSON.parse(jsonUser);
 
-  
+
 
   const [error, setError] = useState(false);
   const [errorMsg, setErrorMessage] = useState();
@@ -157,6 +157,7 @@ const StartInspections = ({ navigation, route }) => {
             } else {
               setError(true);
               setErrorMessage(response.error);
+
             }
           },
           error => {

@@ -13,7 +13,7 @@ import {
   FlatList,
   ActivityIndicator,
 } from 'react-native';
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Card,
   Text,
@@ -29,17 +29,22 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import ImagePicker from 'react-native-image-crop-picker';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import API from '../utility/api';
-import {CONFIG} from '../utility/config';
-import {MMKV} from 'react-native-mmkv';
+import { CONFIG } from '../utility/config';
+import { MMKV } from 'react-native-mmkv';
 import InspectionCheckBox from '../component/inspectioncheckbox';
 import Loader from '../component/activityindicator';
+import { act } from 'react-test-renderer';
+import { responsiveScreenFontSize } from 'react-native-responsive-dimensions';
 
-const CleaningInspections = ({navigation, route}) => {
-  const {data, floorName, roomName, buildingName, building} = route?.params;
+
+const CleaningInspections = ({ navigation, route, condition }) => {
+  const { data, floorName, roomName, buildingName } = route?.params;
+
+
 
   const storage = new MMKV();
   const jsonUser = storage.getString('user');
@@ -74,6 +79,15 @@ const CleaningInspections = ({navigation, route}) => {
   const [item, setItem] = useState(0);
   const [itemList, setItemList] = useState([]);
 
+
+  const RoomNames = roomList.find(el => el.id === room)?.room_name;
+  const FloorNames = floorList.find(el => el.id === floor)?.name;
+
+
+
+
+
+  //Room-summary
   useEffect(() => {
     setIsLoading(true);
     const payload = JSON.stringify({
@@ -108,7 +122,7 @@ const CleaningInspections = ({navigation, route}) => {
                   setFloorList(response?.floors);
                   setRoomList(response?.rooms);
                   let items = response?.items;
-                  setItemList([{item_name: 'All', room_item_id: 0}, ...items]);
+                  setItemList([{ item_name: 'All', room_item_id: 0 }, ...items]);
                 }
               },
               error => {
@@ -121,23 +135,23 @@ const CleaningInspections = ({navigation, route}) => {
         console.error(error);
       },
     );
-  }, []);
+  }, [active]);
 
+  //List-Items-by-room
+  const payload = JSON.stringify({
+    appKey: CONFIG.appKey,
+    device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+    roomId: room,
+    buildingId: data.building_id,
+    inspectionResultId: data.inspection_result_id,
+    inspectionTypeId: active,
+    userId: user.id,
+  })
   useEffect(() => {
     setIsLoading(true);
     API.instance
       .post(
-        `/list-items-by-room-api?is_api=true`,
-        JSON.stringify({
-          appKey: CONFIG.appKey,
-          device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-          roomId: room,
-          buildingId: building,
-          inspectionResultId: data.inspection_result_id,
-          inspectionTypeId: active,
-          userId: user.id,
-        }),
-      )
+        `/list-items-by-room-api?is_api=true`, payload)
       .then(
         response => {
           if (response?.status === 'success') {
@@ -149,6 +163,42 @@ const CleaningInspections = ({navigation, route}) => {
       );
   }, [active]);
 
+  const AllItemsApiCall = () => {
+    LoadListItem()
+    loadSummary()
+  }
+
+  //Load-List-Item (list-items-by-room-api)
+  const LoadListItem = () => {
+    setIsLoading(true);
+    API.instance
+      .post(
+        `/list-items-by-room-api?is_api=true`, JSON.stringify({
+          appKey: CONFIG.appKey,
+          device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+          roomId: room,
+          buildingId: data.building_id,
+          inspectionResultId: data.inspection_result_id,
+          inspectionTypeId: active,
+          userId: user.id,
+        }))
+      .then(
+        response => {
+          // console.log('LoadListItem')
+          if (response?.status === 'success') {
+            setListRooms(response?.data);
+            // let LoadList = response?.data;
+            // setListRooms([...listRooms, LoadList])
+            // console.log('LoadListItem' + JSON.stringify([...listRooms, LoadList]))
+            setIsLoading(false);
+          }
+        },
+        error => console.error(error),
+      );
+  }
+
+
+  //Load-Room-By-Floor
   const loadRoomByFloor = item => {
     if (item) {
       API.instance
@@ -166,14 +216,17 @@ const CleaningInspections = ({navigation, route}) => {
           response => {
             setRoomList(response?.data);
             setItemList([]);
-            setRoom();
+            LoadListItem()
+            setRoom(0);
             setItem(0);
+
           },
           error => console.error(error),
         );
     }
   };
 
+  //Load-Iem-By-room
   const loadItemByRoom = item => {
     if (item) {
       API.instance
@@ -188,13 +241,15 @@ const CleaningInspections = ({navigation, route}) => {
         .then(
           response => {
             let items = response?.data;
-            setItemList([{item_name: 'All', room_item_id: 0}, ...items]);
+            setItemList([{ item_name: 'All', room_item_id: 0 }, ...items]);
+            LoadListItem()
           },
           error => console.error(error),
         );
     }
   };
 
+  //Complete-room
   const completeRoom = () => {
     API.instance
       .post(
@@ -215,6 +270,7 @@ const CleaningInspections = ({navigation, route}) => {
       );
   };
 
+  //Complete-Building
   const completeBuilding = () => {
     API.instance
       .post(
@@ -235,6 +291,7 @@ const CleaningInspections = ({navigation, route}) => {
       );
   };
 
+  //Load-Summary (room-summary-api)
   const loadSummary = () => {
     setReloading(true);
     const newPayload = JSON.stringify({
@@ -247,9 +304,11 @@ const CleaningInspections = ({navigation, route}) => {
     });
     API.instance.post(`/room-summary-api?is_api=true`, newPayload).then(
       response => {
+        // console.log('loadSummary===>' + JSON.stringify(response));
         if (response?.status === 'success');
         {
           setRoomData(response);
+
         }
         setReloading(false);
       },
@@ -260,44 +319,108 @@ const CleaningInspections = ({navigation, route}) => {
     );
   };
 
+  //Save-Comment
+  const saveComment = (condition, comment) => {
+    const payload = JSON.stringify({
+      appKey: CONFIG.appKey,
+      device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+      roomItemId: condition.room_item_id,
+      inspectionResultId: data.inspection_result_id,
+      inspectionTypeId: active,
+      userId: user.id,
+      comment: comment,
+      conditionId: condition.id,
+    });
+    API.instance
+      .post(`/save-condition-comment-api?is_api=true`, payload)
+      .then(
+        response => {
+          if (response.status === "failed") {
+            setError(response.error)
+          }
+        },
+        error => console.error(error),
+      );
+  };
+
+  //Upload-Images
   const [numColumns, setNumColumns] = useState(3);
   const maxImages = 10;
 
-  const openCamera = (images, setImages) => {
+  const uploadImage = (images, imageNames, setImageNames, condition) => {
+    if (!images) return;
+    const ImageData = new FormData();
+    ImageData.append('appKey', CONFIG.appKey);
+    ImageData.append('device_id', '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1');
+    ImageData.append('orgId', user.orgId);
+    ImageData.append('inspectionTypeId', active);
+    ImageData.append('inspectionResultId', data.inspection_result_id);
+    ImageData.append('conditionId', condition.id);
+    ImageData.append('roomItemId', condition.room_item_id);
+    ImageData.append('file', {
+      name: 'image.png',
+      fileName: 'image',
+      type: 'image/png',
+      uri:
+        Platform.OS === 'android'
+          ? images
+          : images.replace('file://', ''),
+    });
+
+    API.instance
+      .upload('/upload-condition-image-api?is_api=true', ImageData)
+      .then(response => {
+        if (response.status === 'success') {
+          setImageNames([...imageNames, response.uploaded_url]);
+        }
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
+
+  const openCamera = (imageNames, setImageNames, condition) => {
     ImagePicker.openCamera({
       width: 300,
       height: 400,
-      //cropping: true,
-    }).then(image => {
-      if (images.length + 1 > maxImages) {
-        alert(`Max limit reached: ${maxImages}`);
-        return;
-      }
-      setImages([...images, {path: image.path}]);
-    });
-  };
-
-  const pickImage = (images, setImages) => {
-    ImagePicker.openPicker({
-      multiple: true,
-      maxFiles: maxImages - images.length,
-    })
-      .then(newImages => {
-        if (images.length + newImages.length > maxImages) {
+    }).then(
+      image => {
+        if (imageNames.length + 1 > maxImages) {
           alert(`Max limit reached: ${maxImages}`);
           return;
         }
-        setImages([...images, ...newImages.map(i => ({path: i.path}))]);
+        uploadImage(image.path, imageNames, setImageNames, condition);
+      },
+      error => {
+        console.error(error);
+      },
+    );
+  };
+
+  const pickImage = (imageNames, setImageNames, condition) => {
+    ImagePicker.openPicker({})
+      .then(image => {
+        if (imageNames.length + 1 > maxImages) {
+          alert(`Max limit reached: ${maxImages}`);
+          return;
+        }
+        uploadImage(image.path, imageNames, setImageNames, condition);
       })
       .catch(error => console.error(error));
   };
 
-  const deleteImage = (index, images, setImages) => {
-    setImages(images.filter((_, i) => i !== index));
+  const deleteImage = index => {
+    //setImages(images.filter((_, i) => i !== index));
   };
 
-  const InspectionCheckBox = ({data, navigation, routeData}) => {
+  const InspectionCheckBox = ({ data, navigation, routeData }) => {
     const [satisfactoryChecked, setSatisfactoryChecked] = useState(false);
+
+    const satisfactoryPress = () => {
+      setSatisfactoryChecked(!satisfactoryChecked)
+    }
+
+
 
     return (
       <View style={SIPCStyles.flex}>
@@ -308,15 +431,15 @@ const CleaningInspections = ({navigation, route}) => {
             backgroundColor: 'white',
             paddingBottom: 20,
           }}>
-          <View style={{backgroundColor: '#fffcf8', padding: 15}}>
-            <View style={{flexDirection: 'row'}}>
-              <Text style={[SIPCStyles.BoldFont, {paddingHorizontal: 15}]}>
+          <View style={{ backgroundColor: '#fffcf8', padding: 15 }}>
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={[SIPCStyles.BoldFont, { paddingHorizontal: 15 }]}>
                 {data.item_name}
               </Text>
             </View>
 
-            <View style={{flexDirection: 'row'}}>
-              <Text style={[SIPCStyles.NormalFont, {paddingHorizontal: 15}]}>
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={[SIPCStyles.NormalFont, { paddingHorizontal: 15 }]}>
                 {data.conditions.length}{' '}
                 {data.conditions.length === 1 ? 'Condition' : 'Conditions'} |
               </Text>
@@ -336,7 +459,7 @@ const CleaningInspections = ({navigation, route}) => {
                 flexDirection: 'column',
                 width: width > 500 ? '50%' : '100%',
               }}>
-              <View style={{flexDirection: 'column'}}>
+              <View style={{ flexDirection: 'column' }}>
                 {/* <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}> */}
                 <View style={SIPCStyles.CheckboxView}>
                   <View
@@ -353,17 +476,17 @@ const CleaningInspections = ({navigation, route}) => {
                         // console.log("inspectionTypeId=>" + Active);
                         // console.log("conditionId=>" + 0);
                         // loadRoomSummary();
-                        setSatisfactoryChecked(!satisfactoryChecked);
+                        satisfactoryPress()
                       }}
                     />
                   </View>
-                  <View style={{borderWidth: 1, borderColor: '#ccc'}} />
+                  <View style={{ borderWidth: 1, borderColor: '#ccc' }} />
 
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text
                       style={[
                         SIPCStyles.checkboxFont,
-                        {paddingLeft: 10, color: '#00aa34'},
+                        { paddingLeft: 10, color: '#00aa34' },
                       ]}>
                       Satisfactory
                     </Text>
@@ -377,7 +500,7 @@ const CleaningInspections = ({navigation, route}) => {
                 flexDirection: 'column',
                 width: width > 500 ? '50%' : '100%',
               }}>
-              <View style={{flexDirection: 'column'}}>
+              <View style={{ flexDirection: 'column' }}>
                 {data.conditions.map(conditions => (
                   <CheckBox
                     condition={conditions}
@@ -395,13 +518,13 @@ const CleaningInspections = ({navigation, route}) => {
     );
   };
 
-  const CheckBox = ({condition, setSatisfactory, satisfactory}) => {
+  const CheckBox = ({ condition, setSatisfactory, satisfactory }) => {
     const [conditionChecked, setConditionChecked] = useState(
       checkBoxRef.current.find(el => el === condition?.id),
     );
     const [isOpen, setIsOpen] = useState(
       checkBoxRef.current.find(el => el === condition?.id) &&
-        !checkBoxCommentRef.current.find(el => el === condition?.id),
+      !checkBoxCommentRef.current.find(el => el === condition?.id),
     );
     const [comment, setComment] = useState('');
     const [images, setImages] = useState([]);
@@ -435,37 +558,38 @@ const CleaningInspections = ({navigation, route}) => {
             }
           },
           error => console.error(error),
-        );
+        )
     };
 
-    const saveComment = condition => {
-      const payload = JSON.stringify({
-        appKey: CONFIG.appKey,
-        device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
-        roomId: room,
-        roomItemId: condition.room_item_id,
-        inspectionResultId: data.inspection_result_id,
-        inspectionTypeId: active,
-        userId: user.id,
-        comment: comment,
-        conditionId: condition.id,
-      });
-      API.instance
-        .post(`/save-condition-comment-image-api?is_api=true`, payload)
-        .then(
-          response => {
-            console.log(response);
-          },
-          error => console.error(error),
-        );
-    };
+    // const saveComment = condition => {
+    //   const payload = JSON.stringify({
+    //     appKey: CONFIG.appKey,
+    //     device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
+    //     roomId: room,
+    //     roomItemId: condition.room_item_id,
+    //     inspectionResultId: data.inspection_result_id,
+    //     inspectionTypeId: active,
+    //     userId: user.id,
+    //     comment: comment,
+    //     conditionId: condition.id,
+    //   });
+    //   API.instance
+    //     .post(`/save-condition-comment-image-api?is_api=true`, payload)
+    //     .then(
+    //       response => {
+    //         console.log(response);
+    //       },
+    //       error => console.error(error),
+    //     );
+    // };
 
-    const onSubmit = () => {
+    const onSubmit = (condition, comment) => {
       if (comment === '') {
         Alert.alert('Comment is Required');
         setIsOpen(true);
       } else {
-        saveComment(condition);
+        saveComment(condition, comment);
+        setIsOpen(false);
         checkBoxCommentRef.current.push(condition?.id);
       }
     };
@@ -475,11 +599,11 @@ const CleaningInspections = ({navigation, route}) => {
       setIsOpen(!isOpen);
     };
 
-    const onPress = () => {
+    const onPress = (condition) => {
       if (!conditionChecked) {
         setConditionChecked(true);
         setIsOpen(true);
-        // checkBoxRef.current.push()
+        checkBoxRef.current.push()
       } else {
       }
     };
@@ -496,6 +620,8 @@ const CleaningInspections = ({navigation, route}) => {
       // }
       if (conditionChecked) {
         setConditionChecked(false);
+        // setComment('')
+        setImages('')
         setIsOpen(false);
         checkBoxRef.current = checkBoxRef.current.filter(
           el => el !== condition?.id,
@@ -526,25 +652,25 @@ const CleaningInspections = ({navigation, route}) => {
               borderBottomRightRadius: isOpen === true ? 0 : 10,
             },
           ]}>
-          <View style={{padding: 10, alignSelf: 'center'}}>
+          <View style={{ padding: 10, alignSelf: 'center' }}>
             <Checkbox
               status={
                 satisfactory
                   ? 'unchecked'
                   : conditionChecked
-                  ? 'checked'
-                  : 'unchecked'
+                    ? 'checked'
+                    : 'unchecked'
               }
               onPress={checkBoxPress}
             />
           </View>
 
-          <View style={{borderWidth: 1, borderColor: '#ccc'}} />
+          <View style={{ borderWidth: 1, borderColor: '#ccc' }} />
 
           <Text
             style={[
               SIPCStyles.checkboxFont,
-              {paddingLeft: 10, alignSelf: 'center'},
+              { paddingLeft: 10, alignSelf: 'center' },
             ]}>
             {condition.condition_name}
           </Text>
@@ -562,19 +688,19 @@ const CleaningInspections = ({navigation, route}) => {
                     setIsOpen(!isOpen);
                   }}>
                   <Text
-                    style={[SIPCStyles.checkboxFont, {marginHorizontal: 10}]}>
+                    style={[SIPCStyles.checkboxFont, { marginHorizontal: 10 }]}>
                     Cancel
                   </Text>
                 </TouchableWithoutFeedback>
 
                 <TouchableWithoutFeedback
                   onPress={() => {
-                    onSubmit(condition);
+                    onSubmit(condition, comment);
                   }}>
                   <Text
                     style={[
                       SIPCStyles.checkboxFont,
-                      {color: '#199be2', marginHorizontal: 10},
+                      { color: '#199be2', marginHorizontal: 10 },
                     ]}>
                     Submit
                   </Text>
@@ -583,7 +709,7 @@ const CleaningInspections = ({navigation, route}) => {
             ) : (
               <>
                 <TouchableWithoutFeedback
-                  onPress={conditionChecked ? onCommentImagePress : onPress}>
+                  onPress={() => { conditionChecked ? onCommentImagePress() : onPress(condition) }}>
                   <Image
                     source={require('../assets/msg.png')}
                     style={SIPCStyles.commentImage}
@@ -591,7 +717,7 @@ const CleaningInspections = ({navigation, route}) => {
                 </TouchableWithoutFeedback>
 
                 <TouchableWithoutFeedback
-                  onPress={conditionChecked ? onCommentImagePress : onPress}>
+                  onPress={() => { conditionChecked ? onCommentImagePress() : onPress(condition) }}>
                   <Image
                     source={require('../assets/img.png')}
                     style={SIPCStyles.commentImage}
@@ -603,14 +729,14 @@ const CleaningInspections = ({navigation, route}) => {
         </View>
 
         {!satisfactory && isOpen && (
-          <View style={{marginHorizontal: 20}}>
+          <View style={{ marginHorizontal: 20 }}>
             <TextInput
               mode="text"
               placeholder="Enter Your Comment"
               numberOfLines={8}
               multiline={true}
               underlineColor="transparent"
-              theme={{colors: {primary: '#cccccc'}}}
+              theme={{ colors: { primary: '#cccccc' } }}
               style={SIPCStyles.TextInput1}
               value={comment}
               onChangeText={setComment}
@@ -633,17 +759,17 @@ const CleaningInspections = ({navigation, route}) => {
                     justifyContent: 'space-around',
                   }}>
                   <TouchableWithoutFeedback
-                    onPress={() => openCamera(images, setImages)}>
+                    onPress={() => openCamera(images, setImages, condition)}>
                     <Image
                       source={require('../assets/camera.png')}
                       style={SIPCStyles.cameraImage}
                     />
                   </TouchableWithoutFeedback>
 
-                  <View style={{borderWidth: 1, borderColor: '#e6e6e6'}} />
+                  <View style={{ borderWidth: 1, borderColor: '#e6e6e6' }} />
 
                   <TouchableWithoutFeedback
-                    onPress={() => pickImage(images, setImages)}>
+                    onPress={() => pickImage(images, setImages, condition)}>
                     <Image
                       source={require('../assets/gallery.png')}
                       style={SIPCStyles.cameraImage}
@@ -651,8 +777,41 @@ const CleaningInspections = ({navigation, route}) => {
                   </TouchableWithoutFeedback>
                 </View>
               </Card>
-
               <View
+                style={{
+                  marginTop: 10,
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  flex: 1,
+                }}>
+                {images[0] !== '' && (
+                  <FlatList
+                    horizontal
+                    data={images}
+                    keyExtractor={(item, index) => index}
+                    renderItem={({ item, index }) => (
+                      <View style={{ position: 'relative' }}>
+                        <Image
+                          source={{ uri: item }}
+                          style={SIPCStyles.CameraClickImage}
+                        />
+                        <TouchableOpacity
+                          style={SIPCStyles.crossImage}
+                          onPress={() => deleteImage(index)}>
+                          <Text
+                            style={{
+                              color: 'white',
+                              fontWeight: 'bold',
+                            }}>
+                            X
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  />
+                )}
+              </View>
+              {/* <View
                 style={{
                   marginTop: 10,
                   flexDirection: 'row',
@@ -664,10 +823,10 @@ const CleaningInspections = ({navigation, route}) => {
                     numColumns={numColumns}
                     data={images}
                     keyExtractor={(item, index) => index.toString()}
-                    renderItem={({item, index}) => (
-                      <View style={{position: 'relative'}}>
+                    renderItem={({ item, index }) => (
+                      <View style={{ position: 'relative' }}>
                         <Image
-                          source={{uri: item.path}}
+                          source={{ uri: item.path }}
                           style={SIPCStyles.CameraClickImage}
                         />
                         <TouchableOpacity
@@ -685,7 +844,7 @@ const CleaningInspections = ({navigation, route}) => {
                     )}
                   />
                 </ScrollView>
-              </View>
+              </View> */}
             </View>
           </View>
         )}
@@ -698,7 +857,7 @@ const CleaningInspections = ({navigation, route}) => {
       <StatusBar barStyle={'dark-content'} backgroundColor="#3a7fc4" />
       <ScrollView>
         {/* ======================HEader============================================= */}
-        <Surface style={[SIPCStyles.headerSurface, {alignItems: 'center'}]}>
+        <Surface style={[SIPCStyles.headerSurface, { alignItems: 'center' }]}>
           <TouchableWithoutFeedback onPress={() => navigation.goBack()}>
             <Image
               source={require('../assets/left.png')}
@@ -706,16 +865,16 @@ const CleaningInspections = ({navigation, route}) => {
             />
           </TouchableWithoutFeedback>
 
-          <View style={{marginHorizontal: 10}}>
+          <View style={{ marginHorizontal: 10 }}>
             {active === 1 ? (
               <Text
-                style={[SIPCStyles.NormalFont, {width: width / 2}]}
+                style={[SIPCStyles.NormalFont, { width: width / 2 }]}
                 numberOfLines={1}>
                 Cleaning Inspections-<Text>{buildingName}</Text>
               </Text>
             ) : (
               <Text
-                style={[SIPCStyles.NormalFont, {width: width / 2}]}
+                style={[SIPCStyles.NormalFont, { width: width / 2 }]}
                 numberOfLines={1}>
                 Maintenance Inspections-<Text>{buildingName}</Text>
               </Text>
@@ -723,14 +882,14 @@ const CleaningInspections = ({navigation, route}) => {
           </View>
 
           <TouchableWithoutFeedback onPress={() => completeRef.current.open()}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={[SIPCStyles.NormalFont, {color: '#199be2'}]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={[SIPCStyles.NormalFont, { color: '#199be2' }]}>
                 Complete
               </Text>
               <Entypo
                 size={18}
                 color={'#818081'}
-                style={{paddingHorizontal: 5}}
+                style={{ paddingHorizontal: 5 }}
                 name="chevron-down"
               />
             </View>
@@ -749,7 +908,7 @@ const CleaningInspections = ({navigation, route}) => {
             justifyContent: 'space-around',
           }}>
           <View
-            style={{flexDirection: 'row', padding: 5, alignItems: 'center'}}>
+            style={{ flexDirection: 'row', padding: 5, alignItems: 'center' }}>
             <Image
               source={require('../assets/floor.png')}
               style={SIPCStyles.MainBuilding}
@@ -757,15 +916,15 @@ const CleaningInspections = ({navigation, route}) => {
             <Text
               style={[
                 SIPCStyles.NormalFont,
-                {paddingLeft: 8, width: width / 4.9, fontWeight: '800'},
+                { paddingLeft: 8, width: width / 4.9, fontWeight: '800' },
               ]}
               numberOfLines={1}>
-              {floorName}
+              {FloorNames}
             </Text>
           </View>
 
           <View
-            style={{flexDirection: 'row', padding: 5, alignItems: 'center'}}>
+            style={{ flexDirection: 'row', padding: 5, alignItems: 'center' }}>
             <Image
               source={require('../assets/door.png')}
               style={SIPCStyles.MainBuilding}
@@ -773,15 +932,15 @@ const CleaningInspections = ({navigation, route}) => {
             <Text
               style={[
                 SIPCStyles.NormalFont,
-                {paddingLeft: 8, width: width / 3.9, fontWeight: '800'},
+                { paddingLeft: 8, width: width / 3.9, fontWeight: '800' },
               ]}
               numberOfLines={1}>
-              {roomName}
+              {RoomNames ? RoomNames : 'Select Room'}
             </Text>
           </View>
 
           <View
-            style={{flexDirection: 'row', padding: 5, alignItems: 'center'}}>
+            style={{ flexDirection: 'row', padding: 5, alignItems: 'center' }}>
             <Image
               source={require('../assets/dot.png')}
               style={SIPCStyles.MainBuilding}
@@ -789,18 +948,18 @@ const CleaningInspections = ({navigation, route}) => {
             <Text
               style={[
                 SIPCStyles.NormalFont,
-                {paddingLeft: 8, width: width / 5.5, fontWeight: '800'},
+                { paddingLeft: 8, width: width / 5.5, fontWeight: '800' },
               ]}
               numberOfLines={1}>
               All Items
             </Text>
           </View>
           <TouchableWithoutFeedback onPress={() => allItemsRef.current.open()}>
-            <View style={{flexDirection: 'row', padding: 5}}>
+            <View style={{ flexDirection: 'row', padding: 5 }}>
               <Entypo
                 size={18}
                 color={'#818081'}
-                style={{paddingHorizontal: 5, alignSelf: 'center'}}
+                style={{ paddingHorizontal: 5, alignSelf: 'center' }}
                 name="chevron-down"
               />
             </View>
@@ -847,7 +1006,7 @@ const CleaningInspections = ({navigation, route}) => {
               </TouchableWithoutFeedback>
               <TouchableWithoutFeedback
                 onPress={() => allItemsRef.current.close()}>
-                <Text style={[SIPCStyles.NormalFont, {color: '#199be2'}]}>
+                <Text style={[SIPCStyles.NormalFont, { color: '#199be2' }]}>
                   Done
                 </Text>
               </TouchableWithoutFeedback>
@@ -870,7 +1029,7 @@ const CleaningInspections = ({navigation, route}) => {
                   backgroundColor: '#fffff6',
                   borderColor: '#D2D2D2',
                 }}
-                searchTextInputStyle={{borderColor: '#D2D2D2'}}
+                searchTextInputStyle={{ borderColor: '#D2D2D2' }}
                 itemSeparator={true}
                 itemSeparatorStyle={{
                   backgroundColor: '#D2D2D2',
@@ -883,7 +1042,7 @@ const CleaningInspections = ({navigation, route}) => {
                     <Entypo
                       size={18}
                       color={'#818081'}
-                      style={{paddingHorizontal: 5}}
+                      style={{ paddingHorizontal: 5 }}
                       name="chevron-down"
                     />
                   );
@@ -893,7 +1052,7 @@ const CleaningInspections = ({navigation, route}) => {
                     <Entypo
                       size={18}
                       color={'#818081'}
-                      style={{paddingHorizontal: 5}}
+                      style={{ paddingHorizontal: 5 }}
                       name="chevron-up"
                     />
                   );
@@ -913,7 +1072,7 @@ const CleaningInspections = ({navigation, route}) => {
                   SIPCStyles.dropDownContainerStyle2,
                   {},
                 ]}
-                labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
+                labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
                 open={showFloorDropDown}
                 value={floor}
                 items={floorList.map(item => ({
@@ -944,7 +1103,7 @@ const CleaningInspections = ({navigation, route}) => {
                   backgroundColor: '#fffff6',
                   borderColor: '#D2D2D2',
                 }}
-                searchTextInputStyle={{borderColor: '#D2D2D2'}}
+                searchTextInputStyle={{ borderColor: '#D2D2D2' }}
                 itemSeparator={true}
                 itemSeparatorStyle={{
                   backgroundColor: '#D2D2D2',
@@ -957,7 +1116,7 @@ const CleaningInspections = ({navigation, route}) => {
                     <Entypo
                       size={18}
                       color={'#818081'}
-                      style={{paddingHorizontal: 5}}
+                      style={{ paddingHorizontal: 5 }}
                       name="chevron-down"
                     />
                   );
@@ -967,14 +1126,14 @@ const CleaningInspections = ({navigation, route}) => {
                     <Entypo
                       size={18}
                       color={'#818081'}
-                      style={{paddingHorizontal: 5}}
+                      style={{ paddingHorizontal: 5 }}
                       name="chevron-up"
                     />
                   );
                 }}
                 style={[
                   SIPCStyles.DropDownPicker2,
-                  {marginHorizontal: 0, borderRadius: 0},
+                  { marginHorizontal: 0, borderRadius: 0 },
                 ]}
                 placeholder="Select Room"
                 textStyle={SIPCStyles.textSize}
@@ -982,7 +1141,7 @@ const CleaningInspections = ({navigation, route}) => {
                   SIPCStyles.dropDownContainerStyle2,
                   {},
                 ]}
-                labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
+                labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
                 open={showRoomDropDown}
                 value={room}
                 items={roomList.map(item => ({
@@ -1011,7 +1170,7 @@ const CleaningInspections = ({navigation, route}) => {
                   backgroundColor: '#fffff6',
                   borderColor: '#D2D2D2',
                 }}
-                searchTextInputStyle={{borderColor: '#D2D2D2'}}
+                searchTextInputStyle={{ borderColor: '#D2D2D2' }}
                 itemSeparator={true}
                 itemSeparatorStyle={{
                   backgroundColor: '#D2D2D2',
@@ -1024,7 +1183,7 @@ const CleaningInspections = ({navigation, route}) => {
                     <Entypo
                       size={18}
                       color={'#818081'}
-                      style={{paddingHorizontal: 5}}
+                      style={{ paddingHorizontal: 5 }}
                       name="chevron-down"
                     />
                   );
@@ -1034,7 +1193,7 @@ const CleaningInspections = ({navigation, route}) => {
                     <Entypo
                       size={18}
                       color={'#818081'}
-                      style={{paddingHorizontal: 5}}
+                      style={{ paddingHorizontal: 5 }}
                       name="chevron-up"
                     />
                   );
@@ -1055,7 +1214,7 @@ const CleaningInspections = ({navigation, route}) => {
                   SIPCStyles.dropDownContainerStyle2,
                   {},
                 ]}
-                labelStyle={[SIPCStyles.NormalFont, {paddingHorizontal: 5}]}
+                labelStyle={[SIPCStyles.NormalFont, { paddingHorizontal: 5 }]}
                 open={showItemDropDown}
                 value={item}
                 items={itemList.map(item => ({
@@ -1065,6 +1224,8 @@ const CleaningInspections = ({navigation, route}) => {
                 setOpen={setShowItemDropDown}
                 setValue={setItem}
                 setItems={setItemList}
+                onSelectItem={AllItemsApiCall}
+
               />
             </View>
 
@@ -1072,6 +1233,8 @@ const CleaningInspections = ({navigation, route}) => {
           </View>
         </RBSheet>
         {/* ==========================================TABS============================================ */}
+
+
         <View
           style={{
             backgroundColor: 'white',
@@ -1126,265 +1289,203 @@ const CleaningInspections = ({navigation, route}) => {
         </View>
         <Divider bold={true} />
 
-        {/* --------------------------IF USER CLICK ON MAINTENANCE --------------------------*/}
-        {/* MAINTENANCE+_------------------------------------------- */}
+        {listRooms.length > 0 ? <>
 
-        {active === 2 && (
-          <>
+          <View
+            style={{
+              backgroundColor: 'white',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              padding: 15,
+            }}>
             <View
               style={{
-                backgroundColor: 'white',
                 flexDirection: 'row',
-                justifyContent: 'space-between',
-                padding: 15,
+                alignItems: 'center',
+                paddingLeft: 5,
               }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingLeft: 5,
-                }}>
-                <Card style={SIPCStyles.CleaningItems}>
-                  <Text style={[SIPCStyles.NormalFont, {}]}>
-                    {roomData.total_item}
-                  </Text>
-                </Card>
-                <Text style={[SIPCStyles.NormalFont, {paddingLeft: 5}]}>
-                  {roomData.total_item === '0' || '1' ? 'Items' : 'Items'}
+              <Card style={SIPCStyles.CleaningItems}>
+                <Text style={[SIPCStyles.NormalFont, {}]}>{roomData.total_item}
                 </Text>
-              </View>
-
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingLeft: 5,
-                }}>
-                <Card style={SIPCStyles.CleaningItems}>
-                  <Text style={[SIPCStyles.NormalFont, {}]}>
-                    {roomData.detected_condition}
-                  </Text>
-                </Card>
-                <Text style={[SIPCStyles.NormalFont, {paddingLeft: 5}]}>
-                  {roomData.detected_condition === '0' || '1'
-                    ? 'Conditions'
-                    : 'Condition'}
-                  {'\n'} Detected
-                </Text>
-              </View>
-
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingLeft: 5,
-                }}>
-                <Card style={SIPCStyles.CleaningItems}>
-                  <Text style={[SIPCStyles.NormalFont, {}]}>
-                    {roomData.satisfactory_item}
-                  </Text>
-                </Card>
-                <Text style={[SIPCStyles.SemiBold, {paddingLeft: 5}]}>
-                  {roomData.satisfactory_item === '0' || '1' ? 'item' : 'items'}
-                  {'\n'}Satisfactory
-                </Text>
-              </View>
+              </Card>
+              <Text style={[SIPCStyles.NormalFont, { paddingLeft: 5 }]}>
+                {roomData.total_item === 1 ? 'Item' : roomData.total_item === 0 ? 'Item' : 'Items'}
+              </Text>
             </View>
-            <Divider bold={true} />
+
             <View
               style={{
-                backgroundColor: 'white',
                 flexDirection: 'row',
-                justifyContent: 'center',
-                padding: 15,
+                alignItems: 'center',
+                paddingLeft: 5,
               }}>
-              <TouchableWithoutFeedback
-                onPress={() => {
-                  setActive(1);
-                }}>
-                <Text style={[SIPCStyles.NormalFont, {color: '#1485cc'}]}>
-                  Switch to cleaning mode for quality score
+              <Card style={SIPCStyles.CleaningItems}>
+                <Text style={[SIPCStyles.NormalFont, {}]}>
+                  {roomData.detected_condition}
                 </Text>
-              </TouchableWithoutFeedback>
+              </Card>
+              <Text style={[SIPCStyles.NormalFont, { paddingLeft: 5 }]}>
+                {roomData.detected_condition === 0 || roomData.detected_condition === 1
+                  ? 'Conditions'
+                  : 'Condition'}
+                {'\n'} Detected
+              </Text>
             </View>
-            <Divider bold={true} />
-          </>
-        )}
 
-        {/* ===========================IF USER CLICK ON CLEANING ===================== */}
-
-        {/* ===========================================ROOM QUALITY=================== */}
-
-        {active === 1 && (
-          <>
             <View
               style={{
-                backgroundColor: 'white',
                 flexDirection: 'row',
-                justifyContent: 'space-between',
-                padding: 15,
+                alignItems: 'center',
+                paddingLeft: 5,
               }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingLeft: 5,
-                }}>
-                <Card style={SIPCStyles.CleaningItems}>
-                  <Text style={[SIPCStyles.NormalFont, {}]}>
-                    {roomData.total_item}
-                  </Text>
-                </Card>
-                <Text style={[SIPCStyles.NormalFont, {paddingLeft: 5}]}>
-                  {roomData.total_item === '0' || '1' ? 'Items' : 'Items'}
+              <Card style={SIPCStyles.CleaningItems}>
+                <Text style={[SIPCStyles.NormalFont, {}]}>
+                  {roomData.satisfactory_item}
                 </Text>
-              </View>
-
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingLeft: 5,
-                }}>
-                <Card style={SIPCStyles.CleaningItems}>
-                  <Text style={[SIPCStyles.NormalFont, {}]}>
-                    {roomData.detected_condition}
-                  </Text>
-                </Card>
-                <Text style={[SIPCStyles.NormalFont, {paddingLeft: 5}]}>
-                  {roomData.detected_condition === '0' || '1'
-                    ? 'Conditions'
-                    : 'Condition'}
-                  {'\n'} Detected
-                </Text>
-              </View>
-
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingLeft: 5,
-                }}>
-                <Card style={SIPCStyles.CleaningItems}>
-                  <Text style={[SIPCStyles.NormalFont, {}]}>
-                    {roomData.satisfactory_item}
-                  </Text>
-                </Card>
-                <Text style={[SIPCStyles.SemiBold, {paddingLeft: 5}]}>
-                  {roomData.satisfactory_item === '0' || '1' ? 'item' : 'items'}
-                  {'\n'}Satisfactory
-                </Text>
-              </View>
+              </Card>
+              <Text style={[SIPCStyles.SemiBold, { paddingLeft: 5 }]}>
+                {roomData.satisfactory_item === 0 || roomData.satisfactory_item === 1 ? 'Item' : 'Items'}
+                {'\n'}Satisfactory
+              </Text>
             </View>
+          </View>
 
-            <Divider bold={true} />
-            <View
-              style={{
-                backgroundColor: 'white',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                padding: 15,
-              }}>
-              <View
-                style={{
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignSelf: 'center',
-                  paddingLeft: 10,
-                  flexShrink: 1,
-                }}>
-                <Text style={SIPCStyles.inspectionScore}>
-                  {/* {checkScore(parseFloat(roomData?.room_quality).toFixed(2))} */}
-                  <Text
-                    style={[
-                      SIPCStyles.inspectionScore,
-                      roomData?.room_quality > 90
-                        ? SIPCStyles.textSuccess
-                        : roomData?.room_quality > 80
-                        ? SIPCStyles.textWarning
-                        : SIPCStyles.textDanger,
-                    ]}>
-                    {parseFloat(roomData?.room_quality).toFixed(2)}%
-                  </Text>
-                </Text>
-                <Text style={[SIPCStyles.lowFont, {}]}>Room Quality</Text>
-              </View>
+          <Divider bold={true} />
 
-              <View
-                style={{flexDirectionL: 'row', alignItems: 'center', flex: 1}}>
-                <Card
-                  style={{
-                    backgroundColor: '#00aa34',
-                    borderRadius: 5,
-                    height: hp('3.5%'),
-                    width: wp('8%'),
-                  }}
-                />
-                <Text style={SIPCStyles.NormalFont}>Good</Text>
-              </View>
-
-              <View
-                style={{flexDirectionL: 'row', alignItems: 'center', flex: 1}}>
-                <Card
-                  style={{
-                    backgroundColor: '#fbac00',
-                    borderRadius: 5,
-                    height: hp('3.5%'),
-                    width: wp('8%'),
-                  }}
-                />
-                <Text style={SIPCStyles.NormalFont}>Warning</Text>
-              </View>
-
-              <View
-                style={{flexDirectionL: 'row', alignItems: 'center', flex: 1}}>
-                <Card
-                  style={{
-                    backgroundColor: '#ea1227',
-                    borderRadius: 5,
-                    height: hp('3.5%'),
-                    width: wp('8%'),
-                  }}
-                />
-                <Text style={[SIPCStyles.NormalFont, {textAlign: 'center'}]}>
-                  Attention{'\n'}
-                </Text>
-              </View>
-            </View>
-          </>
-        )}
-
-        {/* {isLoading ? (<>
-          <Loader />
-        </>) : (<>
-          {listRooms.map((item, index) => (
-            <InspectionCheckBox
-              data={item}
-              key={index}
-              navigation={navigation}
-              routeData={data}
-            />
-          ))}
-
-        </>)} */}
-
-        <>
-          {isLoading ? (
-            <Loader />
-          ) : (
+          {active === 2 && (
             <>
-              {listRooms.length > 0 &&
-                listRooms.map((item, index) => (
-                  <InspectionCheckBox
-                    data={item}
-                    key={index}
-                    navigation={navigation}
-                    routeData={data}
-                  />
-                ))}
+
+              <View
+                style={{
+                  backgroundColor: 'white',
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  padding: 15,
+                }}>
+                <TouchableWithoutFeedback
+                  onPress={() => {
+                    setActive(1);
+                  }}>
+                  <Text style={[SIPCStyles.NormalFont, { color: '#1485cc' }]}>
+                    Switch to cleaning mode for quality score
+                  </Text>
+                </TouchableWithoutFeedback>
+              </View>
+              <Divider bold={true} />
             </>
           )}
+
+          {active === 1 && (
+            <>
+
+              <View
+                style={{
+                  backgroundColor: 'white',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  padding: 15,
+                }}>
+                <View
+                  style={{
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignSelf: 'center',
+                    paddingLeft: 10,
+                    flexShrink: 1,
+                  }}>
+                  <Text style={SIPCStyles.inspectionScore}>
+                    {/* {checkScore(parseFloat(roomData?.room_quality).toFixed(2))} */}
+                    <Text
+                      style={[
+                        SIPCStyles.inspectionScore,
+                        roomData?.room_quality > 90
+                          ? SIPCStyles.textSuccess
+                          : roomData?.room_quality > 80
+                            ? SIPCStyles.textWarning
+                            : SIPCStyles.textDanger,
+                      ]}>
+                      {parseFloat(roomData?.room_quality).toFixed(2)}%
+                    </Text>
+                  </Text>
+                  <Text style={[SIPCStyles.lowFont, {}]}>Room Quality</Text>
+                </View>
+
+                <View
+                  style={{ flexDirectionL: 'row', alignItems: 'center', flex: 1 }}>
+                  <Card
+                    style={{
+                      backgroundColor: '#00aa34',
+                      borderRadius: 5,
+                      height: hp('3.5%'),
+                      width: wp('8%'),
+                    }}
+                  />
+                  <Text style={SIPCStyles.NormalFont}>Good</Text>
+                </View>
+
+                <View
+                  style={{ flexDirectionL: 'row', alignItems: 'center', flex: 1 }}>
+                  <Card
+                    style={{
+                      backgroundColor: '#fbac00',
+                      borderRadius: 5,
+                      height: hp('3.5%'),
+                      width: wp('8%'),
+                    }}
+                  />
+                  <Text style={SIPCStyles.NormalFont}>Warning</Text>
+                </View>
+
+                <View
+                  style={{ flexDirectionL: 'row', alignItems: 'center', flex: 1 }}>
+                  <Card
+                    style={{
+                      backgroundColor: '#ea1227',
+                      borderRadius: 5,
+                      height: hp('3.5%'),
+                      width: wp('8%'),
+                    }}
+                  />
+                  <Text style={[SIPCStyles.NormalFont, { textAlign: 'center' }]}>
+                    Attention{'\n'}
+                  </Text>
+                </View>
+              </View>
+            </>
+          )}
+
+          <>
+            {isLoading ? (<>
+              <Loader />
+            </>
+            ) : (
+              <>
+                {listRooms.length > 0 ?
+                  listRooms.map((item, index) => (
+                    <InspectionCheckBox
+                      data={item}
+                      key={index}
+                      navigation={navigation}
+                      routeData={data}
+                    />
+                  ))
+                  :
+                  <></>
+                }
+              </>
+            )}
+          </>
         </>
+          : <>
+            <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+              <Image source={require('../assets/no-room-item.png')} style={{ height: height / 3, width: width / 2, resizeMode: 'contain' }} />
+              <Text style={{ textAlign: 'center', color: '#4284c6', fontSize: responsiveScreenFontSize(2.5), fontFamily: 'Poppins-Regular' }}>No Items</Text>
+              <Text style={{ textAlign: 'center', fontSize: responsiveScreenFontSize(1.8), fontFamily: 'Poppins-Regular' }}>No items were found.</Text>
+            </View>
+
+          </>
+        }
+
       </ScrollView>
 
       {/* ======================COMPLETE MODAL========================== */}
@@ -1428,7 +1529,7 @@ const CleaningInspections = ({navigation, route}) => {
             </TouchableWithoutFeedback>
             <TouchableWithoutFeedback
               onPress={() => completeRef.current.close()}>
-              <Text style={[SIPCStyles.NormalFont, {color: '#199be2'}]}>
+              <Text style={[SIPCStyles.NormalFont, { color: '#199be2' }]}>
                 Done
               </Text>
             </TouchableWithoutFeedback>
@@ -1449,26 +1550,26 @@ const CleaningInspections = ({navigation, route}) => {
                 style={SIPCStyles.MainBuilding}
               />
               <TouchableOpacity onPress={completeRoom}>
-                <Text style={[SIPCStyles.NormalFont, {paddingLeft: 10}]}>
+                <Text style={[SIPCStyles.NormalFont, { paddingLeft: 10 }]}>
                   Complete Room
                 </Text>
               </TouchableOpacity>
             </View>
-            <Divider bold={true} style={{marginLeft: 30, marginTop: 10}} />
+            <Divider bold={true} style={{ marginLeft: 30, marginTop: 10 }} />
 
-            <View style={[SIPCStyles.healthImageView, {marginTop: 25}]}>
+            <View style={[SIPCStyles.healthImageView, { marginTop: 25 }]}>
               <Image
                 source={require('../assets/building.png')}
                 style={SIPCStyles.MainBuilding}
               />
               <TouchableOpacity onPress={completeBuilding}>
-                <Text style={[SIPCStyles.NormalFont, {paddingLeft: 10}]}>
+                <Text style={[SIPCStyles.NormalFont, { paddingLeft: 10 }]}>
                   Complete Building{' '}
                 </Text>
               </TouchableOpacity>
             </View>
 
-            <Divider bold={true} style={{marginLeft: 30, marginTop: 10}} />
+            <Divider bold={true} style={{ marginLeft: 30, marginTop: 10 }} />
           </Surface>
         </View>
       </RBSheet>
@@ -1481,7 +1582,7 @@ const CleaningInspections = ({navigation, route}) => {
             backgroundColor: '#00000088',
           }}>
           <ActivityIndicator
-            style={{position: 'absolute', top: height / 2, right: width / 2}}
+            style={{ position: 'absolute', top: height / 2, right: width / 2 }}
             color={'#3a7fc4'}
             size={Platform.OS === 'ios' ? 'large' : 50}
           />

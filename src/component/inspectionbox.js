@@ -66,7 +66,7 @@ const InspectionBox = ({ data, navigation, setError, setErrorMessage }) => {
     device_id: "68d41abf-31bb-4bc8-95dc-bb835f1bc7a1",
     buildingId: data.building_id,
     inspectionResultId: data.id,
-    inspectionTypeId:'1',
+    inspectionTypeId: '1',
     userId: user.id,
   });
   const continuePendingInspection = () => {
@@ -76,11 +76,14 @@ const InspectionBox = ({ data, navigation, setError, setErrorMessage }) => {
         params).then(
           response => {
             if (response.status === "success") {
-              navigation.navigate('CleaningInspections', {
-                buildingName: response.buildingName,
-                floorName: response.floorName,
-                roomName: response.roomName,
-              }
+              console.log('response=====> ' + JSON.stringify(response.roomName));
+              navigation.navigate('CleaningInspections',
+                {
+                  data: response.data,
+                  buildingName: response.buildingName,
+                  floorName: response.floorName,
+                  roomName: response.roomName,
+                }
               )
             } else {
               setError(true);
