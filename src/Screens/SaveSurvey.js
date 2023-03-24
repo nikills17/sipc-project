@@ -46,9 +46,11 @@ const SaveSurvey = ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
   const [errorMsg, setErrorMessage] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  // const [firstName, setFirstName] = useState('');
+  // const [lastName, setLastName] = useState('');
 
+  const firstNameRef = useRef('');
+  const lastNameRef = useRef('');
   const finalAnswer = useRef([]);
   const refRBSheet = useRef();
   const refRBSheet1 = useRef();
@@ -107,7 +109,6 @@ const SaveSurvey = ({ navigation, route }) => {
     API.instance
       .upload('/upload-survey-image-api?is_api=true', data)
       .then(response => {
-        console.log(response);
         if (response.status === 'success') {
           const imageName = response.uploaded_url;
           setImageNames([...imageNames, imageName]);
@@ -1073,8 +1074,7 @@ const SaveSurvey = ({ navigation, route }) => {
       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
       surveyId: surveyId,
       user_id: user.id,
-      user_survey_result_id:
-        userSurveyResultId == undefined ? 0 : userSurveyResultId,
+      user_survey_result_id: userSurveyResultId == undefined ? 0 : userSurveyResultId,
       org_id: orgId,
       org_name: orgName,
       building_id: buildingId,
@@ -1085,7 +1085,6 @@ const SaveSurvey = ({ navigation, route }) => {
       last_name: '',
       questions: finalAnswer.current,
     });
-    console.log('Save Answer: ' + payload);
     API.instance
       .post(
         `/save-user-survey-device?is_api=true`,
@@ -1108,24 +1107,35 @@ const SaveSurvey = ({ navigation, route }) => {
       );
   };
 
+  const closeSubmitSheet = () => {
+    firstNameRef.text = '';
+    lastNameRef.text = '';
+    setSubmitError('')
+    close(refRBSheet1)
+  }
+
+  const [submitError, setSubmitError] = useState('');
+  const submitErrorRef = useRef(false);
+  const submitErrorMsgRef = useRef('');
+
   const submitSurvey = () => {
     var payload = JSON.stringify({
       appKey: CONFIG.appKey,
       device_id: '68d41abf-31bb-4bc8-95dc-bb835f1bc7a1',
       surveyId: surveyId,
       user_id: user.id,
-      user_survey_result_id:
-        userSurveyResultId == undefined ? 0 : userSurveyResultId,
+      user_survey_result_id: userSurveyResultId == undefined ? 0 : userSurveyResultId,
       survey_session_id: surveySessionId == undefined ? '' : surveySessionId,
       org_id: orgId,
       org_name: orgName,
       building_id: buildingId,
       building_name: buildingName,
       request_type: '1',
-      first_name: firstName,
-      last_name: lastName,
+      first_name: firstNameRef.text != undefined ? firstNameRef.text : "",
+      last_name: lastNameRef.text != undefined ? lastNameRef.text : "",
       questions: finalAnswer.current,
     });
+    // console.log('payload===>' + payload);
 
     API.instance.post(`/save-user-survey-device?is_api=true`, payload).then(
       response => {
@@ -1133,8 +1143,12 @@ const SaveSurvey = ({ navigation, route }) => {
         if (response.status == 'success') {
           navigation.navigate('SurveyViewAll');
         } else {
-          setError(true);
-          setErrorMessage(response.error);
+          console.log(response.error);
+          submitErrorRef.current = true;
+          submitErrorMsgRef.current = response.error;
+          setSubmitError(submitErrorMsgRef.current)
+          // setError(true);
+          // setErrorMessage(response.error);
         }
       },
       error => {
@@ -1331,7 +1345,8 @@ const SaveSurvey = ({ navigation, route }) => {
               padding: 15,
               backgroundColor: 'white',
             }}>
-            {error && (
+
+            {submitError && (
               <View
                 style={{
                   width: '100%',
@@ -1343,13 +1358,14 @@ const SaveSurvey = ({ navigation, route }) => {
                     fontSize: responsiveScreenFontSize(1.8),
                     marginHorizontal: 20,
                   }}>
-                  Error! {errorMsg}
+                  Error! {submitError}
                 </Text>
               </View>
             )}
 
             <TextInput
-              onChangeText={value => setFirstName(value)}
+              ref={firstNameRef}
+              onChangeText={text => firstNameRef.text = text}
               mode="flat"
               placeholder="First Name"
               placeholderTextColor={'black'}
@@ -1359,10 +1375,12 @@ const SaveSurvey = ({ navigation, route }) => {
                 SIPCStyles.TextInput,
                 { height: height / 18, marginTop: 15, borderRadius: 0 },
               ]}
+            // onSubmitEditing={handleSubmit}
             />
 
             <TextInput
-              onChangeText={value => setLastName(value)}
+              ref={lastNameRef}
+              onChangeText={text => lastNameRef.text = text}
               mode="flat"
               placeholder="Last Name"
               placeholderTextColor={'black'}
@@ -1381,7 +1399,7 @@ const SaveSurvey = ({ navigation, route }) => {
                 marginVertical: 15,
               }}>
               <TouchableWithoutFeedback
-                onPress={() => close(refRBSheet1)}
+                onPress={closeSubmitSheet}
                 style={{ borderWidth: 1 }}>
                 <Text style={[SIPCStyles.NormalFont, { marginRight: 15 }]}>
                   Cancel
